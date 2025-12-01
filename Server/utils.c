@@ -2,7 +2,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-void send_json(int socket, cJSON *json) {
+void send_json(int socket_fd, cJSON *json) {
     if (socket_fd <= 0 || json == NULL) return;
 
     char *str_json = cJSON_PrintUnformatted(json);
