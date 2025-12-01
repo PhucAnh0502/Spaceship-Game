@@ -11,7 +11,7 @@
 #define MAX_TEAMS 10
 #define MAX_MEMBERS 3
 
-//Cost constants
+// Cost constants
 #define COST_AMMO_BOX 100
 #define COST_LASER 1000
 #define COST_LASER_BATTERY 100
@@ -20,7 +20,7 @@
 #define COST_HEAVY_ARMOR 2000
 #define COST_REPAIR_PER_HP 1
 
-//Stats constants
+// Stats constants
 #define DMG_CANNON 10
 #define DMG_LASER 100
 #define DMG_MISSILE 800
@@ -58,7 +58,8 @@ typedef enum
     ACT_ANSWER
 } ActionType;
 
-typedef enum {
+typedef enum
+{
     RES_AUTH_SUCCESS = 100,
     RES_ACCOUNT_EXISTS = 111,
     RES_ACCOUNT_NOT_FOUND = 112,
@@ -91,7 +92,8 @@ typedef enum {
     RES_UNKNOWN_ACTION = 611,
 } ResponseCode;
 
-typedef enum {
+typedef enum
+{
     ITEM_AMMO_30MM = 1,
     ITEM_WEAPON_LASER_GUN,
     ITEM_LASER_BATTERY,
@@ -100,47 +102,67 @@ typedef enum {
     ITEM_ARMOR_HEAVY_KIT
 } ShopItemType;
 
-typedef enum {
-    WEAPON_CANNON_30MM = 1, 
-    WEAPON_LASER = 2,    
+typedef enum
+{
+    WEAPON_CANNON_30MM = 1,
+    WEAPON_LASER = 2,
     WEAPON_MISSILE = 3
 } WeaponType;
 
-typedef enum {
+typedef enum
+{
     ARMOR_NONE = 1,
     ARMOR_BASIC = 2,
     ARMOR_HEAVY = 3
 } ArmorType;
 
-typedef enum {
+typedef enum
+{
     STATUS_OFFLINE = 0,
-    STATUS_LOBBY = 1,    
-    STATUS_IN_TEAM = 2,  
-    STATUS_READY = 3,    
+    STATUS_LOBBY = 1,
+    STATUS_IN_TEAM = 2,
+    STATUS_READY = 3,
     STATUS_IN_BATTLE = 4
 } UserStatus;
 
-typedef struct {
+typedef struct
+{
+    WeaponType weapon; // current weapons type (CANNON, LASER, MISSILES)
+    int current_ammo;  // remaining ammo in this slot
+} WeaponSlot;
+
+typedef struct
+{
+    int hp;
+    int coin;
+
+    //---EQUIPMENTS---
+    WeaponSlot cannons[4];  // 4 cannons slot (normal or laser)
+    WeaponSlot missiles[4]; // 4 missiles slot
+
+    struct
+    {
+        ArmorType type;
+        int current_durability; // current armour durability
+    } armor[2];                 // 2 slot for armour
+} BattleShip;
+
+typedef struct
+{
     int id;
     char username[50];
     char password[50];
 
-    int hp;
-    int coin;
-    int armor_point;
-    int amor_type;
-
-    int ammo_30mm;
-    int laser_battery;
-    int missiles_count;
+    BattleShip ship; // battle ship that player controlled
 
     int team_id;
     int socket_fd;
-    int is_onine;
+    int is_online;
     int status;
 } Player;
 
-typedef struct {
+typedef struct
+{
     int team_id;
     char team_name[50];
     int captain_id;
@@ -152,12 +174,13 @@ typedef struct {
     int opponent_team_id;
 } Team;
 
-typedef struct {
+typedef struct
+{
     int id;
     char question[256];
     char options[4][100];
     int correct_option;
     int reward_type;
-} Question;
+} Question; // multiple choice questions
 
 #endif
