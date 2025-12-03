@@ -6,8 +6,8 @@
 #include <stdlib.h>
 
 #define PORT 8080
-#define BUFFER_SIZE 2048
-#define MAX_CLIENTS 100
+#define BUFFER_SIZE 4096
+#define MAX_CLIENTS 1000
 #define MAX_TEAMS 10
 #define MAX_MEMBERS 3
 
@@ -66,6 +66,7 @@ typedef enum
     RES_INVALID_PASSWORD = 113,
     RES_ACCOUNT_ALREADY_LOGGED_IN = 114,
     RES_NOT_LOGGED_IN = 115,
+    RES_MISSING_CREDENTIALS = 116,
 
     RES_TEAM_SUCCESS = 200,
     RES_ALREADY_IN_TEAM = 211,
