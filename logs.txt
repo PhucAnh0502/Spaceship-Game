@@ -1,0 +1,10 @@
+[2025-12-03 21:25:29] [ERROR] Action: LOGIN | Input: pa | Result: Account does not exist
+[2025-12-03 21:25:41] [SUCCESS] Action: REGISTER | Input: pa | Result: Account created successfully
+[2025-12-03 21:26:07] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-03 21:30:38] [SUCCESS] Action: REGISTER | Input: admin | Result: Account created successfully
+[2025-12-03 21:30:53] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-03 21:33:45] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-03 21:38:47] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-03 21:44:52] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-03 21:44:56] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-03 21:45:15] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
