@@ -91,6 +91,9 @@ typedef enum
     RES_TREASURE_OPENED = 512,
 
     RES_UNKNOWN_ACTION = 611,
+    RES_INVALID_ID = 612,
+    RES_INVALID_ARGUMENT = 613,
+    RES_NOT_FOUND = 614,
 } ResponseCode;
 
 typedef enum
