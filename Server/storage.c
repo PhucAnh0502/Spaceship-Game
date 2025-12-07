@@ -8,6 +8,9 @@ Player *players = NULL;
 int player_count = 0;
 size_t player_capacity = 0;
 
+Team *team = NULL;
+int team_count = 0;
+
 Player* find_player_by_username(const char* username) {
     for(int i = 0; i < player_count; i++){
         if(strcmp(players[i].username, username) == 0){
@@ -21,6 +24,27 @@ Player* find_player_by_id(int id) {
     for(int i = 0; i < player_count; i++){
         if(players[i].id == id){
             return &players[i];
+        }
+    }
+    return NULL;
+}
+
+Player *get_player_by_fd(int client_fd)
+{
+    for(int i = 0; i < player_count; i++){
+        // only return if socket is found and that player is online
+        if(players[i].socket_fd == client_fd && players[i].is_online){
+            return &players[i];
+        }
+    }
+    return NULL;
+}
+
+Team *find_team_by_id(int team_id)
+{
+    for (int i = 0; i < team_count; i++) {
+        if (teams[i].team_id == team_id) {
+            return &teams[i];
         }
     }
     return NULL;
