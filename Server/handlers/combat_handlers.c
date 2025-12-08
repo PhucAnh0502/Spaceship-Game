@@ -17,9 +17,10 @@ extern Player *find_player_by_id(int id);
 
 void handle_send_challenge(int client_fd, cJSON *payload)
 {
-    Player *challenger = find_player_by_id(client_fd);
+    Player *challenger = get_player_by_fd(client_fd);
     Team *challenger_team = find_team_by_id(challenger->team_id);
-    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_id");
+    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_id"); // Get target team Id from payload
+
     // If team not found
     if (!target_team_node)
     {
@@ -31,11 +32,15 @@ void handle_send_challenge(int client_fd, cJSON *payload)
     // TODO: Find opponent in teams array
     Team *opponent_team = find_team_by_id(target_team_id);
 
+    if (!opponent_team)
+    {
+        send_response(client_fd, RES_OPONENT_NOT_FOUND, "Opponent team not found", NULL);
+        return;
+    }
+
     // If found
     Player *opponent_captain = find_player_by_id(opponent_team->captain_id);
 
-    challenger_team->opponent_team_id = opponent_team->team_id;
-    opponent_team->opponent_team_id = challenger_team->team_id;
     // Send response to target team
     send_response(client_fd, RES_BATTLE_SUCCESS, "Challenge sent", NULL);
 
@@ -45,25 +50,19 @@ void handle_send_challenge(int client_fd, cJSON *payload)
 
 void handle_accept_challenge(int client_fd, cJSON *payload)
 {
-    // 1. Get accepter ID
-    Player *accepter = get_player_by_fd(client_fd);
-    if (!accepter || accepter->team_id == 0)
+    // 1. Get challenger information
+    Player *challenger = get_player_by_fd(client_fd);
+    if (!challenger || challenger->team_id == 0)
     {
         send_response(client_fd, RES_UNKNOWN_ACTION, "You are not in a team", NULL);
         return;
     }
 
-    // 2. Get accepter's team id
-    Team *my_team = find_team_by_id(accepter->team_id);
+    // 2. Get challenger's team id
+    Team *my_team = find_team_by_id(challenger->team_id);
 
-    // 3. Check if is there is any pending challenger
-    if (my_team->opponent_team_id == 0)
-    {
-        send_response(client_fd, RES_OPONENT_NOT_FOUND, "No pending challenge found", NULL);
-        return;
-    }
 
-    // 4. Get challenger team Infor
+    // 3. Get challenger team Infor
     Team *opponent_team = find_team_by_id(my_team->opponent_team_id);
     if (!opponent_team)
     {
@@ -71,15 +70,20 @@ void handle_accept_challenge(int client_fd, cJSON *payload)
         return;
     }
 
-    // 5. Get challenger's team captain ID
-    Player *challenger = find_player_by_id(opponent_team->captain_id);
+    // 4. Get challenger's team captain ID
+    Player *opponent_captain = find_player_by_id(opponent_team->captain_id);
 
     // --- GAME LOGIC HANDLER ---
+    if (challenger->status == STATUS_IN_BATTLE)
+    {
+        send_response(client_fd, RES_TEAM_ALREADY_IN_BATTLE, "challenger team is already in battle", NULL);
+        return;
+    }
 
     // Update status
-    accepter->status = STATUS_IN_BATTLE;
-    if (challenger)
-        challenger->status = STATUS_IN_BATTLE;
+    challenger->status = STATUS_IN_BATTLE;
+    if (opponent_captain)
+        opponent_captain->status = STATUS_IN_BATTLE;
 
     // Update status for my_team members
     for (int i = 0; i < my_team->current_size; i++)
@@ -96,7 +100,7 @@ void handle_accept_challenge(int client_fd, cJSON *payload)
         }
     }
 
-    // Update status for challenger team members
+    // Update status for opponent_team members
     for (int i = 0; i < opponent_team->current_size; i++)
     {
         int mem_id = opponent_team->member_ids[i];
@@ -110,15 +114,20 @@ void handle_accept_challenge(int client_fd, cJSON *payload)
             team_member->status = STATUS_IN_BATTLE;
         }
     }
+
+    // Binding opponent team to both of the team
+    my_team->opponent_team_id = opponent_team->team_id;
+    opponent_team->opponent_team_id = my_team->team_id;
+
     // --- SEND RESPONSE
 
     // Notification about game start
     send_response(client_fd, RES_BATTLE_SUCCESS, "Game Started! You are in team B", NULL);
 
-    // Send response for challenger's team captain
-    if (challenger && challenger->is_online)
+    // Send response for opponent_captain's team captain
+    if (opponent_captain && opponent_captain->is_online)
     {
-        send_response(challenger->socket_fd, RES_BATTLE_SUCCESS, "Your challenge was accepted! Game Started!", NULL);
+        send_response(opponent_captain->socket_fd, RES_BATTLE_SUCCESS, "Your challenge was accepted! Game Started!", NULL);
     }
 }
 
@@ -234,14 +243,13 @@ void handle_attack(int client_fd, cJSON *payload)
 
     if (target->ship.hp < 0)
         target->ship.hp = 0; // case that damage overflow
-       
+
     // 3. Send response
     cJSON *res_data = cJSON_CreateObject();
     cJSON_AddNumberToObject(res_data, "damage", damage);
     cJSON_AddNumberToObject(res_data, "target_hp", target->ship.hp);
     send_response(client_fd, RES_BATTLE_SUCCESS, "Attack successfully", res_data);
-    
+
     // 4. Check end game condition
     // TODO: Implement end game condition
-    
 }
