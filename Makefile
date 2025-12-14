@@ -4,9 +4,9 @@ LDFLAGS = -lm
 CJSON = Lib/cJSON.c
 
 SERVER_HANDLERS = $(wildcard Server/handlers/*.c)
-SERVER_SRC = Server/server.c Server/storage.c Server/utils.c $(SERVER_HANDLERS)
+SERVER_SRC = Server/server_b.c Server/storage.c Server/utils.c $(SERVER_HANDLERS)
 
-CLIENT_SRC = Client/client.c Client/utils.c
+CLIENT_SRC = Client/client_b.c Client/utils.c
 
 .PHONY: all clean
 

@@ -41,4 +41,6 @@ Player* get_player_by_fd (int client_fd);
  * @return team infomation of given team id
  */
 Team* find_team_by_id(int team_id);
+
+void init_teams();
 #endif

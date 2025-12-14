@@ -47,3 +47,5 @@ void check_end_game(int client_fd,int team_id);
  * @param payload request body
  */
 void end_game_for_team(int client_fd, Team *team, cJSON *payload);
+
+void handle_game_start(Team* my_team, Team* opponent_team);

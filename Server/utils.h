@@ -18,4 +18,5 @@ void log_action(const char *status, const char *action, const char *input, const
 
 cJSON *receive_json(int socket_fd, char *buffer, int *buf_len, int max_buf_size);
 
+void broadcast_to_team(Team *team, int status, const char *message, cJSON *payload);
 #endif
