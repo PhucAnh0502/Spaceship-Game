@@ -61,7 +61,6 @@ void handle_accept_challenge(int client_fd, cJSON *payload)
     // 2. Get challenger's team id
     Team *my_team = find_team_by_id(challenger->team_id);
 
-
     // 3. Get challenger team Infor
     Team *opponent_team = find_team_by_id(my_team->opponent_team_id);
     if (!opponent_team)
@@ -128,6 +127,7 @@ void handle_accept_challenge(int client_fd, cJSON *payload)
     if (opponent_captain && opponent_captain->is_online)
     {
         send_response(opponent_captain->socket_fd, RES_BATTLE_SUCCESS, "Your challenge was accepted! Game Started!", NULL);
+        // TODO: Implement game start ACT
     }
 }
 
@@ -165,7 +165,7 @@ void handle_fix_ship(int client_fd, cJSON *payload)
     }
 
     // Case that player do not have enough coin for heal for just 1 HP
-    if (hp_missing <= 0)
+    if (p->ship.coin < COST_REPAIR_PER_HP)
     {
         send_response(client_fd, RES_NOT_ENOUGH_COIN, "Not enough coin", NULL);
         return;
@@ -192,9 +192,25 @@ void handle_attack(int client_fd, cJSON *payload)
 {
     // Get attacker information
     Player *attacker = get_player_by_fd(client_fd);
+    if (!attacker)
+    {
+        send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+        return;
+    }
 
-    int target_id = cJSON_GetObjectItem(payload, "target_user_id")->valueint;
-    int weapon_type = cJSON_GetObjectItem(payload, "weapon_id")->valueint; // 1: Cannon, 2: Laser, 3: Missile
+    // Get target and weapong from payload
+    cJSON *target_node = cJSON_GetObjectItem(payload, "target_user_id");
+    cJSON *weapon_node = cJSON_GetObjectItem(payload, "weapon_id");
+
+    // Validate input
+    if (!target_node || !weapon_node)
+    {
+        send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid parameters", NULL);
+        return;
+    }
+
+    int target_id = target_node->valueint;
+    int weapon_type = weapon_node->valueint; // 1: Cannon, 2: Laser, 3: Missile
 
     Player *target = find_player_by_id(target_id); // Get target information
     if (!target)
@@ -203,53 +219,208 @@ void handle_attack(int client_fd, cJSON *payload)
         return;
     }
 
+    //---------------------------------------------------------
+    // 1. CHECK AMMO & DEDUCT
+    //---------------------------------------------------------
+
     // 1. Damage indication and minus ammo
+    WeaponSlot *found_slot = NULL;
     int damage = 0;
 
-    // check weapon type
+    // Check weapon type
     if (weapon_type == WEAPON_MISSILE)
     {
         // check dmg and ammo
-        damage = DMG_MISSILE; // 800
+        for (int i = 0; i < 4; i++)
+        {
+            if (attacker->ship.missiles[i].weapon == WEAPON_MISSILE &&
+                attacker->ship.missiles[i].current_ammo > 0)
+            {
+                found_slot = &attacker->ship.missiles[i];
+                damage = DMG_MISSILE; // 800
+                break;
+            }
+        }
     }
     else if (weapon_type == WEAPON_CANNON_30MM)
     {
-        damage = DMG_CANNON; // 10
+        for (int i = 0; i < 4; i++)
+        {
+            if (attacker->ship.cannons[i].weapon == weapon_type &&
+                attacker->ship.cannons[i].current_ammo > 0)
+            {
+                found_slot = &attacker->ship.cannons[i];
+
+                // Indicate damage by type of weapons
+                if (weapon_type == WEAPON_CANNON_30MM)
+                    damage = DMG_CANNON; // 10
+                else if (weapon_type == WEAPON_LASER)
+                    damage = DMG_LASER; // 100
+
+                break;
+            }
+        }
     }
 
     // TODO: add return RES_OUT_OF_AMMO logic
+    // If can NOT found any weapon or out of ammo
+    if (found_slot == NULL)
+    {
+        send_response(client_fd, RES_OUT_OF_AMMO, "Out of ammo or weapon not equipped", NULL);
+        return;
+    }
 
+    found_slot->current_ammo--;
+
+    // ---------------------------------------------------------
     // 2. Damage target's armour/HP
-    int current_armour = target->ship.armor[0].current_durability; // Get armour values
+    // ---------------------------------------------------------
+
+    // 1. Getting armour slot we are using
+    int armour_idx = -1; // No armour
+
+    if (target->ship.armor[0].current_durability > 0)
+    {
+        armour_idx = 0;
+    }
+    else if (target->ship.armor[1].current_durability > 0)
+    {
+        armour_idx = 1;
+    }
+
+    int current_armor_val = 0;
     int real_hp_loss = 0;
 
-    if (current_armour > 0) // case that target got armour
+    // 2. Calculate health/damage reduction
+    if (armour_idx != -1) // If target has armour
     {
-        if (current_armour >= damage) // case that target armour is bigger than attacker's dmg
+        current_armor_val = target->ship.armor[armour_idx].current_durability;
+
+        if (current_armor_val >= damage) // Armour take all the damage
         {
-            target->ship.armor[0].current_durability -= damage;
+            target->ship.armor[armour_idx].current_durability -= damage; // armour takes all the damage
+
+            current_armor_val = target->ship.armor[armour_idx].current_durability; // update
         }
-        else
+        else // Damage overflow, broken armour
         {
-            real_hp_loss = damage - current_armour;
-            target->ship.armor[0].current_durability = 0;
+            real_hp_loss = damage - current_armor_val;
+            target->ship.armor[armour_idx].current_durability = 0; // Armour index into 0
             target->ship.hp -= real_hp_loss;
+            current_armor_val = 0;
         }
     }
-    else // cast that target do not have armor
+    else // target do not have armour -> damage into health directly
     {
         target->ship.hp -= damage;
     }
 
+    // prevent damage overflow
     if (target->ship.hp < 0)
-        target->ship.hp = 0; // case that damage overflow
-
+        target->ship.hp = 0;
+    // ---------------------------------------------------------
     // 3. Send response
+    // ---------------------------------------------------------
     cJSON *res_data = cJSON_CreateObject();
     cJSON_AddNumberToObject(res_data, "damage", damage);
     cJSON_AddNumberToObject(res_data, "target_hp", target->ship.hp);
+    cJSON_AddNumberToObject(res_data, "target_armor", current_armor_val);          // Update target armour for better UX
+    cJSON_AddNumberToObject(res_data, "armor_slot_hit", armour_idx);               // Update armour slot that take dmg
+    cJSON_AddNumberToObject(res_data, "remaining_ammo", found_slot->current_ammo); // Update reamining ammo for better UX
     send_response(client_fd, RES_BATTLE_SUCCESS, "Attack successfully", res_data);
 
     // 4. Check end game condition
     // TODO: Implement end game condition
+    if (target->ship.hp == 0)
+    {
+        check_end_game(client_fd, target->team_id);
+    }
+}
+
+void check_end_game(int client_fd, int team_id)
+{
+    Team *losing_team = find_team_by_id(team_id);
+    if (!losing_team)
+    {
+        send_response(client_fd, RES_NOT_FOUND, "Team not found", NULL);
+        return;
+    }
+
+    //---------------------------------------------------------
+    // 1. Check if all member of one team is already eliminated
+    //---------------------------------------------------------
+
+    int alive_count = 0;
+    for (int i = 0; i < losing_team->current_size; i++)
+    {
+        int member_id = losing_team->member_ids[i];
+        Player *p = find_player_by_id(member_id);
+
+        // If player found and HP > 0 -> alive
+        if (p && p->ship.hp > 0)
+        {
+            alive_count++;
+        }
+        else if (!p)
+        {
+            send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+            continue;
+        }
+    }
+
+    if (alive_count > 0) // team is not completely eliminated
+        return;
+
+    //---------------------------------------------------------
+    // 2. Handle end game logic
+    //---------------------------------------------------------
+
+    // Determinate winning team
+    int winning_team_id = losing_team->opponent_team_id;
+    Team *winning_team = find_team_by_id(winning_team_id);
+
+    // TODO: Logging informations
+
+    // ---------------------------------------------------------
+    // 3. Send response
+    // ---------------------------------------------------------
+    cJSON *end_game_data = cJSON_CreateObject();
+    cJSON_AddNumberToObject(end_game_data, "winner_team_id", winning_team_id);
+
+    // Send notification for both team and reset status
+    end_game_for_team(client_fd,losing_team,end_game_data);
+    end_game_for_team(client_fd,winning_team,end_game_data);
+}
+
+void end_game_for_team(int client_fd, Team *team, cJSON *payload)
+{
+    if (!team)
+    {
+        send_response(client_fd, RES_NOT_FOUND, "Team not found", NULL);
+        return;
+    }
+
+    // Loop through every member of teams
+    for (int i = 0; i < team->current_size; i++)
+    {
+        int member_id = team->member_ids[i];
+        if (member_id <= 0)
+        {
+            send_response(client_fd, RES_INVALID_ID, "Invalid member id", NULL);
+            continue;
+        }
+
+        Player *member = find_player_by_id(member_id);
+        if (member && member->is_online)
+        {
+            // 1. Reset status to IN_TEAM (Ready for new game)
+            member->status = STATUS_IN_TEAM;
+
+            // 2. Send result notification
+            send_response(member->socket_fd, RES_BATTLE_SUCCESS, "Game Over", payload);
+        }
+    }
+
+    // Delete opponent team link
+    team->opponent_team_id = 0;
 }
