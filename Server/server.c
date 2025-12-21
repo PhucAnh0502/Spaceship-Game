@@ -27,6 +27,9 @@ extern void handle_logout(int client_fd);
 extern int check_auth(int client_fd);
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
 
+extern void handle_team_action(int client_fd, int action, cJSON *payload);
+
+
 void init_clients() {
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
@@ -68,16 +71,32 @@ void process_request(int client_fd, cJSON *root){
         case ACT_REGISTER:
             handle_register(client_fd, payload);
             break;
+
         case ACT_LOGIN:
             handle_login(client_fd, payload);
             break;
+
         case ACT_LOGOUT:
             handle_logout(client_fd);
             break;
+
+        // TEAM ACTIONS
+        case ACT_LIST_TEAMS:
+        case ACT_LIST_MEMBERS:
+        case ACT_CREATE_TEAM:
+        case ACT_REQ_JOIN:
+        case ACT_APPROVE_REQ:
+        case ACT_REFUSE_REQ:
+        case ACT_LEAVE_TEAM:
+        case ACT_KICK_MEMBER:
+            handle_team_action(client_fd, action, payload);
+            break;
+
         default:
             send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
             break;
     }
+
 }
 
 void run_server() {
