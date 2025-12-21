@@ -9,7 +9,7 @@
 
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
-#include "utils.h" 
+#include "utils.h"
 
 #define SERVER_IP "127.0.0.1"
 
@@ -19,15 +19,11 @@ int current_user_id = 0;
 char client_buffer[BUFFER_SIZE];
 int client_buf_len = 0;
 
+
 cJSON* wait_for_response() {
-    cJSON *response = NULL;
-    
     while (1) {
-        response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
-        
-        if (response != NULL) {
-            return response;
-        }
+        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
+        if (response) return response;
 
         char dummy;
         int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
@@ -36,12 +32,10 @@ cJSON* wait_for_response() {
             printf("\n[ERROR] Server disconnected unexpectedly!\n");
             close(sock);
             exit(1);
-        } else if (check < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
-            perror("\n[ERROR] Socket error");
-            exit(1);
         }
     }
 }
+
 
 void do_register() {
     char username[50], password[50];
@@ -57,7 +51,6 @@ void do_register() {
     send_json(sock, ACT_REGISTER, data);
 
     cJSON *res = wait_for_response();
-    
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
@@ -94,8 +87,9 @@ void do_login() {
     send_json(sock, ACT_LOGIN, data);
 
     cJSON *res = wait_for_response();
-    
     if (res) {
+        int status = cJSON_GetObjectItem(res, "status")->valueint;
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         
@@ -117,17 +111,54 @@ void do_login() {
 }
 
 void do_logout() {
+    send_json(sock, ACT_LOGOUT, NULL);
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        current_user_id = 0;
+        cJSON_Delete(res);
+    }
+}
+
+
+void do_list_teams() {
+    send_json(sock, ACT_LIST_TEAMS, NULL);
+    cJSON *res = wait_for_response();
+    if (!res) return;
+
+    int status = cJSON_GetObjectItem(res, "status")->valueint;
+    if (status != 200) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
     if (current_user_id == 0) {
         display_response_message(10, 10, 1, 0, "You are not logged in.");
         getch();
         return;
     }
 
-    send_json(sock, ACT_LOGOUT, NULL);
+    cJSON *arr = cJSON_GetObjectItem(res, "data");
+    printf("\n--- TEAM LIST ---\n");
+    cJSON *team;
+    cJSON_ArrayForEach(team, arr) {
+        printf("ID: %d | Name: %s | Slots: %d\n",
+            cJSON_GetObjectItem(team, "id")->valueint,
+            cJSON_GetObjectItem(team, "name")->valuestring,
+            cJSON_GetObjectItem(team, "slots")->valueint);
+    }
+    cJSON_Delete(res);
+}
 
+void do_create_team() {
+    char name[50];
+    get_input("Team name: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", name);
+
+    send_json(sock, ACT_CREATE_TEAM, data);
     cJSON *res = wait_for_response();
-    
     if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         if (msg) {
             display_response_message(8, 10, 2, 0, msg->valuestring);
@@ -139,6 +170,118 @@ void do_logout() {
     getch();
 }
 
+void do_list_members() {
+    char team_name[50];
+    get_input("Enter team name: ", team_name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", team_name);
+
+    send_json(sock, ACT_LIST_MEMBERS, data);
+
+    cJSON *res = wait_for_response();
+    if (!res) return;
+
+    if (cJSON_GetObjectItem(res, "status")->valueint != 200) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+        return;
+    }
+
+    cJSON *members = cJSON_GetObjectItem(res, "data");
+    cJSON *mem;
+
+    printf("\n--- MEMBERS OF TEAM '%s' ---\n", team_name);
+    cJSON_ArrayForEach(mem, members) {
+        printf("ID: %d | Name: %s | Captain: %s\n",
+            cJSON_GetObjectItem(mem, "id")->valueint,
+            cJSON_GetObjectItem(mem, "name")->valuestring,
+            cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO"
+        );
+    }
+
+    cJSON_Delete(res);
+}
+
+void do_req_join() {
+    char name[50];
+    get_input("Team name to join: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", name);
+
+    send_json(sock, ACT_REQ_JOIN, data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+
+void do_approve_req(int approve) {
+    char username[50];
+    get_input("Target username: ", username, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "target_username", username);
+
+    send_json(sock,
+              approve ? ACT_APPROVE_REQ : ACT_REFUSE_REQ,
+              data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+void do_leave_team() {
+    send_json(sock, ACT_LEAVE_TEAM, NULL);
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+void do_kick_member() {
+    char name[50];
+    get_input("Username to kick: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "target_username", name);
+
+    send_json(sock, ACT_KICK_MEMBER, data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n",
+            cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+
+
+void print_menu() {
+    printf("\n============================\n");
+    if (current_user_id == 0) {
+        printf("1. Register\n");
+        printf("2. Login\n");
+    } else {
+        printf("User ID: %d\n", current_user_id);
+        printf("3. Logout\n");
+        printf("4. List teams\n");
+        printf("5. Create team\n");
+        printf("6. List team members\n");
+        printf("7. Request join team\n");
+        printf("8. Approve join request\n");
+        printf("9. Refuse join request\n");
+        printf("10. Leave team\n");
+        printf("11. Kick member\n");
 void print_menu(int highlight) {
     const char *choices[] = {
         "1. Register",
@@ -169,31 +312,47 @@ void print_menu(int highlight) {
     refresh();
 }
 
+
 int main() {
     struct sockaddr_in serv_addr;
 
     memset(client_buffer, 0, BUFFER_SIZE);
-    client_buf_len = 0;
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return -1;
-    }
-
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
+    inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
 
-    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
-
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
+    connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
+    int choice;
+    char buf[16];
+
+    while (1) {
+        print_menu();
+        if (!fgets(buf, sizeof(buf), stdin)) break;
+        choice = atoi(buf);
+
+        switch (choice) {
+            case 1: do_register(); break;
+            case 2: do_login(); break;
+            case 3: do_logout(); break;
+            case 4: do_list_teams(); break;
+            case 5: do_create_team(); break;
+            case 6: do_list_members(); break;
+            case 7: do_req_join(); break;
+            case 8: do_approve_req(1); break;
+            case 9: do_approve_req(0); break;
+            case 10: do_leave_team(); break;
+            case 11: do_kick_member(); break;
+            case 0:
+                close(sock);
+                return 0;
+            default:
+                printf("Invalid choice\n");
+        }
+    }
     initscr();
     start_color();
     init_pair(1, COLOR_RED, COLOR_BLACK);
