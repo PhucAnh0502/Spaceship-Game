@@ -81,18 +81,18 @@ void process_request(int client_fd, cJSON *root){
 }
 
 void run_server() {
-    int master_socket, new_socket, max_sd, sd;
+    int listen_socket, new_socket, max_sd, sd;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
     fd_set readfds;
 
-    if((master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    if((listen_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("Socket failed");
         exit(EXIT_FAILURE);
     }
 
     int opt = 1;
-    if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0 ) {
+    if(setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0 ) {
         perror("Setsockopt failed");
         exit(EXIT_FAILURE);
     }
@@ -101,12 +101,12 @@ void run_server() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
-    if(bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    if(bind(listen_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
 
-    if(listen(master_socket, 10) < 0) {
+    if(listen(listen_socket, 10) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
     }
@@ -115,8 +115,8 @@ void run_server() {
 
     while(1){
         FD_ZERO(&readfds);
-        FD_SET(master_socket, &readfds);
-        max_sd = master_socket;
+        FD_SET(listen_socket, &readfds);
+        max_sd = listen_socket;
 
         for (int i = 0; i < MAX_CLIENTS; i++) {
             sd = clients[i].fd;
@@ -133,8 +133,8 @@ void run_server() {
             printf("Select error");
         }
 
-        if(FD_ISSET(master_socket, &readfds)) {
-            if((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+        if(FD_ISSET(listen_socket, &readfds)) {
+            if((new_socket = accept(listen_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
                 perror("Accept failed");
                 exit(EXIT_FAILURE);
             }

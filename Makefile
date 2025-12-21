@@ -1,6 +1,10 @@
 CC = gcc
-CFLAGS = -Wall -g -I Common -I Lib -I Server -I Client
-LDFLAGS = -lm
+CFLAGS = -Wall -g -ICommon -ILib -IServer -IClient
+
+LDFLAGS_COMMON = -lm
+
+LDFLAGS_CLIENT = -lncurses
+
 CJSON = Lib/cJSON.c
 
 SERVER_HANDLERS = $(wildcard Server/handlers/*.c)
@@ -13,10 +17,10 @@ CLIENT_SRC = Client/client.c Client/utils.c
 all: server_app client_app
 
 server_app: $(SERVER_SRC) $(CJSON)
-	$(CC) $(CFLAGS) $(SERVER_SRC) $(CJSON) -o server_app $(LDFLAGS)
+	$(CC) $(CFLAGS) $(SERVER_SRC) $(CJSON) -o server_app $(LDFLAGS_COMMON)
 
 client_app: $(CLIENT_SRC) $(CJSON)
-	$(CC) $(CFLAGS) $(CLIENT_SRC) $(CJSON) -o client_app $(LDFLAGS)
+	$(CC) $(CFLAGS) $(CLIENT_SRC) $(CJSON) -o client_app $(LDFLAGS_COMMON) $(LDFLAGS_CLIENT)
 
 clean:
 	rm -f server_app client_app
