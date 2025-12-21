@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+extern void log_action(const char *status, const char *action, const char *input, const char *result);
 
 void handle_register(int client_fd, cJSON *payload) {
     cJSON *user_node = cJSON_GetObjectItem(payload, "username");
@@ -23,7 +24,7 @@ void handle_register(int client_fd, cJSON *payload) {
         printf("[LOG] Account created: %s\n", user_node->valuestring);
         log_action("SUCCESS", "REGISTER", user_node->valuestring, "Account created successfully");
         send_response(client_fd, RES_AUTH_SUCCESS, "Registered successfully", NULL);
-    } else if(result == -1){
+    } else if(result == 0){
         log_action("ERROR", "REGISTER", user_node->valuestring, "Account already exists");
         send_response(client_fd, RES_ACCOUNT_EXISTS, "Username already exists", NULL);
     } else {

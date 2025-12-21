@@ -40,3 +40,37 @@
 [2025-12-14 10:50:09] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
 [2025-12-14 10:54:29] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
 [2025-12-14 10:54:32] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-21 20:44:14] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-21 20:44:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-21 20:44:21] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-21 20:44:38] [SUCCESS] Action: BUY_AMMO | Input: pa | Result: Mua 1 hop dan, con 0 coins
+[2025-12-21 20:44:52] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 1 players
+[2025-12-21 20:45:01] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-21 20:45:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Bac) auto spawned, broadcast to 1 players
+[2025-12-21 20:45:27] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-21 20:45:33] [SUCCESS] Action: BUY_LASER | Input: pa | Result: Mua phao laser
+[2025-12-21 20:46:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 1 players
+[2025-12-21 20:46:06] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-21 20:46:28] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-21 10:20:06] [SUCCESS] Action: REGISTER | Input: test1 | Result: Account created successfully
+[2025-12-21 10:20:21] [SUCCESS] Action: LOGIN | Input: test1 | Result: Logged in successfully
+[2025-12-21 10:20:56] [ERROR] Action: LOGIN | Input: test1 | Result: Account already logged in
+[2025-12-21 10:22:19] [SUCCESS] Action: LOGOUT | Input: test1 | Result: Logged out successfully
+[2025-12-21 10:22:25] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-21 10:33:02] [SUCCESS] Action: REGISTER | Input: abc | Result: Account created successfully
+[2025-12-21 10:33:22] [ERROR] Action: LOGIN | Input: absdf | Result: Account does not exist
+[2025-12-21 10:33:34] [ERROR] Action: REGISTER | Input: abc | Result: Account already exists
+[2025-12-21 10:33:52] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-21 10:36:52] [SUCCESS] Action: REGISTER | Input: abcde | Result: Account created successfully
+[2025-12-21 10:37:01] [ERROR] Action: REGISTER | Input: abcde | Result: Account already exists
+[2025-12-21 10:37:17] [ERROR] Action: LOGIN | Input: asfkjsh | Result: Account does not exist
+[2025-12-21 10:37:31] [SUCCESS] Action: LOGIN | Input: abcde | Result: Logged in successfully
+[2025-12-21 10:38:20] [SUCCESS] Action: LOGOUT | Input: abcde | Result: Logged out successfully
+[2025-12-21 10:39:45] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-21 10:46:46] [SUCCESS] Action: LOGIN | Input: abcde | Result: Logged in successfully
+[2025-12-21 10:47:07] [SUCCESS] Action: REGISTER | Input: test | Result: Account created successfully
+[2025-12-21 10:47:20] [SUCCESS] Action: LOGOUT | Input: abcde | Result: Logged out successfully
+[2025-12-21 11:05:28] [ERROR] Action: LOGIN | Input: abcdefe | Result: Account does not exist
+[2025-12-21 11:07:27] [ERROR] Action: LOGIN | Input: adfsadsf | Result: Account does not exist
+[2025-12-21 11:09:57] [SUCCESS] Action: LOGIN | Input: abcde | Result: Logged in successfully
+[2025-12-21 11:10:18] [SUCCESS] Action: LOGOUT | Input: abcde | Result: Logged out successfully
