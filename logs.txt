@@ -8,6 +8,18 @@
 [2025-12-03 21:44:52] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
 [2025-12-03 21:44:56] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
 [2025-12-03 21:45:15] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-21 20:44:14] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-21 20:44:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-21 20:44:21] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-21 20:44:38] [SUCCESS] Action: BUY_AMMO | Input: pa | Result: Mua 1 hop dan, con 0 coins
+[2025-12-21 20:44:52] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 1 players
+[2025-12-21 20:45:01] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-21 20:45:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Bac) auto spawned, broadcast to 1 players
+[2025-12-21 20:45:27] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-21 20:45:33] [SUCCESS] Action: BUY_LASER | Input: pa | Result: Mua phao laser
+[2025-12-21 20:46:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 1 players
+[2025-12-21 20:46:06] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-21 20:46:28] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
 [2025-12-21 10:20:06] [SUCCESS] Action: REGISTER | Input: test1 | Result: Account created successfully
 [2025-12-21 10:20:21] [SUCCESS] Action: LOGIN | Input: test1 | Result: Logged in successfully
 [2025-12-21 10:20:56] [ERROR] Action: LOGIN | Input: test1 | Result: Account already logged in

@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -g -ICommon -ILib -IServer -IClient
+CFLAGS = -Wall -g -I Common -I Lib -I Server -I Client
+LDFLAGS = -lm -lpthread
 
 LDFLAGS_COMMON = -lm
 
