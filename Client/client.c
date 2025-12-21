@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <ncurses.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -60,23 +61,16 @@ int is_ui_locked() {
 }
 
 cJSON* wait_for_response() {
-    cJSON *response = NULL;
-    
     while (1) {
-        response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
-        
-        if (response != NULL) {
-            return response;
-        }
+        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
+        if (response) return response;
 
         char dummy;
         int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
         if (check == 0) {
+            endwin();
             printf("\n[ERROR] Server disconnected unexpectedly!\n");
             close(sock);
-            exit(1);
-        } else if (check < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
-            perror("\n[ERROR] Socket error");
             exit(1);
         }
     }
@@ -107,9 +101,10 @@ void do_register() {
     lock_ui();
     
     char username[50], password[50];
-    printf("\n--- REGISTER ---\n");
-    get_input("Username: ", username, 50);
-    get_input("Password: ", password, 50);
+    clear();
+    mvprintw(2, 10, "--- REGISTER ---");
+    get_input(4, 10, "Username: ", username, 50, 0);
+    get_input(5, 10, "Password: ", password, 50, 1);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "username", username);
@@ -118,31 +113,38 @@ void do_register() {
     send_json(sock, ACT_REGISTER, data);
 
     cJSON *res = wait_for_response();
-    
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf(">> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            if(status->valueint == RES_AUTH_SUCCESS) {
+                display_response_message(8, 10, 2, status->valueint, msg->valuestring);
+            } else {
+                display_response_message(8, 10, 1, status->valueint, msg->valuestring);
+            }
         }
         cJSON_Delete(res);
     }
     
     unlock_ui();
+    mvprintw(10, 10, "Press any key to continue...");
+    getch();
 }
 
 void do_login() {
     if (current_user_id != 0) {
-        printf(">> You are already logged in!\n");
+        display_response_message(10, 10, 1, 0, "You are already logged in!");
+        getch();
         return;
     }
 
     lock_ui();
     
     char username[50], password[50];
-    printf("\n--- LOGIN ---\n");
-    get_input("Username: ", username, 50);
-    get_input("Password: ", password, 50);
+    erase();
+    mvprintw(2, 10, "=== LOGIN ===");
+    get_input(4, 10, "Username: ", username, 50, 0);
+    get_input(5, 10, "Password: ", password, 50, 1);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "username", username);
@@ -151,14 +153,13 @@ void do_login() {
     send_json(sock, ACT_LOGIN, data);
 
     cJSON *res = wait_for_response();
-    
     if (res) {
+        int status = cJSON_GetObjectItem(res, "status")->valueint;
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         
         if (status && msg) {
-            printf(">> Server [%d]: %s\n", status->valueint, msg->valuestring);
-
             if (status->valueint == RES_AUTH_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
                 if (res_data) {
@@ -176,38 +177,181 @@ void do_login() {
                     // Start listener thread
                     should_exit = 0;
                     pthread_create(&listener_thread, NULL, background_listener, NULL);
+                    display_response_message(8, 10, 2, status->valueint, msg->valuestring);
                 }
+            } else {
+                display_response_message(8, 10, 1, status->valueint, msg->valuestring);
             }
         }
         cJSON_Delete(res);
     }
     
     unlock_ui();
+    mvprintw(10, 10, "Press any key to continue...");
+    getch();
 }
 
 void do_logout() {
+    send_json(sock, ACT_LOGOUT, NULL);
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        current_user_id = 0;
+        cJSON_Delete(res);
+    }
+}
+
+
+void do_list_teams() {
+    send_json(sock, ACT_LIST_TEAMS, NULL);
+    cJSON *res = wait_for_response();
+    if (!res) return;
+
+    int status = cJSON_GetObjectItem(res, "status")->valueint;
+    if (status != 200) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
     if (current_user_id == 0) {
-        printf(">> You are not logged in.\n");
+        display_response_message(10, 10, 1, 0, "You are not logged in.");
+        getch();
         return;
     }
 
-    should_exit = 1;
-    pthread_join(listener_thread, NULL);
+//     should_exit = 1;
+//     pthread_join(listener_thread, NULL);
 
-    send_json(sock, ACT_LOGOUT, NULL);
+//     send_json(sock, ACT_LOGOUT, NULL);
+    cJSON *arr = cJSON_GetObjectItem(res, "data");
+    printf("\n--- TEAM LIST ---\n");
+    cJSON *team;
+    cJSON_ArrayForEach(team, arr) {
+        printf("ID: %d | Name: %s | Slots: %d\n",
+            cJSON_GetObjectItem(team, "id")->valueint,
+            cJSON_GetObjectItem(team, "name")->valuestring,
+            cJSON_GetObjectItem(team, "slots")->valueint);
+    }
+    cJSON_Delete(res);
+}
 
+void do_create_team() {
+    char name[50];
+    get_input("Team name: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", name);
+
+    send_json(sock, ACT_CREATE_TEAM, data);
     cJSON *res = wait_for_response();
-    
     if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON *msg = cJSON_GetObjectItem(res, "message");
-        if (msg) printf(">> Server: %s\n", msg->valuestring);
-        
+        if (msg) {
+            display_response_message(8, 10, 2, 0, msg->valuestring);
+        }
         current_user_id = 0;
         current_coins = 0;
         current_hp = 1000;
         cJSON_Delete(res);
     }
+    mvprintw(10, 10, "Press any key to continue...");
+    getch();
 }
+
+void do_list_members() {
+    char team_name[50];
+    get_input("Enter team name: ", team_name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", team_name);
+
+    send_json(sock, ACT_LIST_MEMBERS, data);
+
+    cJSON *res = wait_for_response();
+    if (!res) return;
+
+    if (cJSON_GetObjectItem(res, "status")->valueint != 200) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+        return;
+    }
+
+    cJSON *members = cJSON_GetObjectItem(res, "data");
+    cJSON *mem;
+
+    printf("\n--- MEMBERS OF TEAM '%s' ---\n", team_name);
+    cJSON_ArrayForEach(mem, members) {
+        printf("ID: %d | Name: %s | Captain: %s\n",
+            cJSON_GetObjectItem(mem, "id")->valueint,
+            cJSON_GetObjectItem(mem, "name")->valuestring,
+            cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO"
+        );
+    }
+
+    cJSON_Delete(res);
+}
+
+void do_req_join() {
+    char name[50];
+    get_input("Team name to join: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "team_name", name);
+
+    send_json(sock, ACT_REQ_JOIN, data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+
+void do_approve_req(int approve) {
+    char username[50];
+    get_input("Target username: ", username, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "target_username", username);
+
+    send_json(sock,
+              approve ? ACT_APPROVE_REQ : ACT_REFUSE_REQ,
+              data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+void do_leave_team() {
+    send_json(sock, ACT_LEAVE_TEAM, NULL);
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+void do_kick_member() {
+    char name[50];
+    get_input("Username to kick: ", name, 50);
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "target_username", name);
+
+    send_json(sock, ACT_KICK_MEMBER, data);
+
+    cJSON *res = wait_for_response();
+    if (res) {
+        printf(">> %s\n",
+            cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON_Delete(res);
+    }
+}
+
+
 
 void print_menu() {
     printf("\n============================\n");
@@ -218,7 +362,7 @@ void print_menu() {
         printf("User ID: %d | %d coins | %d HP\n", current_user_id, current_coins, current_hp);
         printf("--- Account ---\n");
         printf("3. Logout\n");
-        
+        //**//
         printf("\n--- Shop ---\n");
         printf("4. Mua dan 30mm\n");
         printf("5. Mua phao laser\n");
@@ -226,39 +370,61 @@ void print_menu() {
         printf("7. Mua ten lua\n");
         printf("8. Mua giap\n");
         printf("9. Sua tau\n");
+        printf("4. List teams\n");
+        printf("5. Create team\n");
+        printf("6. List team members\n");
+        printf("7. Request join team\n");
+        printf("8. Approve join request\n");
+        printf("9. Refuse join request\n");
+        printf("10. Leave team\n");
+        printf("11. Kick member\n");
+void print_menu(int highlight) {
+    const char *choices[] = {
+        "1. Register",
+        "2. Login",
+        "3. Logout",
+        "0. Exit"
+    };
+    int n_choices = sizeof(choices) / sizeof(choices[0]);
+
+    erase();
+    mvprintw(1, 10, "=== SPACE BATTLE ONLINE ===");
+    if(current_user_id != 0){
+        attron(COLOR_PAIR(2));
+        mvprintw(2, 10, "Logged in as User ID: %d", current_user_id);
+        attroff(COLOR_PAIR(2));
+      //**//
     }
-    printf("0. Exit\n");
-    printf("============================\n");
-    printf("Your choice: ");
+
+    for(int i = 0; i < n_choices; i++){
+        if(highlight == i){
+            attron(A_REVERSE);
+            mvprintw(5 + i, 10, "-> %s", choices[i]);
+            attroff(A_REVERSE);
+        } else {
+            mvprintw(5 + i, 10, "%s", choices[i]);
+        }
+    }
+    mvprintw(12, 10, "Use arrow keys to move, Enter to select.");
+    refresh();
 }
+
 
 int main() {
     struct sockaddr_in serv_addr;
 
     memset(client_buffer, 0, BUFFER_SIZE);
-    client_buf_len = 0;
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return -1;
-    }
-
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
+    inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
 
-    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
-
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
+    connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
     int choice;
-    char buffer[10];
+    char buf[16];
 
     while (1) {
         // Kiểm tra và hiển thị treasure pending (nếu có)
@@ -306,6 +472,9 @@ int main() {
         
         // Xử lý menu bình thường
         if (sscanf(buffer, "%d", &choice) != 1) continue;
+        print_menu();
+        if (!fgets(buf, sizeof(buf), stdin)) break;
+        choice = atoi(buf);
 
         switch (choice) {
             case 1: do_register(); break;
@@ -323,11 +492,66 @@ int main() {
                     should_exit = 1;
                     pthread_join(listener_thread, NULL);
                 }
-                close(sock);
-                return 0;
-            default: printf("Invalid choice!\n");
+            case 4: do_list_teams(); break;
+            case 5: do_create_team(); break;
+            case 6: do_list_members(); break;
+            case 7: do_req_join(); break;
+            case 8: do_approve_req(1); break;
+            case 9: do_approve_req(0); break;
+            case 10: do_leave_team(); break;
+            case 11: do_kick_member(); break;
+//             case 0:
+//                 close(sock);
+//                 return 0;
+//             default:
+//                 printf("Invalid choice\n");
+        }
+    }
+    initscr();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+
+    int choice = -1;
+    int highlight = 0;
+
+    while (1) {
+        print_menu(highlight);
+        int c = getch();
+        
+        switch (c)
+        {
+        case KEY_UP:
+                highlight = (highlight == 0) ? 3 : highlight - 1;
+                break;
+            case KEY_DOWN:
+                highlight = (highlight == 3) ? 0 : highlight + 1;
+                break;
+            case 10:
+                choice = highlight;
+                break;
+            default:
+                break;
+        }
+
+        if(choice != -1){
+            if(choice == 0){
+                do_register();
+            } else if(choice == 1){
+                do_login();
+            } else if(choice == 2){
+                do_logout();
+            } else if(choice == 3){
+                break;
+            }
+            choice = -1;
         }
     }
 
+    endwin();
+    close(sock);
     return 0;
 }

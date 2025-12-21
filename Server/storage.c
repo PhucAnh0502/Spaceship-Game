@@ -204,3 +204,172 @@ int register_player(const char* username, const char* password) {
     player_count++;
     return 1;
 }
+
+
+
+Team teams[MAX_TEAMS];
+int team_count = 0;
+
+Team *find_team_by_id(int team_id) {
+    for (int i = 0; i < team_count; i++) {
+        if (teams[i].team_id == team_id)
+            return &teams[i];
+    }
+    return NULL;
+}
+
+Team* find_team_by_name(const char *team_name) {
+    if (!team_name) return NULL;
+
+    for (int i = 0; i < team_count; i++) {
+        if (strcmp(teams[i].team_name, team_name) == 0) {
+            return &teams[i];
+        }
+    }
+    return NULL;
+}
+
+
+int is_valid_team_name(const char *name) {
+    if (!name) return 0;
+    size_t len = strlen(name);
+    if (len > 0 && len >= 50) return 0;
+    return 1;
+}
+
+int is_team_name_exists(const char *name) {
+    for (int i = 0; i < team_count; i++) {
+        if (strcmp(teams[i].team_name, name) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+// return:
+//Team* : tao thanh cong
+//NULL  : tao that bai
+Team *create_team(const char *name, int captain_id
+) {
+    if (team_count >= MAX_TEAMS) return NULL;
+    if (!is_valid_team_name(name)) return NULL;
+    if (is_team_name_exists(name)) return NULL;
+
+    Team *t = &teams[team_count];
+    memset(t, 0, sizeof(Team));
+
+    if (team_count == 0)
+        t->team_id = 1;
+    else
+        t->team_id = teams[team_count - 1].team_id + 1;
+
+    strncpy(t->team_name, name, sizeof(t->team_name) - 1);
+    t->captain_id = captain_id;
+    t->member_ids[0] = captain_id;
+    t->current_size = 1;
+
+    team_count++;
+    return t;
+}
+
+int delete_team(int team_id) {
+    for (int i = 0; i < team_count; i++) {
+        if (teams[i].team_id == team_id) {
+            for (int j = i; j < team_count - 1; j++)
+                teams[j] = teams[j + 1];
+            team_count--;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+int is_member(Team *team, int user_id) {
+    for (int i = 0; i < team->current_size; i++)
+        if (team->member_ids[i] == user_id)
+            return 1;
+    return 0;
+}
+
+//return
+//1: them thanh cong
+//0: da la member
+//-1: team full
+int add_member(Team *team, int user_id) {
+    if (team->current_size >= MAX_MEMBERS) return -1;
+    if (is_member(team, user_id)) return 0;
+
+    team->member_ids[team->current_size++] = user_id;
+    return 1;
+}
+
+//return 
+//1: xoa thanh cong
+//0: khong tim thay member
+int remove_member(Team *team, int user_id) {
+    int idx = -1;
+    for (int i = 0; i < team->current_size; i++) {
+        if (team->member_ids[i] == user_id) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) return 0;
+
+    for (int i = idx; i < team->current_size - 1; i++)
+        team->member_ids[i] = team->member_ids[i + 1];
+
+    team->current_size--;
+    return 1;
+}
+
+
+int is_pending_request_exists(Team *team, int user_id) {
+    for (int i = 0; i < team->pending_size; i++)
+        if (team->pending_requests[i] == user_id)
+            return 1;
+    return 0;
+}
+
+//return
+//1: gui request thanh cong
+//0: request da ton tai
+//-1: team full
+//-2: da la member
+//-3: captain tu join
+int add_pending_request(Team *team, int user_id) {
+    if (team->current_size >= MAX_MEMBERS) return -1;
+    if (is_member(team, user_id)) return -2;
+    if (team->captain_id == user_id) return -3;
+    if (add_pending_request(team, user_id)) return 0;
+
+    team->pending_requests[team->pending_size] = user_id;
+    team->pending_size++;
+    return 1;
+}
+
+//return
+//1: xoa thanh cong
+//2: khong tim thay request
+int remove_pending_request(Team *team, int user_id) {
+    int idx = -1; //chua tim thay
+    for (int i = 0; i < team->pending_size; i++) {
+        if (team->pending_requests[i] == user_id) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) return 0;
+
+    for (int i = idx; i < team->pending_size - 1; i++)
+        team->pending_requests[i] = team->pending_requests[i + 1];
+
+    team->pending_size--;
+    return 1;
+}
+
+int is_captain(Team *team, int user_id) {
+    return team->captain_id == user_id;
+}

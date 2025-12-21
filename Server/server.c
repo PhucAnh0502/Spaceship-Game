@@ -35,6 +35,8 @@ extern void send_response(int socket_fd, int status, const char *message, cJSON 
 
 pthread_t treasure_spawner_thread;
 int server_running = 1;
+extern void handle_team_action(int client_fd, int action, cJSON *payload);
+
 
 void init_clients() {
     for (int i = 0; i < MAX_CLIENTS; i++)
@@ -77,9 +79,11 @@ void process_request(int client_fd, cJSON *root){
         case ACT_REGISTER:
             handle_register(client_fd, payload);
             break;
+
         case ACT_LOGIN:
             handle_login(client_fd, payload);
             break;
+
         case ACT_LOGOUT:
             handle_logout(client_fd);
             break;
@@ -92,10 +96,24 @@ void process_request(int client_fd, cJSON *root){
         case ACT_ANSWER:
             handle_answer(client_fd, payload);
             break;
+
+        // TEAM ACTIONS
+        case ACT_LIST_TEAMS:
+        case ACT_LIST_MEMBERS:
+        case ACT_CREATE_TEAM:
+        case ACT_REQ_JOIN:
+        case ACT_APPROVE_REQ:
+        case ACT_REFUSE_REQ:
+        case ACT_LEAVE_TEAM:
+        case ACT_KICK_MEMBER:
+            handle_team_action(client_fd, action, payload);
+            break;
+
         default:
             send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
             break;
     }
+
 }
 
 void* auto_spawn_treasure(void* arg) {
@@ -128,18 +146,18 @@ void* auto_spawn_treasure(void* arg) {
 }
 
 void run_server() {
-    int master_socket, new_socket, max_sd, sd;
+    int listen_socket, new_socket, max_sd, sd;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
     fd_set readfds;
 
-    if((master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    if((listen_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("Socket failed");
         exit(EXIT_FAILURE);
     }
 
     int opt = 1;
-    if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0 ) {
+    if(setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0 ) {
         perror("Setsockopt failed");
         exit(EXIT_FAILURE);
     }
@@ -148,12 +166,12 @@ void run_server() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
-    if(bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    if(bind(listen_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
 
-    if(listen(master_socket, 10) < 0) {
+    if(listen(listen_socket, 10) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
     }
@@ -162,8 +180,8 @@ void run_server() {
 
     while(1){
         FD_ZERO(&readfds);
-        FD_SET(master_socket, &readfds);
-        max_sd = master_socket;
+        FD_SET(listen_socket, &readfds);
+        max_sd = listen_socket;
 
         for (int i = 0; i < MAX_CLIENTS; i++) {
             sd = clients[i].fd;
@@ -180,8 +198,8 @@ void run_server() {
             printf("Select error");
         }
 
-        if(FD_ISSET(master_socket, &readfds)) {
-            if((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+        if(FD_ISSET(listen_socket, &readfds)) {
+            if((new_socket = accept(listen_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
                 perror("Accept failed");
                 exit(EXIT_FAILURE);
             }

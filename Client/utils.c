@@ -5,17 +5,25 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <ncurses.h>
 
-void get_input(const char *prompt, char *buffer, int size) {
-    printf("%s", prompt);
-    if (fgets(buffer, size, stdin) != NULL) {
-        size_t len = strlen(buffer);
-        if (len > 0 && buffer[len - 1] == '\n') {
-            buffer[len - 1] = '\0';
-        }
+void get_input(int y, int x, const char *prompt, char *buffer, int size, int is_password) {
+    mvprintw(y, x, "%s", prompt);
+    if(is_password) noecho();
+    else echo();
+
+    getnstr(buffer, size - 1);
+    noecho();
+}
+
+void display_response_message(int y, int x, int color_pair, int status, const char *msg) {
+    attron(COLOR_PAIR(color_pair));
+    if(status){
+        mvprintw(y, x, ">> Server [%d]: %s", status, msg);
     } else {
-        buffer[0] = '\0';
+        mvprintw(y, x, ">> Server: %s", msg);
     }
+    attroff(COLOR_PAIR(color_pair));
 }
 
 void send_json(int sock, int action, cJSON *data) {
