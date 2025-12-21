@@ -1,13 +1,13 @@
-#include "../../Common/protocol.h"
-#include "../../Lib/cJSON.h"
-#include "../storage.h"
-#include "../utils.h"
+#include "../../../Common/protocol.h"
+#include "../../../Lib/cJSON.h"
+#include "../../services/storage/storage.h"
+#include "../../services/utils/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "combat/combat_handlers.h"
+#include "combat_handlers.h"
 
 extern Player *players; // Player array
-extern Team *teams;     // Teams array
+extern Team teams[MAX_TEAMS];     // Teams array
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
 extern Team *find_team_by_id(int team_id);
 extern Player *find_player_by_id(int id);

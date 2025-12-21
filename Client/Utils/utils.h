@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "../Lib/cJSON.h"
+#include "../../Lib/cJSON.h"
 
 void send_json(int sock, int action, cJSON *data);
 

@@ -1,6 +1,6 @@
-#include "../../Common/protocol.h"
-#include "../storage.h"
-#include "../../Lib/cJSON.h"
+#include "../../../Common/protocol.h"
+#include "../../services/storage/storage.h"
+#include "../../../Lib/cJSON.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -278,41 +278,41 @@ void handle_buy_armor(int client_fd, cJSON *payload) {
     send_response(client_fd, RES_SHOP_SUCCESS, "Mua giap thanh cong", data);
 }
 
-void handle_fix_ship(int client_fd, cJSON *payload) {
-    Player *player = find_player_by_socket(client_fd);
-    if (!player) {
-        send_response(client_fd, RES_NOT_LOGGED_IN, "Chua dang nhap", NULL);
-        return;
-    }
-
-    int max_hp = 1000;
-    int hp_needed = max_hp - player->ship.hp;
-
-    if (hp_needed <= 0) {
-        send_response(client_fd, RES_HP_IS_FULL, "HP da day", NULL);
-        return;
-    }
-
-    int repair_cost = hp_needed * COST_REPAIR_PER_HP;
-
-    if (player->ship.coin < repair_cost) {
-        send_response(client_fd, RES_NOT_ENOUGH_COIN, "Khong du tien sua", NULL);
-        return;
-    }
-
-    player->ship.coin -= repair_cost;
-    player->ship.hp = max_hp;
-
-    update_player_to_file(player);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "hp", player->ship.hp);
-    cJSON_AddNumberToObject(data, "coin", player->ship.coin);
-    cJSON_AddNumberToObject(data, "repair_cost", repair_cost);
-
-    log_action("SUCCESS", "FIX_SHIP", player->username, "Sua tau");
-    send_response(client_fd, RES_SHOP_SUCCESS, "Sua tau thanh cong", data);
-}
+// void handle_fix_ship(int client_fd, cJSON *payload) {
+//     Player *player = find_player_by_socket(client_fd);
+//     if (!player) {
+//         send_response(client_fd, RES_NOT_LOGGED_IN, "Chua dang nhap", NULL);
+//         return;
+//     }
+//
+//     int max_hp = 1000;
+//     int hp_needed = max_hp - player->ship.hp;
+//
+//     if (hp_needed <= 0) {
+//         send_response(client_fd, RES_HP_IS_FULL, "HP da day", NULL);
+//         return;
+//     }
+//
+//     int repair_cost = hp_needed * COST_REPAIR_PER_HP;
+//
+//     if (player->ship.coin < repair_cost) {
+//         send_response(client_fd, RES_NOT_ENOUGH_COIN, "Khong du tien sua", NULL);
+//         return;
+//     }
+//
+//     player->ship.coin -= repair_cost;
+//     player->ship.hp = max_hp;
+//
+//     update_player_to_file(player);
+//
+//     cJSON *data = cJSON_CreateObject();
+//     cJSON_AddNumberToObject(data, "hp", player->ship.hp);
+//     cJSON_AddNumberToObject(data, "coin", player->ship.coin);
+//     cJSON_AddNumberToObject(data, "repair_cost", repair_cost);
+//
+//     log_action("SUCCESS", "FIX_SHIP", player->username, "Sua tau");
+//     send_response(client_fd, RES_SHOP_SUCCESS, "Sua tau thanh cong", data);
+// }
 
 void handle_buy_item(int client_fd, cJSON *payload) {
     cJSON *item_type_node = cJSON_GetObjectItem(payload, "item_type");

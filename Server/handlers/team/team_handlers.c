@@ -1,6 +1,6 @@
-#include "../../Common/protocol.h"
-#include "../storage.h"
-#include "../../Lib/cJSON.h"
+#include "../../../Common/protocol.h"
+#include "../../services/storage/storage.h"
+#include "../../../Lib/cJSON.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@ extern void send_response(int socket_fd, int status, const char *message, cJSON 
 extern void log_action(const char *status, const char *action, const char *input, const char *result);
 
 
-static Player *get_player_by_fd(int client_fd) {
+Player *get_player_by_fd(int client_fd) {
     for (int i = 0; i < player_count; i++) {
         if (players[i].socket_fd == client_fd && players[i].is_online)
             return &players[i];

@@ -1,7 +1,7 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include "../Common/protocol.h"
+#include "../../../Common/protocol.h"
 
 extern Player *players;
 extern int player_count;

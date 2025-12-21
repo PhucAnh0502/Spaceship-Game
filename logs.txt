@@ -74,3 +74,8 @@
 [2025-12-21 11:07:27] [ERROR] Action: LOGIN | Input: adfsadsf | Result: Account does not exist
 [2025-12-21 11:09:57] [SUCCESS] Action: LOGIN | Input: abcde | Result: Logged in successfully
 [2025-12-21 11:10:18] [SUCCESS] Action: LOGOUT | Input: abcde | Result: Logged out successfully
+[2025-12-21 10:35:14] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-21 10:35:21] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-21 11:00:52] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-21 11:01:17] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-21 11:01:20] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found

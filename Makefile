@@ -8,10 +8,10 @@ LDFLAGS_CLIENT = -lncurses
 
 CJSON = Lib/cJSON.c
 
-SERVER_HANDLERS = $(wildcard Server/handlers/*.c)
-SERVER_SRC = Server/server_b.c Server/storage.c Server/utils.c $(SERVER_HANDLERS)
+SERVER_HANDLERS = $(shell find Server/handlers -name "*.c" ! -name "client_*.c")
+SERVER_SRC = Server/server.c Server/services/storage/storage.c Server/services/utils/utils.c $(SERVER_HANDLERS)
 
-CLIENT_SRC = Client/client_b.c Client/utils.c
+CLIENT_SRC = $(shell find Client -name "*.c")
 
 .PHONY: all clean
 

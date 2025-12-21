@@ -2,8 +2,8 @@
 #define CLIENT_STATE_H
 
 #include <pthread.h>
-#include "../Common/protocol.h"
-#include "../Lib/cJSON.h"
+#include "../../../Common/protocol.h"
+#include "../../../Lib/cJSON.h"
 
 // Connection
 extern int sock;
@@ -45,7 +45,7 @@ extern pthread_mutex_t pending_mutex;
 // Từ utils.c (đã có sẵn)
 extern void send_json(int sock, int action, cJSON *data);
 extern cJSON* receive_json(int sock, char *buffer, int *buf_len, int buf_size);
-extern void get_input(const char *prompt, char *buffer, int size);
+// extern void get_input(const char *prompt, char *buffer, int size);
 
 // Wait for server response
 cJSON* wait_for_response(void);

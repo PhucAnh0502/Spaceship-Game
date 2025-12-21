@@ -1,5 +1,5 @@
 #include "storage.h"
-#include "../Common/protocol.h"
+#include "../../../Common/protocol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +8,7 @@ Player *players = NULL;
 int player_count = 0;
 size_t player_capacity = 0;
 
-Team *teams = NULL;
+Team teams[MAX_TEAMS];
 int team_count = 0;
 
 Player *find_player_by_username(const char *username)
@@ -35,19 +35,6 @@ Player *find_player_by_id(int id)
     return NULL;
 }
 
-Player *get_player_by_fd(int client_fd)
-{
-    printf("Begin getting player by id\n");
-    for (int i = 0; i < player_count; i++)
-    {
-        // only return if socket is found and that player is online
-        if (players[i].socket_fd == client_fd && players[i].is_online)
-        {
-          return &players[i];
-        }
-    }
-  return NULL;
-}
 
 // Tìm player theo socket_fd
 Player* find_player_by_socket(int socket_fd) {
@@ -262,21 +249,13 @@ void init_teams()
     if (teams == NULL)
     {
         // Cấp phát bộ nhớ cho 10 đội (theo MAX_TEAMS trong protocol.h)
-        teams = (Team *)calloc(MAX_TEAMS, sizeof(Team));
         printf("[STORAGE] Allocated memory for teams.\n");
     }
 }
 
-Team teams[MAX_TEAMS];
-int team_count = 0;
 
-Team *find_team_by_id(int team_id) {
-    for (int i = 0; i < team_count; i++) {
-        if (teams[i].team_id == team_id)
-            return &teams[i];
-    }
-    return NULL;
-}
+
+
 
 Team* find_team_by_name(const char *team_name) {
     if (!team_name) return NULL;

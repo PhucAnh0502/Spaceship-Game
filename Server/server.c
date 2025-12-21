@@ -12,8 +12,8 @@
 
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
-#include "storage.h"
-#include "utils.h"
+#include "services/storage/storage.h"
+#include "services/utils/utils.h"
 
 typedef struct {
     int fd;

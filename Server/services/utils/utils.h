@@ -7,8 +7,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "../Lib/cJSON.h"
-#include "../Common/protocol.h"
+#include "../../../Lib/cJSON.h"
+#include "../../../Common/protocol.h"
 
 void send_json(int socket_fd, cJSON *json);
 
