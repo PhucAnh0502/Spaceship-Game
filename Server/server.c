@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <errno.h>
+#include <pthread.h>
+#include <time.h>
 
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
@@ -24,8 +26,15 @@ ClientContext clients[MAX_CLIENTS];
 extern void handle_register(int client_fd, cJSON *payload);
 extern void handle_login(int client_fd, cJSON *payload);
 extern void handle_logout(int client_fd);
+extern void handle_buy_item(int client_fd, cJSON *payload);
+extern void handle_fix_ship(int client_fd, cJSON *payload);
+extern void handle_treasure_appear(int client_fd, cJSON *payload);
+extern void handle_answer(int client_fd, cJSON *payload);
 extern int check_auth(int client_fd);
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+
+pthread_t treasure_spawner_thread;
+int server_running = 1;
 
 void init_clients() {
     for (int i = 0; i < MAX_CLIENTS; i++)
@@ -74,10 +83,48 @@ void process_request(int client_fd, cJSON *root){
         case ACT_LOGOUT:
             handle_logout(client_fd);
             break;
+        case ACT_BUY_ITEM:
+            handle_buy_item(client_fd, payload);
+            break;
+        case ACT_FIX_SHIP:
+            handle_fix_ship(client_fd, payload);
+            break;
+        case ACT_ANSWER:
+            handle_answer(client_fd, payload);
+            break;
         default:
             send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
             break;
     }
+}
+
+void* auto_spawn_treasure(void* arg) {
+    srand(time(NULL));
+    
+    while (server_running) {
+        // Chờ 30-60 giây random
+        int wait_time = 30 + (rand() % 31);
+        sleep(wait_time);
+        
+        // Kiểm tra có player online không
+        extern Player* players;
+        extern int player_count;
+        
+        int online_count = 0;
+        for (int i = 0; i < player_count; i++) {
+            if (players[i].is_online) {
+                online_count++;
+            }
+        }
+        
+        // Chỉ thả nếu có player online
+        if (online_count > 0) {
+            printf("\n[AUTO] Spawning treasure... (%d players online)\n", online_count);
+            handle_treasure_appear(-1, NULL);
+        }
+    }
+    
+    return NULL;
 }
 
 void run_server() {
@@ -187,8 +234,14 @@ int main() {
     load_accounts("accounts.txt");
 
     init_clients();
-
+    
+    pthread_create(&treasure_spawner_thread, NULL, auto_spawn_treasure, NULL);
+    printf("[AUTO] Treasure spawner started (30-60s interval)\n");
+    
     run_server();
+    
+    server_running = 0;
+    pthread_join(treasure_spawner_thread, NULL);
 
     return 0;
 }

@@ -26,6 +26,41 @@ Player* find_player_by_id(int id) {
     return NULL;
 }
 
+// Tìm player theo socket_fd
+Player* find_player_by_socket(int socket_fd) {
+    for(int i = 0; i < player_count; i++){
+        if(players[i].socket_fd == socket_fd && players[i].is_online){
+            return &players[i];
+        }
+    }
+    return NULL;
+}
+
+// Cập nhật player vào file
+void update_player_to_file(Player *player) {
+    if (!player) return;
+    
+    // Chỉ lưu id, username, password. Ship data (hp, coin, weapons) CHỈ tồn tại trong sẽ reset khi server restart!
+    
+    FILE *file = fopen("accounts.txt", "w");
+    if (!file) {
+        printf("[ERROR] Cannot open accounts.txt for writing\n");
+        return;
+    }
+    
+    for (int i = 0; i < player_count; i++) {
+        fprintf(file, "%d %s %s\n", 
+                players[i].id, 
+                players[i].username, 
+                players[i].password);
+    }
+    
+    fclose(file);
+    
+    printf("[STORAGE] Updated player %s (coin=%d, hp=%d)\n", 
+           player->username, player->ship.coin, player->ship.hp);
+}
+
 int check_account_data(const char *username)
 {
     if (!username || strlen(username) == 0)
@@ -122,7 +157,7 @@ void load_accounts(const char* filename) {
     player_capacity = capacity;
 
     fclose(file);
-    printf("[STORAGE] Loaded %d accounts\n", player_count, filename);
+    printf("[STORAGE] Loaded %d accounts from %s\n", player_count, filename);
 }
 
 void append_account_to_file(const char* filename, Player* player) {

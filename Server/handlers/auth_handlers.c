@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+extern void log_action(const char *status, const char *action, const char *input, const char *result);
 
 void handle_register(int client_fd, cJSON *payload) {
     cJSON *user_node = cJSON_GetObjectItem(payload, "username");

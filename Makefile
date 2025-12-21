@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g -I Common -I Lib -I Server -I Client
-LDFLAGS = -lm
+LDFLAGS = -lm -lpthread
 CJSON = Lib/cJSON.c
 
 SERVER_HANDLERS = $(wildcard Server/handlers/*.c)
