@@ -7,16 +7,22 @@
 #include <time.h>
 #include <errno.h>
 
-void send_json(int socket_fd, cJSON *json) {
-    if (socket_fd <= 0 || json == NULL) return;
+#include "storage.h"
+
+void send_json(int socket_fd, cJSON *json)
+{
+    if (socket_fd <= 0 || json == NULL)
+        return;
 
     char *str_json = cJSON_PrintUnformatted(json);
-    if (str_json == NULL) return;
+    if (str_json == NULL)
+        return;
 
     size_t len = strlen(str_json);
 
     char *msg = (char *)malloc(len + 3);
-    if (msg == NULL) {
+    if (msg == NULL)
+    {
         free(str_json);
         return;
     }
@@ -24,7 +30,8 @@ void send_json(int socket_fd, cJSON *json) {
     strcpy(msg, str_json);
     strcat(msg, "\r\n");
 
-    if (send(socket_fd, msg, strlen(msg), 0) < 0) {
+    if (send(socket_fd, msg, strlen(msg), 0) < 0)
+    {
         perror("[Server] Send failed");
     }
 
@@ -32,14 +39,18 @@ void send_json(int socket_fd, cJSON *json) {
     free(str_json);
 }
 
-cJSON *receive_json(int socket_fd, char *buffer, int *buf_len, int max_buf_size) {
-    if (socket_fd <= 0 || buffer == NULL || buf_len == NULL) return NULL;
+cJSON *receive_json(int socket_fd, char *buffer, int *buf_len, int max_buf_size)
+{
+    if (socket_fd <= 0 || buffer == NULL || buf_len == NULL)
+        return NULL;
 
     char *line_end = strstr(buffer, "\r\n");
 
-    if (line_end == NULL) {
+    if (line_end == NULL)
+    {
         int free_space = max_buf_size - *buf_len - 1;
-        if (free_space <= 0) {
+        if (free_space <= 0)
+        {
             printf("[WARN] Buffer overflow detected fd %d, clearing.\n", socket_fd);
             *buf_len = 0;
             free_space = max_buf_size - 1;
@@ -47,55 +58,68 @@ cJSON *receive_json(int socket_fd, char *buffer, int *buf_len, int max_buf_size)
 
         int bytes_received = recv(socket_fd, buffer + *buf_len, free_space, 0);
 
-        if (bytes_received > 0) {
+        if (bytes_received > 0)
+        {
             *buf_len += bytes_received;
             buffer[*buf_len] = '\0';
-            line_end = strstr(buffer, "\r\n"); 
-        } else {
-            return NULL; 
+            line_end = strstr(buffer, "\r\n");
+        }
+        else
+        {
+            return NULL;
         }
     }
 
-    if (line_end != NULL) {
-        *line_end = '\0'; 
-        
+    if (line_end != NULL)
+    {
+        *line_end = '\0';
+
         cJSON *json = cJSON_Parse(buffer);
-        if (json == NULL) {
+        if (json == NULL)
+        {
             printf("[ERROR] JSON Parse Error: %s\n", buffer);
         }
 
         char *next_start = line_end + 2;
         int remaining_len = *buf_len - (next_start - buffer);
 
-        if (remaining_len > 0) {
+        if (remaining_len > 0)
+        {
             memmove(buffer, next_start, remaining_len);
         }
         *buf_len = remaining_len;
         buffer[*buf_len] = '\0';
-        
+
         return json;
     }
 
     return NULL;
 }
 
-void send_response(int socket_fd, int status, const char *msg, cJSON *data) {
+void send_response(int socket_fd, int status, const char *msg, cJSON *data)
+{
+    printf("Begin send resposne\n");
     cJSON *root = cJSON_CreateObject();
     cJSON_AddNumberToObject(root, "status", status);
     cJSON_AddStringToObject(root, "message", msg);
-    if (data) {
-        cJSON_AddItemToObject(root, "data", data);
-    } else {
+    if (data)
+    {
+        cJSON *data_copy = cJSON_Duplicate(data, 1);
+        cJSON_AddItemToObject(root, "data", data_copy);
+    }
+    else
+    {
         cJSON_AddNullToObject(root, "data");
     }
-    
     send_json(socket_fd, root);
     cJSON_Delete(root);
 }
 
-void log_action(const char *status, const char *action, const char *input, const char *result) {
+void log_action(const char *status, const char *action, const char *input, const char *result)
+{
     FILE *file = fopen("logs.txt", "a");
-    if(file == NULL) {
+    if (file == NULL)
+    {
         perror("Failed to open log file");
         return;
     }
@@ -103,8 +127,39 @@ void log_action(const char *status, const char *action, const char *input, const
     struct tm *t = localtime(&now);
     char time_str[64];
     strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", t);
-    
-    fprintf(file, "[%s] [%s] Action: %s | Input: %s | Result: %s\n", 
+
+    fprintf(file, "[%s] [%s] Action: %s | Input: %s | Result: %s\n",
             time_str, status, action, (input ? input : "N/A"), result);
     fclose(file);
+}
+
+void broadcast_to_team(Team *team,
+                       int status,
+                       const char *message,
+                       cJSON *payload)
+{
+    if (!team)
+        return;
+
+    // Loop through all player in team
+    for (int i = 0; i < team->current_size; i++)
+    {
+        int member_id = team->member_ids[i];
+
+        // Skip if member id is invalid
+        if (member_id <= 0)
+            continue;
+
+        // Find player
+        Player *member = find_player_by_id(member_id);
+
+        // Only send message if:
+        // 1. Player found
+        // 2. Player is online
+        // 3. Valid socket
+        if (member && member->is_online && member->socket_fd > 0)
+        {
+            send_response(member->socket_fd, status, message, payload);
+        }
+    }
 }
