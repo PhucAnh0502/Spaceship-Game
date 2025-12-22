@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include "combat_handlers.h"
 
-extern Player *players; // Player array
-extern Team teams[MAX_TEAMS];     // Teams array
+extern Player *players;       // Player array
+extern Team teams[MAX_TEAMS]; // Teams array
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
 extern Team *find_team_by_id(int team_id);
 extern Player *find_player_by_id(int id);
@@ -241,9 +241,10 @@ void handle_attack(int client_fd, cJSON *payload)
     // Get target and weapong from payload
     cJSON *target_node = cJSON_GetObjectItem(payload, "target_user_id");
     cJSON *weapon_node = cJSON_GetObjectItem(payload, "weapon_id");
+    cJSON *weapon_slot_node = cJSON_GetObjectItem(payload, "weapon_slot");
 
     // Validate input
-    if (!target_node || !weapon_node)
+    if (!target_node || !weapon_node || !weapon_slot_node)
     {
         send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid parameters", NULL);
         return;
@@ -251,6 +252,13 @@ void handle_attack(int client_fd, cJSON *payload)
 
     int target_id = target_node->valueint;
     int weapon_type = weapon_node->valueint; // 1: Cannon, 2: Laser, 3: Missile
+    int weapon_slot = weapon_slot_node->valueint;
+
+    if (weapon_slot < 0 || weapon_slot >= 8)
+    {
+        send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid weapon slot", NULL);
+        return;
+    }
 
     Player *target = find_player_by_id(target_id); // Get target information
     if (!target)
@@ -285,34 +293,26 @@ void handle_attack(int client_fd, cJSON *payload)
     if (weapon_type == WEAPON_MISSILE)
     {
         // check dmg and ammo
-        for (int i = 0; i < 4; i++)
+        if (attacker->ship.missiles[weapon_slot].weapon == WEAPON_MISSILE &&
+            attacker->ship.missiles[weapon_slot].current_ammo > 0)
         {
-            if (attacker->ship.missiles[i].weapon == WEAPON_MISSILE &&
-                attacker->ship.missiles[i].current_ammo > 0)
-            {
-                found_slot = &attacker->ship.missiles[i];
-                damage = DMG_MISSILE; // 800
-                break;
-            }
+            found_slot = &attacker->ship.missiles[weapon_slot];
+            damage = DMG_MISSILE; // 800
         }
     }
-    else if (weapon_type == WEAPON_CANNON_30MM)
+    else if (weapon_type == WEAPON_CANNON_30MM || weapon_type == WEAPON_LASER)
     {
-        for (int i = 0; i < 4; i++)
+        if (attacker->ship.cannons[weapon_slot].weapon == weapon_type &&
+            attacker->ship.cannons[weapon_slot].current_ammo > 0)
         {
-            if (attacker->ship.cannons[i].weapon == weapon_type &&
-                attacker->ship.cannons[i].current_ammo > 0)
-            {
-                found_slot = &attacker->ship.cannons[i];
+            found_slot = &attacker->ship.cannons[weapon_slot];
 
-                // Indicate damage by type of weapons
-                if (weapon_type == WEAPON_CANNON_30MM)
-                    damage = DMG_CANNON; // 10
-                else if (weapon_type == WEAPON_LASER)
-                    damage = DMG_LASER; // 100
+            // Indicate damage by type of weapons
+            if (weapon_type == WEAPON_CANNON_30MM)
+                damage = DMG_CANNON; // 10
+            else if (weapon_type == WEAPON_LASER)
+                damage = DMG_LASER; // 100
 
-                break;
-            }
         }
     }
 

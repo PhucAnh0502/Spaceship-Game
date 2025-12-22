@@ -13,7 +13,6 @@
 #include "../Server/handlers/shop/client_state.h"
 #include "../Server/handlers/shop/client_treasure.c"
 
-
 #define SERVER_IP "127.0.0.1"
 
 int sock = 0;
@@ -40,33 +39,44 @@ pthread_mutex_t treasure_mutex = PTHREAD_MUTEX_INITIALIZER;
 PendingTreasure pending_treasure = {0};
 pthread_mutex_t pending_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void lock_ui() {
+void do_attack();
+void do_challenge();
+void do_accept();
+
+void lock_ui()
+{
     pthread_mutex_lock(&ui_mutex);
     ui_locked = 1;
     pthread_mutex_unlock(&ui_mutex);
 }
 
-void unlock_ui() {
+void unlock_ui()
+{
     pthread_mutex_lock(&ui_mutex);
     ui_locked = 0;
     pthread_mutex_unlock(&ui_mutex);
 }
 
-int is_ui_locked() {
+int is_ui_locked()
+{
     pthread_mutex_lock(&ui_mutex);
     int locked = ui_locked;
     pthread_mutex_unlock(&ui_mutex);
     return locked;
 }
 
-cJSON* wait_for_response() {
-    while (1) {
+cJSON *wait_for_response()
+{
+    while (1)
+    {
         cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
-        if (response) return response;
+        if (response)
+            return response;
 
         char dummy;
         int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
-        if (check == 0) {
+        if (check == 0)
+        {
             endwin();
             printf("\n[ERROR] Server disconnected unexpectedly!\n");
             close(sock);
@@ -75,30 +85,35 @@ cJSON* wait_for_response() {
     }
 }
 
-void show_player_status() {
+void show_player_status()
+{
     printf("\n========== TRANG THAI HIEN TAI ==========\n");
     printf("Coins: %d\n", current_coins);
     printf("HP: %d/1000\n", current_hp);
 }
 
-int confirm_purchase(const char* item_name, int cost) {
-    if (current_coins < cost) {
+int confirm_purchase(const char *item_name, int cost)
+{
+    if (current_coins < cost)
+    {
         printf("\n>> Khong du coins! Can %d, hien co %d\n", cost, current_coins);
         return 0;
     }
-    
+
     printf("\nXac nhan mua %s voi gia %d coins? (y/n): ", item_name, cost);
     fflush(stdout);
-    
+
     char confirm[10];
-    if (fgets(confirm, sizeof(confirm), stdin) == NULL) return 0;
-    
+    if (fgets(confirm, sizeof(confirm), stdin) == NULL)
+        return 0;
+
     return (confirm[0] == 'y' || confirm[0] == 'Y');
 }
 
-void do_register() {
+void do_register()
+{
     lock_ui();
-    
+
     char username[50], password[50];
     clear();
     mvprintw(2, 10, "--- REGISTER ---");
@@ -112,33 +127,40 @@ void do_register() {
     send_json(sock, ACT_REGISTER, data);
 
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
-        if (status && msg) {
-            if(status->valueint == RES_AUTH_SUCCESS) {
+        if (status && msg)
+        {
+            if (status->valueint == RES_AUTH_SUCCESS)
+            {
                 display_response_message(8, 10, 2, status->valueint, msg->valuestring);
-            } else {
+            }
+            else
+            {
                 display_response_message(8, 10, 1, status->valueint, msg->valuestring);
             }
         }
         cJSON_Delete(res);
     }
-    
+
     unlock_ui();
     mvprintw(10, 10, "Press any key to continue...");
     getch();
 }
 
-void do_login() {
-    if (current_user_id != 0) {
+void do_login()
+{
+    if (current_user_id != 0)
+    {
         display_response_message(10, 10, 1, 0, "You are already logged in!");
         getch();
         return;
     }
 
     lock_ui();
-    
+
     char username[50], password[50];
     erase();
     mvprintw(2, 10, "=== LOGIN ===");
@@ -152,63 +174,76 @@ void do_login() {
     send_json(sock, ACT_LOGIN, data);
 
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
-        
-        if (status && msg) {
-            if (status->valueint == RES_AUTH_SUCCESS) {
+
+        if (status && msg)
+        {
+            if (status->valueint == RES_AUTH_SUCCESS)
+            {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
-                if (res_data) {
+                if (res_data)
+                {
                     current_user_id = cJSON_GetObjectItem(res_data, "id")->valueint;
-                    
+
                     cJSON *hp = cJSON_GetObjectItem(res_data, "hp");
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
-                    
-                    if (hp) current_hp = hp->valueint;
-                    if (coin) current_coins = coin->valueint;
-                    
+
+                    if (hp)
+                        current_hp = hp->valueint;
+                    if (coin)
+                        current_coins = coin->valueint;
+
                     printf(">> Login success! User ID: %d\n", current_user_id);
                     printf(">> HP: %d | Coins: %d\n", current_hp, current_coins);
-                    
+
                     // Start listener thread
                     should_exit = 0;
                     pthread_create(&listener_thread, NULL, background_listener, NULL);
                     display_response_message(8, 10, 2, status->valueint, msg->valuestring);
                 }
-            } else {
+            }
+            else
+            {
                 display_response_message(8, 10, 1, status->valueint, msg->valuestring);
             }
         }
         cJSON_Delete(res);
     }
-    
+
     unlock_ui();
     mvprintw(10, 10, "Press any key to continue...");
     getch();
 }
 
-void do_logout() {
+void do_logout()
+{
     send_json(sock, ACT_LOGOUT, NULL);
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         current_user_id = 0;
         cJSON_Delete(res);
     }
 }
 
-
-void do_list_teams() {
+void do_list_teams()
+{
     send_json(sock, ACT_LIST_TEAMS, NULL);
     cJSON *res = wait_for_response();
-    if (!res) return;
+    if (!res)
+        return;
 
     int status = cJSON_GetObjectItem(res, "status")->valueint;
-    if (status != 200) {
+    if (status != 200)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
-        if (current_user_id == 0) {
+        if (current_user_id == 0)
+        {
             display_response_message(10, 10, 1, 0, "You are not logged in.");
             getch();
             return;
@@ -221,29 +256,33 @@ void do_list_teams() {
         cJSON *arr = cJSON_GetObjectItem(res, "data");
         printf("\n--- TEAM LIST ---\n");
         cJSON *team;
-        cJSON_ArrayForEach(team, arr) {
+        cJSON_ArrayForEach(team, arr)
+        {
             printf("ID: %d | Name: %s | Slots: %d\n",
-                cJSON_GetObjectItem(team, "id")->valueint,
-                cJSON_GetObjectItem(team, "name")->valuestring,
-                cJSON_GetObjectItem(team, "slots")->valueint);
+                   cJSON_GetObjectItem(team, "id")->valueint,
+                   cJSON_GetObjectItem(team, "name")->valuestring,
+                   cJSON_GetObjectItem(team, "slots")->valueint);
         }
         cJSON_Delete(res);
     }
 }
 
-void do_create_team() {
+void do_create_team()
+{
     char name[50];
-    get_input(4,5,"Team name: ", name, 50,0);
+    get_input(4, 5, "Team name: ", name, 50, 0);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "team_name", name);
 
     send_json(sock, ACT_CREATE_TEAM, data);
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON *msg = cJSON_GetObjectItem(res, "message");
-        if (msg) {
+        if (msg)
+        {
             display_response_message(8, 10, 2, 0, msg->valuestring);
         }
         current_user_id = 0;
@@ -255,9 +294,10 @@ void do_create_team() {
     getch();
 }
 
-void do_list_members() {
+void do_list_members()
+{
     char team_name[50];
-    get_input(4,5,"Enter team name: ", team_name, 50,0);
+    get_input(4, 5, "Enter team name: ", team_name, 50, 0);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "team_name", team_name);
@@ -265,9 +305,11 @@ void do_list_members() {
     send_json(sock, ACT_LIST_MEMBERS, data);
 
     cJSON *res = wait_for_response();
-    if (!res) return;
+    if (!res)
+        return;
 
-    if (cJSON_GetObjectItem(res, "status")->valueint != 200) {
+    if (cJSON_GetObjectItem(res, "status")->valueint != 200)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
         return;
@@ -277,20 +319,21 @@ void do_list_members() {
     cJSON *mem;
 
     printf("\n--- MEMBERS OF TEAM '%s' ---\n", team_name);
-    cJSON_ArrayForEach(mem, members) {
+    cJSON_ArrayForEach(mem, members)
+    {
         printf("ID: %d | Name: %s | Captain: %s\n",
-            cJSON_GetObjectItem(mem, "id")->valueint,
-            cJSON_GetObjectItem(mem, "name")->valuestring,
-            cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO"
-        );
+               cJSON_GetObjectItem(mem, "id")->valueint,
+               cJSON_GetObjectItem(mem, "name")->valuestring,
+               cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO");
     }
 
     cJSON_Delete(res);
 }
 
-void do_req_join() {
+void do_req_join()
+{
     char name[50];
-    get_input(4,5,"Team name to join: ", name, 50,0);
+    get_input(4, 5, "Team name to join: ", name, 50, 0);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "team_name", name);
@@ -298,16 +341,17 @@ void do_req_join() {
     send_json(sock, ACT_REQ_JOIN, data);
 
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
     }
 }
 
-
-void do_approve_req(int approve) {
+void do_approve_req(int approve)
+{
     char username[50];
-    get_input(4,5,"Target username: ", username, 50,0);
+    get_input(4, 5, "Target username: ", username, 50, 0);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "target_username", username);
@@ -317,24 +361,28 @@ void do_approve_req(int approve) {
               data);
 
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
     }
 }
 
-void do_leave_team() {
+void do_leave_team()
+{
     send_json(sock, ACT_LEAVE_TEAM, NULL);
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
     }
 }
 
-void do_kick_member() {
+void do_kick_member()
+{
     char name[50];
-    get_input(4,5,"Username to kick: ", name, 50,0);
+    get_input(4, 5, "Username to kick: ", name, 50, 0);
 
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "target_username", name);
@@ -342,66 +390,74 @@ void do_kick_member() {
     send_json(sock, ACT_KICK_MEMBER, data);
 
     cJSON *res = wait_for_response();
-    if (res) {
+    if (res)
+    {
         printf(">> %s\n",
-            cJSON_GetObjectItem(res, "message")->valuestring);
+               cJSON_GetObjectItem(res, "message")->valuestring);
         cJSON_Delete(res);
     }
 }
 
-
-void print_menu(int highlight) {
-    const char *choices[] = {
+void print_menu(int highlight)
+{
+    const char *choices_guest[] = {
         "1. Register",
         "2. Login",
-        "3. Logout",
-        "0. Exit"
+        "3. Exit"
     };
-    int n_choices = sizeof(choices) / sizeof(choices[0]);
+
+    const char *choices_user[] = {
+        "1. Logout",
+        "2. Create Team",
+        "3. List Teams",
+        "4. Join Team",
+        "5. Exit" 
+        
+    };
+    int n_choices;
+    char **current_choices;
 
     erase();
     mvprintw(1, 10, "=== SPACE BATTLE ONLINE ===");
-    if(current_user_id != 0){
+    if (current_user_id != 0)
+    {
         attron(COLOR_PAIR(2));
         mvprintw(2, 10, "Logged in as User ID: %d", current_user_id);
+        mvprintw(3, 10, "Coins: %d | HP: %d", current_coins, current_hp);
         attroff(COLOR_PAIR(2));
-      //**//
-    }else {
-        printf("User ID: %d | %d coins | %d HP\n", current_user_id, current_coins, current_hp);
-        printf("--- Account ---\n");
-        printf("3. Logout\n");
-        // printf("\n--- Shop ---\n");
-        // printf("4. Mua dan 30mm\n");
-        // printf("5. Mua phao laser\n");
-        // printf("6. Mua pin laser\n");
-        // printf("7. Mua ten lua\n");
-        // printf("8. Mua giap\n");
-        // printf("9. Sua tau\n");
-        printf("4. List teams\n");
-        printf("5. Create team\n");
-        printf("6. List team members\n");
-        printf("7. Request join team\n");
-        printf("8. Approve join request\n");
-        printf("9. Refuse join request\n");
-        printf("10. Leave team\n");
-        printf("11. Kick member\n");
+
+        current_choices = (char **)choices_user;
+        n_choices = sizeof(choices_user) / sizeof(choices_user[0]);
+    }
+    else
+    {
+        mvprintw(2, 10, "Status: Guest (Not Logged In)");
+        current_choices = (char **)choices_guest;
+        n_choices = sizeof(choices_guest) / sizeof(choices_guest[0]);
     }
 
-    for(int i = 0; i < n_choices; i++){
-        if(highlight == i){
+
+    for (int i = 0; i < n_choices; i++)
+    {
+        refresh();
+        if (highlight == i)
+        {
             attron(A_REVERSE);
-            mvprintw(5 + i, 10, "-> %s", choices[i]);
+            mvprintw(5 + i, 10, "-> %s", current_choices[i]);
             attroff(A_REVERSE);
-        } else {
-            mvprintw(5 + i, 10, "%s", choices[i]);
+        }
+        else
+        {
+            mvprintw(5 + i, 10, "   %s", current_choices[i]);
         }
     }
-    mvprintw(12, 10, "Use arrow keys to move, Enter to select.");
-    refresh();
+    
+    mvprintw(5 + n_choices + 2, 10, "Use arrow keys to move, Enter to select.");
+    refresh(); 
 }
 
-
-int main() {
+int main()
+{
     struct sockaddr_in serv_addr;
 
     memset(client_buffer, 0, BUFFER_SIZE);
@@ -414,9 +470,10 @@ int main() {
     connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
-    //char buf[16];
+    // char buf[16];
 
-    while (1) {
+    while (1)
+    {
         //     // Kiểm tra và hiển thị treasure pending (nếu có)
         //     show_pending_treasure();
         //
@@ -508,33 +565,42 @@ int main() {
         int choice = -1;
         int highlight = 0;
 
-        while (1) {
+        while (1)
+        {
             print_menu(highlight);
             int c = getch();
 
             switch (c)
             {
-                case KEY_UP:
-                    highlight = (highlight == 0) ? 3 : highlight - 1;
-                    break;
-                case KEY_DOWN:
-                    highlight = (highlight == 3) ? 0 : highlight + 1;
-                    break;
-                case 10:
-                    choice = highlight;
-                    break;
-                default:
-                    break;
+            case KEY_UP:
+                highlight = (highlight == 0) ? 3 : highlight - 1;
+                break;
+            case KEY_DOWN:
+                highlight = (highlight == 3) ? 0 : highlight + 1;
+                break;
+            case 10:
+                choice = highlight;
+                break;
+            default:
+                break;
             }
 
-            if(choice != -1){
-                if(choice == 0){
+            if (choice != -1)
+            {
+                if (choice == 0)
+                {
                     do_register();
-                } else if(choice == 1){
+                }
+                else if (choice == 1)
+                {
                     do_login();
-                } else if(choice == 2){
+                }
+                else if (choice == 2)
+                {
                     do_logout();
-                } else if(choice == 3){
+                }
+                else if (choice == 3)
+                {
                     break;
                 }
                 choice = -1;
@@ -544,5 +610,175 @@ int main() {
         endwin();
         close(sock);
         return 0;
+    }
+}
+
+void do_challenge()
+{
+    int target_id;
+    printf("\n--- SEND CHALLENGE ---\n");
+    printf("Enter Opponent Team ID: ");
+
+    // Kiểm tra nhập liệu để tránh trôi lệnh
+    if (scanf("%d", &target_id) != 1)
+    {
+        printf("[ERROR] Invalid input!\n");
+        while (getchar() != '\n')
+            ; // Xóa buffer nếu nhập sai
+        return;
+    }
+    getchar(); // Quan trọng: Xóa ký tự \n thừa trong buffer
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddNumberToObject(data, "target_team_id", target_id);
+
+    // Gửi lệnh đi
+    send_json(sock, ACT_SEND_CHALLANGE, data);
+
+    // Chờ phản hồi
+    cJSON *res = wait_for_response();
+    if (res)
+    {
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+
+        if (status)
+        {
+            if (status->valueint == RES_BATTLE_SUCCESS)
+            {
+                // Thành công: Server báo "Challenge sent..."
+                printf("[SUCCESS] %s\n", msg ? msg->valuestring : "Request sent.");
+            }
+            else
+            {
+                // Thất bại: Server báo lỗi (VD: Team not found, Team busy...)
+                printf("[ERROR] Failed to send challenge: %s (Code: %d)\n",
+                       msg ? msg->valuestring : "Unknown error",
+                       status->valueint);
+            }
+        }
+        cJSON_Delete(res);
+    }
+}
+
+// Hàm chấp nhận thách đấu
+void do_accept()
+{
+    printf("\n--- ACCEPT CHALLENGE ---\n");
+
+    // Gửi lệnh chấp nhận (không cần payload)
+    send_json(sock, ACT_ACCEPT_CHALLANGE, NULL);
+
+    // Chờ phản hồi (Server sẽ trả về thông báo Start Game)
+    cJSON *res = wait_for_response();
+    if (res)
+    {
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *data = cJSON_GetObjectItem(res, "data");
+
+        if (status)
+        {
+            if (status->valueint == RES_BATTLE_SUCCESS)
+            {
+                // Thành công: Bắt đầu trận đấu
+                printf("[GAME START] %s\n", msg ? msg->valuestring : "Battle started!");
+
+                // Nếu có dữ liệu kèm theo (Ví dụ: Tên đối thủ)
+                if (data && !cJSON_IsNull(data))
+                {
+                    cJSON *opp_name = cJSON_GetObjectItem(data, "opponent_name");
+                    cJSON *match_id = cJSON_GetObjectItem(data, "match_id");
+
+                    if (opp_name)
+                        printf("Your Opponent: %s\n", opp_name->valuestring);
+                    if (match_id)
+                        printf("Match ID: %d\n", match_id->valueint);
+                }
+            }
+            else
+            {
+                // Thất bại: Có thể do hết thời gian, lỗi hệ thống...
+                printf("❌ [ERROR] Cannot start game: %s\n", msg ? msg->valuestring : "Unknown error");
+            }
+        }
+        cJSON_Delete(res);
+    }
+}
+
+void do_attack()
+{
+    int target_uid, wp_type, wp_slot;
+    printf("Enter Target User ID: ");
+    if (scanf("%d", &target_uid) != 1)
+        return; // Kiểm tra nhập liệu
+
+    printf("Enter weapon slots: ");
+    if (scanf("%d", &wp_slot) != 1)
+        return; // Kiểm tra nhập liệu
+
+    if (0 < wp_slot && wp_slot < 4)
+    {
+        printf("Weapon (1:Cannon, 2:Laser): ");
+    }
+    else if (4 <= wp_slot && wp_slot < 8)
+    {
+        printf("Weapon (3:Missile): ");
+    }
+    else
+    {
+        printf("Invalid weapon slot\n");
+        return;
+    }
+
+    if (scanf("%d", &wp_type) != 1)
+        return;
+
+    // Xóa bộ nhớ đệm bàn phím để tránh lỗi trôi lệnh menu sau này
+    getchar();
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddNumberToObject(data, "target_user_id", target_uid);
+    cJSON_AddNumberToObject(data, "weapon_id", wp_type);
+    cJSON_AddNumberToObject(data, "weapon_slot", wp_slot);
+    send_json(sock, ACT_ATTACK, data);
+
+    cJSON *res = wait_for_response();
+    if (res)
+    {
+        // 1. Kiểm tra trạng thái phản hồi từ Server
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+
+        if (status && status->valueint == RES_BATTLE_SUCCESS) // RES_BATTLE_SUCCESS = 400
+        {
+            cJSON *d = cJSON_GetObjectItem(res, "data");
+
+            // 2. Kiểm tra data có hợp lệ và không phải NULL không
+            if (d && !cJSON_IsNull(d))
+            {
+                cJSON *dmg_node = cJSON_GetObjectItem(d, "damage");
+                cJSON *hp_node = cJSON_GetObjectItem(d, "target_hp");
+
+                // 3. Chỉ in ra nếu các trường tồn tại
+                if (dmg_node && hp_node)
+                {
+                    printf(">> HIT! Damage: %d | Target HP: %d\n",
+                           dmg_node->valueint,
+                           hp_node->valueint);
+                }
+                else
+                {
+                    printf(">> Attack success but no damage data returned.\n");
+                }
+            }
+        }
+        else
+        {
+            // Trường hợp tấn công thất bại (Sai mục tiêu, hết đạn...)
+            printf(">> Attack Failed: %s\n", msg ? msg->valuestring : "Unknown error");
+        }
+
+        cJSON_Delete(res);
     }
 }
