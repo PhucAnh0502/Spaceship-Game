@@ -104,6 +104,12 @@ void handle_create_team(int client_fd, cJSON *payload) {
         return;
     }
 
+    if (!name_node || !cJSON_IsString(name_node) || name_node->valuestring == NULL) {
+        send_response(client_fd, RES_UNKNOWN_ACTION,
+                      "Missing or invalid target_username", NULL);
+        return;
+    }
+
     Team *team = create_team(name_node->valuestring, player->id);
     if (!team) {
         send_response(client_fd, RES_UNKNOWN_ACTION,
