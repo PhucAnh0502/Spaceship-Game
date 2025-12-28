@@ -191,7 +191,11 @@ void handle_approve_req(int client_fd, cJSON *payload, int approve) {
                       "Missing target_username", NULL);
         return;
     }
-
+    if (!name_node || !cJSON_IsString(name_node) || name_node->valuestring == NULL) {
+        send_response(client_fd, RES_UNKNOWN_ACTION,
+                      "Missing or invalid target_username", NULL);
+        return;
+    }
     Player *target = find_player_by_username(name_node->valuestring);
     if (!target) {
         send_response(client_fd, RES_ACCOUNT_NOT_FOUND,
