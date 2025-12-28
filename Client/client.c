@@ -235,106 +235,211 @@ void do_logout()
 
 void do_list_teams()
 {
+    clear(); // Xóa màn hình cũ
+    
+    // Tiêu đề
+    attron(A_BOLD | COLOR_PAIR(2)); // Chữ đậm, màu xanh
+    mvprintw(2, 5, "=== LIST OF TEAMS ===");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    
+    mvprintw(3, 5, "Fetching data...");
+    refresh();
+
+    // 1. Gửi lệnh
     send_json(sock, ACT_LIST_TEAMS, NULL);
+
+    // 2. Chờ phản hồi
     cJSON *res = wait_for_response();
-    if (!res)
-        return;
+    
+    // Xóa dòng "Fetching data..." để in kết quả
+    move(3, 0); clrtoeol(); 
 
-    int status = cJSON_GetObjectItem(res, "status")->valueint;
-    if (status != 200)
+    if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
-        if (current_user_id == 0)
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *data = cJSON_GetObjectItem(res, "data");
+
+        if (status && status->valueint == RES_TEAM_SUCCESS)
         {
-            display_response_message(10, 10, 1, 0, "You are not logged in.");
-            getch();
-            return;
+            // --- HIỂN THỊ DẠNG BẢNG ---
+            attron(A_BOLD);
+            // In Header bảng: ID (rộng 5), Name (rộng 20), Slots (rộng 10)
+            mvprintw(4, 5, "%-5s %-30s %-10s", "ID", "TEAM NAME", "MEMBERS");
+            attroff(A_BOLD);
+            mvhline(5, 5, ACS_HLINE, 50); // Vẽ đường kẻ ngang
+
+            if (cJSON_IsArray(data))
+            {
+                int row = 6;
+                cJSON *team;
+                cJSON_ArrayForEach(team, data)
+                {
+                    int id = cJSON_GetObjectItem(team, "id")->valueint;
+                    char *name = cJSON_GetObjectItem(team, "name")->valuestring;
+                    int slots = cJSON_GetObjectItem(team, "slots")->valueint;
+
+                    mvprintw(row++, 5, "%-5d %-30s %d/3", id, name, slots);
+                }
+                
+                if (row == 6) {
+                    mvprintw(6, 5, "No teams found.");
+                }
+            }
         }
-
-        //     should_exit = 1;
-        //     pthread_join(listener_thread, NULL);
-
-        //     send_json(sock, ACT_LOGOUT, NULL);
-        cJSON *arr = cJSON_GetObjectItem(res, "data");
-        printf("\n--- TEAM LIST ---\n");
-        cJSON *team;
-        cJSON_ArrayForEach(team, arr)
+        else
         {
-            printf("ID: %d | Name: %s | Slots: %d\n",
-                   cJSON_GetObjectItem(team, "id")->valueint,
-                   cJSON_GetObjectItem(team, "name")->valuestring,
-                   cJSON_GetObjectItem(team, "slots")->valueint);
+            // Có lỗi (in màu đỏ)
+            display_response_message(4, 5, 1, status ? status->valueint : 0, msg ? msg->valuestring : "Error");
         }
         cJSON_Delete(res);
     }
+    else
+    {
+        mvprintw(4, 5, "Error: No response from server.");
+    }
+
+    // Dừng màn hình
+    attron(A_DIM);
+    mvprintw(20, 5, "Press any key to return...");
+    attroff(A_DIM);
+    getch();
 }
 
 void do_create_team()
 {
-    char name[50];
-    get_input(4, 5, "Team name: ", name, 50, 0);
+    clear();
+    attron(A_BOLD);
+    mvprintw(2, 5, "=== CREATE NEW TEAM ===");
+    attroff(A_BOLD);
+    refresh();
 
+    char name[50];
+    get_input(4, 5, "Enter Team name: ", name, 50, 0);
+
+    // 1. Gửi dữ liệu đi
     cJSON *data = cJSON_CreateObject();
     cJSON_AddStringToObject(data, "team_name", name);
-
     send_json(sock, ACT_CREATE_TEAM, data);
+
+    // 2. Chờ phản hồi
     cJSON *res = wait_for_response();
+    
     if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *status = cJSON_GetObjectItem(res, "status");
         cJSON *msg = cJSON_GetObjectItem(res, "message");
-        if (msg)
+
+        if (status && msg)
         {
-            display_response_message(8, 10, 2, 0, msg->valuestring);
+            // RES_TEAM_SUCCESS là 200 (Định nghĩa trong protocol.h)
+            if (status->valueint == RES_TEAM_SUCCESS) 
+            {
+                // THÀNH CÔNG: In màu xanh (Color Pair 2)
+                display_response_message(6, 5, 2, status->valueint, msg->valuestring);
+                
+                // Cập nhật state nếu cần (ví dụ login thành công thì update ID)
+            } 
+            else 
+            {
+                // THẤT BẠI: In màu đỏ (Color Pair 1)
+                // Đây chính là chỗ hiển thị lỗi server gửi về
+                display_response_message(6, 5, 1, status->valueint, msg->valuestring);
+            }
         }
-        current_user_id = 0;
-        current_coins = 0;
-        current_hp = 1000;
         cJSON_Delete(res);
     }
-    mvprintw(10, 10, "Press any key to continue...");
-    getch();
+    else 
+    {
+        // Trường hợp không nhận được JSON hoặc lỗi mạng
+        mvprintw(6, 5, ">> Error: No response from server!");
+    }
+    
+    // 3. Dừng màn hình để đọc lỗi
+    mvprintw(8, 5, "Press any key to return...");
+    getch(); 
 }
 
 void do_list_members()
 {
+    clear();
+    
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 5, "=== VIEW TEAM MEMBERS ===");
+    attroff(A_BOLD | COLOR_PAIR(2));
+
     char team_name[50];
-    get_input(4, 5, "Enter team name: ", team_name, 50, 0);
+    // Nhập tên team muốn xem
+    get_input(4, 5, "Enter Team Name to view: ", team_name, 50, 0);
 
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "team_name", team_name);
+    // 1. Tạo payload và gửi
+    cJSON *payload = cJSON_CreateObject();
+    cJSON_AddStringToObject(payload, "team_name", team_name);
+    send_json(sock, ACT_LIST_MEMBERS, payload);
 
-    send_json(sock, ACT_LIST_MEMBERS, data);
-
+    // 2. Chờ phản hồi
     cJSON *res = wait_for_response();
-    if (!res)
-        return;
 
-    if (cJSON_GetObjectItem(res, "status")->valueint != 200)
+    if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *data = cJSON_GetObjectItem(res, "data");
+
+        if (status && status->valueint == RES_TEAM_SUCCESS)
+        {
+            // Hiển thị tên team đang xem
+            mvprintw(6, 5, "Members of team: [%s]", team_name);
+
+            // --- HIỂN THỊ DẠNG BẢNG ---
+            attron(A_BOLD);
+            mvprintw(8, 5, "%-5s %-20s %-15s", "ID", "USERNAME", "ROLE");
+            attroff(A_BOLD);
+            mvhline(9, 5, ACS_HLINE, 45);
+
+            if (cJSON_IsArray(data))
+            {
+                int row = 10;
+                cJSON *member;
+                cJSON_ArrayForEach(member, data)
+                {
+                    int id = cJSON_GetObjectItem(member, "id")->valueint;
+                    char *name = cJSON_GetObjectItem(member, "name")->valuestring;
+                    int is_cap = cJSON_GetObjectItem(member, "is_captain")->valueint;
+
+                    // In thông tin, nếu là captain thì in màu xanh hoặc đánh dấu sao
+                    if (is_cap) {
+                        attron(COLOR_PAIR(2)); // Màu xanh cho captain
+                        mvprintw(row, 5, "%-5d %-20s %-15s", id, name, "CAPTAIN");
+                        attroff(COLOR_PAIR(2));
+                    } else {
+                        mvprintw(row, 5, "%-5d %-20s %-15s", id, name, "MEMBER");
+                    }
+                    row++;
+                }
+            }
+        }
+        else
+        {
+            // Lỗi (VD: Team không tồn tại) - In màu đỏ
+            display_response_message(6, 5, 1, status ? status->valueint : 0, msg ? msg->valuestring : "Error");
+        }
         cJSON_Delete(res);
-        return;
     }
-
-    cJSON *members = cJSON_GetObjectItem(res, "data");
-    cJSON *mem;
-
-    printf("\n--- MEMBERS OF TEAM '%s' ---\n", team_name);
-    cJSON_ArrayForEach(mem, members)
+    else
     {
-        printf("ID: %d | Name: %s | Captain: %s\n",
-               cJSON_GetObjectItem(mem, "id")->valueint,
-               cJSON_GetObjectItem(mem, "name")->valuestring,
-               cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO");
+        mvprintw(6, 5, "Error: No response from server.");
     }
 
-    cJSON_Delete(res);
+    attron(A_DIM);
+    mvprintw(20, 5, "Press any key to return...");
+    attroff(A_DIM);
+    getch();
 }
 
 void do_req_join()
 {
+    clear();
     char name[50];
     get_input(4, 5, "Team name to join: ", name, 50, 0);
 
@@ -353,6 +458,7 @@ void do_req_join()
 
 void do_approve_req(int approve)
 {
+    clear();
     char username[50];
     get_input(4, 5, "Target username: ", username, 50, 0);
 
@@ -373,6 +479,7 @@ void do_approve_req(int approve)
 
 void do_leave_team()
 {
+    clear();
     send_json(sock, ACT_LEAVE_TEAM, NULL);
     cJSON *res = wait_for_response();
     if (res)
@@ -462,33 +569,48 @@ void print_menu(int highlight)
 // Hàm tiện ích để vẽ menu và trả về lựa chọn của người dùng
 int draw_menu(const char *title, const char *options[], int n_opts) {
     int highlight = 0;
-    int choice = -1;
     int c;
+    int height, width;
 
     while (1) {
-        erase();
-        // Hiển thị Header
-        mvprintw(1, 10, "=== %s ===", title);
-        if (current_user_id != 0) {
-            attron(COLOR_PAIR(2)); // Giả sử pair 2 là màu xanh
-            mvprintw(2, 10, "User ID: %d | Coins: %d | HP: %d", current_user_id, current_coins, current_hp);
-            attroff(COLOR_PAIR(2));
-        } else {
-            mvprintw(2, 10, "Status: Guest");
-        }
+        clear(); // Xóa sạch màn hình để tránh lỗi hiển thị rác
+        getmaxyx(stdscr, height, width); // Lấy kích thước terminal
+        box(stdscr, 0, 0); // Vẽ khung viền bao quanh
 
-        // Hiển thị danh sách lựa chọn
+        // 1. Hiển thị Tiêu đề (Căn giữa)
+        attron(A_BOLD | COLOR_PAIR(2));
+        mvprintw(2, (width - strlen(title)) / 2, "%s", title);
+        attroff(A_BOLD | COLOR_PAIR(2));
+
+        // 2. Hiển thị Trạng thái User (Góc trên bên trái, trong khung)
+        if (current_user_id != 0) {
+            mvprintw(4, 4, "User: %d | HP: %d | Coin: %d", current_user_id, current_hp, current_coins);
+        } else {
+            mvprintw(4, 4, "Status: Guest");
+        }
+        
+        // Vẽ đường kẻ ngang phân cách
+        mvwhline(stdscr, 5, 1, ACS_HLINE, width - 2); 
+
+        // 3. Hiển thị danh sách lựa chọn
+        int start_y = 7; // Bắt đầu in menu từ dòng 7
+        int start_x = 4; // Cách lề trái 4 ký tự
+
         for (int i = 0; i < n_opts; i++) {
             if (i == highlight) {
-                attron(A_REVERSE);
-                mvprintw(4 + i, 10, "-> %s", options[i]);
+                attron(A_REVERSE); // Đảo màu cho dòng đang chọn
+                mvprintw(start_y + i, start_x, " -> %s ", options[i]);
                 attroff(A_REVERSE);
             } else {
-                mvprintw(4 + i, 10, "   %s", options[i]);
+                mvprintw(start_y + i, start_x, "    %s ", options[i]);
             }
         }
         
-        mvprintw(4 + n_opts + 2, 10, "Use UP/DOWN to move, ENTER to select, BACKSPACE to go back.");
+        // 4. Hướng dẫn sử dụng ở đáy
+        attron(COLOR_PAIR(1)); // Màu đỏ nhạt (hoặc màu khác tùy bạn chỉnh)
+        mvprintw(height - 2, 2, "[UP/DOWN]: Move | [ENTER]: Select | [BACKSPACE]: Back");
+        attroff(COLOR_PAIR(1));
+
         refresh();
 
         c = getch();
@@ -499,9 +621,9 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
             case KEY_DOWN:
                 highlight = (highlight == n_opts - 1) ? 0 : highlight + 1;
                 break;
-            case 10: // Enter key
+            case 10: // Enter
                 return highlight;
-            case KEY_BACKSPACE: // Quay lại
+            case KEY_BACKSPACE: 
             case 127: 
                 return -1;
             default:
@@ -538,14 +660,15 @@ void menu_shop() {
 }
 
 void menu_team() {
+    // Rút gọn text để giao diện gọn hơn
     const char *options[] = {
         "1. List All Teams",
         "2. Create New Team",
         "3. View Team Members",
         "4. Request to Join Team",
-        "5. Approve Join Request (Captain only)",
-        "6. Refuse Join Request (Captain only)",
-        "7. Kick Member (Captain only)",
+        "5. Approve Request (Captain)", // Rút gọn
+        "6. Refuse Request (Captain)",  // Rút gọn
+        "7. Kick Member (Captain)",     // Rút gọn
         "8. Leave Team",
         "9. Back"
     };
@@ -556,14 +679,14 @@ void menu_team() {
         if (choice == -1 || choice == 8) break;
 
         switch(choice) {
-            case 0: do_list_teams(); break;    // Từ client.c
-            case 1: do_create_team(); break;   // Từ client.c
-            case 2: do_list_members(); break;  // Từ client.c
-            case 3: do_req_join(); break;      // Từ client.c
-            case 4: do_approve_req(1); break;  // Từ client.c
-            case 5: do_approve_req(0); break;  // Từ client.c
-            case 6: do_kick_member(); break;   // Từ client.c
-            case 7: do_leave_team(); break;    // Từ client.c
+            case 0: do_list_teams(); break;
+            case 1: do_create_team(); break;
+            case 2: do_list_members(); break;
+            case 3: do_req_join(); break;
+            case 4: do_approve_req(1); break;
+            case 5: do_approve_req(0); break;
+            case 6: do_kick_member(); break;
+            case 7: do_leave_team(); break;
         }
     }
 }
@@ -636,14 +759,14 @@ int main()
             int choice = draw_menu("MAIN DASHBOARD", options, 5);
 
             switch(choice) {
-                case 1: menu_shop(); break;
-                case 2: menu_team(); break;
-                case 3: menu_combat(); break;
-                case 4: 
+                case 0: menu_shop(); break;
+                case 1: menu_team(); break;
+                case 2: menu_combat(); break;
+                case 3: 
                     // Refresh status (gửi heartbeat hoặc logic khác nếu cần)
                     // Hiện tại chỉ cần redraw menu là sẽ update UI
                     break; 
-                case 5: 
+                case 4: 
                     do_logout(); 
                     break;
                 case -1: // Nút backspace ở main menu cũng hỏi logout
@@ -661,6 +784,7 @@ int main()
 
 void do_challenge()
 {
+    clear();
     int target_id;
     printf("\n--- SEND CHALLENGE ---\n");
     printf("Enter Opponent Team ID: ");
@@ -710,6 +834,7 @@ void do_challenge()
 // Hàm chấp nhận thách đấu
 void do_accept()
 {
+    clear();
     printf("\n--- ACCEPT CHALLENGE ---\n");
 
     // Gửi lệnh chấp nhận (không cần payload)
