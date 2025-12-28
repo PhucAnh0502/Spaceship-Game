@@ -66,135 +66,7 @@ int is_ui_locked()
     return locked;
 }
 
-// Hàm tiện ích để vẽ menu và trả về lựa chọn của người dùng
-int draw_menu(const char *title, const char *options[], int n_opts) {
-    int highlight = 0;
-    int choice = -1;
-    int c;
 
-    while (1) {
-        erase();
-        // Hiển thị Header
-        mvprintw(1, 10, "=== %s ===", title);
-        if (current_user_id != 0) {
-            attron(COLOR_PAIR(2)); // Giả sử pair 2 là màu xanh
-            mvprintw(2, 10, "User ID: %d | Coins: %d | HP: %d", current_user_id, current_coins, current_hp);
-            attroff(COLOR_PAIR(2));
-        } else {
-            mvprintw(2, 10, "Status: Guest");
-        }
-
-        // Hiển thị danh sách lựa chọn
-        for (int i = 0; i < n_opts; i++) {
-            if (i == highlight) {
-                attron(A_REVERSE);
-                mvprintw(4 + i, 10, "-> %s", options[i]);
-                attroff(A_REVERSE);
-            } else {
-                mvprintw(4 + i, 10, "   %s", options[i]);
-            }
-        }
-        
-        mvprintw(4 + n_opts + 2, 10, "Use UP/DOWN to move, ENTER to select, BACKSPACE to go back.");
-        refresh();
-
-        c = getch();
-        switch (c) {
-            case KEY_UP:
-                highlight = (highlight == 0) ? n_opts - 1 : highlight - 1;
-                break;
-            case KEY_DOWN:
-                highlight = (highlight == n_opts - 1) ? 0 : highlight + 1;
-                break;
-            case 10: // Enter key
-                return highlight;
-            case KEY_BACKSPACE: // Quay lại
-            case 127: 
-                return -1;
-            default:
-                break;
-        }
-    }
-}
-
-void menu_shop() {
-    const char *options[] = {
-        "1. Buy Ammo (30mm)",
-        "2. Buy Laser Gun",
-        "3. Buy Laser Battery",
-        "4. Buy Missiles",
-        "5. Buy Armor",
-        "6. Fix Ship",
-        "7. Back"
-    };
-    int n_opts = 7;
-
-    while(1) {
-        int choice = draw_menu("SHOP SYSTEM", options, n_opts);
-        if (choice == -1 || choice == 6) break;
-
-        switch(choice) {
-            case 0: do_buy_ammo(); break;           // Từ client_shop.c
-            case 1: do_buy_laser(); break;          // Từ client_shop.c
-            case 2: do_buy_laser_battery(); break;  // Từ client_shop.c
-            case 3: do_buy_missile(); break;        // Từ client_shop.c
-            case 4: do_buy_armor(); break;          // Từ client_shop.c
-            case 5: do_fix_ship(); break;           // Từ client_shop.c
-        }
-    }
-}
-
-void menu_team() {
-    const char *options[] = {
-        "1. List All Teams",
-        "2. Create New Team",
-        "3. View Team Members",
-        "4. Request to Join Team",
-        "5. Approve Join Request (Captain only)",
-        "6. Refuse Join Request (Captain only)",
-        "7. Kick Member (Captain only)",
-        "8. Leave Team",
-        "9. Back"
-    };
-    int n_opts = 9;
-
-    while(1) {
-        int choice = draw_menu("TEAM MANAGEMENT", options, n_opts);
-        if (choice == -1 || choice == 8) break;
-
-        switch(choice) {
-            case 0: do_list_teams(); break;    // Từ client.c
-            case 1: do_create_team(); break;   // Từ client.c
-            case 2: do_list_members(); break;  // Từ client.c
-            case 3: do_req_join(); break;      // Từ client.c
-            case 4: do_approve_req(1); break;  // Từ client.c
-            case 5: do_approve_req(0); break;  // Từ client.c
-            case 6: do_kick_member(); break;   // Từ client.c
-            case 7: do_leave_team(); break;    // Từ client.c
-        }
-    }
-}
-
-void menu_combat() {
-    const char *options[] = {
-        "1. Send Challenge",
-        "2. Accept Challenge",
-        "3. Attack Opponent",
-        "4. Back"
-    };
-    int n_opts = 4;
-
-    while(1) {
-        int choice = draw_menu("COMBAT ZONE", options, n_opts);
-        if (choice == -1 || choice == 3) break;
-
-        switch(choice) {
-            case 0: do_challenge(); break; // Từ client.c
-            case 1: do_accept(); break;    // Từ client.c
-            case 2: do_attack(); break;    // Từ client.c
-        }
-    }
-}
 
 cJSON *wait_for_response()
 {
@@ -585,6 +457,136 @@ void print_menu(int highlight)
     
     mvprintw(5 + n_choices + 2, 10, "Use arrow keys to move, Enter to select.");
     refresh(); 
+}
+
+// Hàm tiện ích để vẽ menu và trả về lựa chọn của người dùng
+int draw_menu(const char *title, const char *options[], int n_opts) {
+    int highlight = 0;
+    int choice = -1;
+    int c;
+
+    while (1) {
+        erase();
+        // Hiển thị Header
+        mvprintw(1, 10, "=== %s ===", title);
+        if (current_user_id != 0) {
+            attron(COLOR_PAIR(2)); // Giả sử pair 2 là màu xanh
+            mvprintw(2, 10, "User ID: %d | Coins: %d | HP: %d", current_user_id, current_coins, current_hp);
+            attroff(COLOR_PAIR(2));
+        } else {
+            mvprintw(2, 10, "Status: Guest");
+        }
+
+        // Hiển thị danh sách lựa chọn
+        for (int i = 0; i < n_opts; i++) {
+            if (i == highlight) {
+                attron(A_REVERSE);
+                mvprintw(4 + i, 10, "-> %s", options[i]);
+                attroff(A_REVERSE);
+            } else {
+                mvprintw(4 + i, 10, "   %s", options[i]);
+            }
+        }
+        
+        mvprintw(4 + n_opts + 2, 10, "Use UP/DOWN to move, ENTER to select, BACKSPACE to go back.");
+        refresh();
+
+        c = getch();
+        switch (c) {
+            case KEY_UP:
+                highlight = (highlight == 0) ? n_opts - 1 : highlight - 1;
+                break;
+            case KEY_DOWN:
+                highlight = (highlight == n_opts - 1) ? 0 : highlight + 1;
+                break;
+            case 10: // Enter key
+                return highlight;
+            case KEY_BACKSPACE: // Quay lại
+            case 127: 
+                return -1;
+            default:
+                break;
+        }
+    }
+}
+
+void menu_shop() {
+    const char *options[] = {
+        "1. Buy Ammo (30mm)",
+        "2. Buy Laser Gun",
+        "3. Buy Laser Battery",
+        "4. Buy Missiles",
+        "5. Buy Armor",
+        "6. Fix Ship",
+        "7. Back"
+    };
+    int n_opts = 7;
+
+    while(1) {
+        int choice = draw_menu("SHOP SYSTEM", options, n_opts);
+        if (choice == -1 || choice == 6) break;
+
+        switch(choice) {
+            case 0: do_buy_ammo(); break;           // Từ client_shop.c
+            case 1: do_buy_laser(); break;          // Từ client_shop.c
+            case 2: do_buy_laser_battery(); break;  // Từ client_shop.c
+            case 3: do_buy_missile(); break;        // Từ client_shop.c
+            case 4: do_buy_armor(); break;          // Từ client_shop.c
+            case 5: do_fix_ship(); break;           // Từ client_shop.c
+        }
+    }
+}
+
+void menu_team() {
+    const char *options[] = {
+        "1. List All Teams",
+        "2. Create New Team",
+        "3. View Team Members",
+        "4. Request to Join Team",
+        "5. Approve Join Request (Captain only)",
+        "6. Refuse Join Request (Captain only)",
+        "7. Kick Member (Captain only)",
+        "8. Leave Team",
+        "9. Back"
+    };
+    int n_opts = 9;
+
+    while(1) {
+        int choice = draw_menu("TEAM MANAGEMENT", options, n_opts);
+        if (choice == -1 || choice == 8) break;
+
+        switch(choice) {
+            case 0: do_list_teams(); break;    // Từ client.c
+            case 1: do_create_team(); break;   // Từ client.c
+            case 2: do_list_members(); break;  // Từ client.c
+            case 3: do_req_join(); break;      // Từ client.c
+            case 4: do_approve_req(1); break;  // Từ client.c
+            case 5: do_approve_req(0); break;  // Từ client.c
+            case 6: do_kick_member(); break;   // Từ client.c
+            case 7: do_leave_team(); break;    // Từ client.c
+        }
+    }
+}
+
+void menu_combat() {
+    const char *options[] = {
+        "1. Send Challenge",
+        "2. Accept Challenge",
+        "3. Attack Opponent",
+        "4. Back"
+    };
+    int n_opts = 4;
+
+    while(1) {
+        int choice = draw_menu("COMBAT ZONE", options, n_opts);
+        if (choice == -1 || choice == 3) break;
+
+        switch(choice) {
+            case 0: do_challenge(); break; // Từ client.c
+            case 1: do_accept(); break;    // Từ client.c
+            case 2: do_attack(); break;    // Từ client.c
+        }
+    }
 }
 
 int main()
