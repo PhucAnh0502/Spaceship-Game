@@ -36,6 +36,7 @@ extern void handle_send_challenge(int client_fd, cJSON *payload);
 extern void handle_accept_challenge(int client_fd, cJSON *payload);
 extern void handle_attack(int client_fd, cJSON *payload);
 
+extern void handle_mock_equip(int client_fd, cJSON *payload);
 pthread_t treasure_spawner_thread;
 int server_running = 1;
 extern void handle_team_action(int client_fd, int action, cJSON *payload);
@@ -109,7 +110,7 @@ void process_request(int client_fd, cJSON *root){
         case ACT_REFUSE_REQ:
         case ACT_LEAVE_TEAM:
         case ACT_KICK_MEMBER:
-        
+
         // case ACT_LIST_TEAMS:
         //     handle_list_teams(client_fd);
         //     break;
@@ -148,6 +149,9 @@ void process_request(int client_fd, cJSON *root){
         break;
     case ACT_ATTACK:
         handle_attack(client_fd, payload);
+        break;
+    case ACT_MOCK_EQUIP:          // [THÊM]
+        handle_mock_equip(client_fd, payload);
         break;
     default:
         send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
