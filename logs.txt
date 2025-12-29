@@ -345,3 +345,56 @@
 [2025-12-29 00:53:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 11 (Dong) auto spawned, broadcast to 1 players
 [2025-12-29 00:53:27] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-29 00:53:28] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-29 16:40:52] [SUCCESS] Action: REGISTER | Input: thaoltn | Result: Account created successfully
+[2025-12-29 16:41:05] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:41:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Vang) auto spawned, broadcast to 1 players
+[2025-12-29 16:41:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 1 players
+[2025-12-29 16:42:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Vang) auto spawned, broadcast to 1 players
+[2025-12-29 16:43:16] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:43:29] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:43:30] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Bac) auto spawned, broadcast to 1 players
+[2025-12-29 16:44:20] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:44:28] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:44:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Vang) auto spawned, broadcast to 1 players
+[2025-12-29 16:44:52] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:45:01] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:45:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Dong) auto spawned, broadcast to 1 players
+[2025-12-29 16:45:52] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Vang) auto spawned, broadcast to 1 players
+[2025-12-29 16:46:17] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:46:22] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:46:34] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:46:42] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:47:23] [SUCCESS] Action: REGISTER | Input:  | Result: Account created successfully
+[2025-12-29 16:47:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 8 (Dong) auto spawned, broadcast to 1 players
+[2025-12-29 16:47:53] [SUCCESS] Action: REGISTER | Input: thaoltn1 | Result: Account created successfully
+[2025-12-29 16:48:01] [SUCCESS] Action: LOGIN | Input: thaoltn1 | Result: Logged in successfully
+[2025-12-29 16:48:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 9 (Bac) auto spawned, broadcast to 2 players
+[2025-12-29 16:48:59] [SUCCESS] Action: LOGOUT | Input: thaoltn1 | Result: Logged out successfully
+[2025-12-29 16:49:01] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:50:18] [ERROR] Action: REGISTER | Input: thaoltn | Result: Account already exists
+[2025-12-29 16:50:34] [ERROR] Action: REGISTER | Input: thaoltn | Result: Account already exists
+[2025-12-29 16:50:44] [SUCCESS] Action: REGISTER | Input: thaoltn2 | Result: Account created successfully
+[2025-12-29 16:50:53] [SUCCESS] Action: LOGIN | Input: thaoltn2 | Result: Logged in successfully
+[2025-12-29 16:51:00] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:51:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 10 (Bac) auto spawned, broadcast to 2 players
+[2025-12-29 16:52:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 11 (Vang) auto spawned, broadcast to 2 players
+[2025-12-29 16:52:52] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:52:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 12 (Dong) auto spawned, broadcast to 1 players
+[2025-12-29 16:53:11] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 16:53:44] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 16:53:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 13 (Dong) auto spawned, broadcast to 1 players
+[2025-12-29 16:53:51] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 17:08:54] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 17:09:05] [SUCCESS] Action: LOGIN | Input: thaoltn2 | Result: Logged in successfully
+[2025-12-29 17:09:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-29 17:09:23] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-29 17:09:32] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-29 17:10:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 2 players
+[2025-12-29 17:10:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 2 players
+[2025-12-29 17:11:02] [SUCCESS] Action: LOGOUT | Input: thaoltn2 | Result: Logged out successfully
+[2025-12-29 17:11:23] [ERROR] Action: LOGIN | Input: thaoltn | Result: Account already logged in
+[2025-12-29 17:11:37] [SUCCESS] Action: LOGIN | Input: thaoltn2 | Result: Logged in successfully
+[2025-12-29 17:11:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 2 players
+[2025-12-29 17:12:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 2 players
+[2025-12-29 17:12:14] [SUCCESS] Action: LOGOUT | Input: thaoltn2 | Result: Logged out successfully
+[2025-12-29 17:12:16] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
