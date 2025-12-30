@@ -332,9 +332,6 @@ void do_login()
                     if (coin)
                         current_coins = coin->valueint;
 
-                    printf("\t>> Login success! User ID: %d\n", current_user_id);
-                    printf(">> HP: %d | Coins: %d\n", current_hp, current_coins);
-
                     // Start listener thread
                     should_exit = 0;
                     display_response_message(8, 10, 2, status->valueint, msg->valuestring);
@@ -938,16 +935,19 @@ void menu_combat()
 
 void print_dashboard_menu(int highlight)
 {
-    clear();
+    erase();
     const char *options[] = {
         "1. Shop System",
         "2. Team Management",
         "3. Combat Zone",
-        "4. Treasure Hunt", // Tùy chọn xem lại/trả lời nếu lỡ tắt popup
-        "5. Logout"};
+        "4. Treasure Hunt", 
+        "5. Logout"
+    };
     int n_choices = 5;
 
-    erase(); // Xóa màn hình cũ
+    int height, width;
+    getmaxyx(stdscr, height, width);
+    box(stdscr, 0, 0);
 
     // Vẽ Header
     attron(A_BOLD | COLOR_PAIR(2)); // Màu xanh lá
@@ -1005,6 +1005,7 @@ int main()
     keypad(stdscr, TRUE);
     timeout(100);
     int dashboard_highlight = 0;
+    int need_redraw = 1; // Biến cờ để kiểm soát việc vẽ lại màn hình
     // MENU CHÍNH
     while (1)
     {
@@ -1026,7 +1027,8 @@ int main()
             case 1:
                 do_login();
                 // [FIX 2] Reset highlight để menu không bị lệch dòng khi mới vào
-                dashboard_highlight = 0; 
+                dashboard_highlight = 0;
+                need_redraw = 1; // Đánh dấu cần vẽ lại sau login
                 break;
             }
         }
@@ -1037,6 +1039,7 @@ int main()
             {
                 show_game_result_screen();
                 // Sau khi xem xong kết quả, continue để vẽ lại dashboard mới
+                need_redraw = 1; // Đánh dấu cần vẽ lại
                 continue;
             }
             if (current_hp <= 0)
@@ -1087,8 +1090,12 @@ int main()
             else
             {
                 // --- LOGIC MENU CHÍNH ---
-                // Vẽ menu
-                print_dashboard_menu(dashboard_highlight);
+                // Vẽ menu chỉ khi cần
+                if (need_redraw)
+                {
+                    print_dashboard_menu(dashboard_highlight);
+                    need_redraw = 0; // Reset cờ
+                }
 
                 // Xử lý phím cho menu
                 if (c != ERR)
@@ -1097,9 +1104,11 @@ int main()
                     {
                     case KEY_UP:
                         dashboard_highlight = (dashboard_highlight == 0) ? 4 : dashboard_highlight - 1;
+                        need_redraw = 1; // Cần vẽ lại do thay đổi highlight
                         break;
                     case KEY_DOWN:
                         dashboard_highlight = (dashboard_highlight == 4) ? 0 : dashboard_highlight + 1;
+                        need_redraw = 1; // Cần vẽ lại do thay đổi highlight
                         break;
                     case 10: // Phím ENTER
                         timeout(-1);
@@ -1125,6 +1134,7 @@ int main()
 
                         timeout(100);
                         clear(); // Xóa màn hình menu con
+                        need_redraw = 1; // Cần vẽ lại sau khi thoát menu con
                         break;
                     }
                 }
