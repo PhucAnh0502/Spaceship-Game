@@ -60,6 +60,7 @@ void show_player_status(void);
 
 // Helper để xác nhận mua hàng
 int confirm_purchase(const char* item_name, int cost);
+void handle_treasure_answer(int answer);
 
 extern cJSON *treasure_response_data; 
 extern volatile int waiting_for_result;

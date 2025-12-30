@@ -7,13 +7,12 @@
 #include <ncurses.h>
 #include <pthread.h>
 
+#include "main_menu.h"
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"
 #include "../Server/handlers/shop/client_state.h"
-#include "../Server/handlers/shop/client_treasure.c"
-#include "../Server/handlers/shop/client_shop.c"
-#include "services/storage/storage.h"
+
 
 // Hàm chấp nhận thách đấu
 void do_accept() {

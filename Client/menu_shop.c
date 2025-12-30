@@ -1,10 +1,12 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <string.h>
-
+#include <unistd.h>
 #include <ncurses.h>
+#include <pthread.h>
 
-#include "main_menu.c"
+#include "main_menu.h"
+#include "menu_shop.h"
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"

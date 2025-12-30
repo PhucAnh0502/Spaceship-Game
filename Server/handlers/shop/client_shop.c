@@ -2,7 +2,7 @@
 #define CLIENT_SHOP_C
 
 #include "client_state.h"
-
+#include "../Client/menu_shop.h"
 void do_buy_ammo() {
     lock_ui();
     

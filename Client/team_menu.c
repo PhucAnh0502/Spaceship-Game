@@ -7,7 +7,7 @@
 #include <ncurses.h>
 #include <pthread.h>
 
-#include "main_menu.c"
+#include "main_menu.h"
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"

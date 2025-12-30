@@ -12,10 +12,10 @@
 #include "Utils/utils.h"
 #include "../Server/handlers/shop/client_state.h"
 #include "../Server/handlers/shop/client_treasure.c"
-#include "main_menu.c"
-#include "menu_shop.c"
-#include "combat_menu.c"
-#include "team_menu.c"
+#include "main_menu.h"
+#include "menu_shop.h"
+#include "combat_menu.h"
+#include "team_menu.h"
 
 #define SERVER_IP "127.0.0.1"
 
