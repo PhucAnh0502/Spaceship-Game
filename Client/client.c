@@ -47,12 +47,17 @@ volatile int end_game_flag = 0;     // 0: Bình thường, 1: Có kết quả tr
 volatile int last_match_result = 0; // 0: Thua, 1: Thắng
 char last_winner_name[50] = "Unknown";
 
+pthread_mutex_t sync_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t sync_cond = PTHREAD_COND_INITIALIZER;
+cJSON *sync_response = NULL;
+
 void do_attack();
 void do_challenge();
 void do_accept();
 void do_treasure_hunt();
 void do_mock_equip();
 void show_game_result_screen();
+void *background_listener(void *arg);
 
 void lock_ui()
 {
@@ -76,25 +81,54 @@ int is_ui_locked()
     return locked;
 }
 
+// cJSON *wait_for_response()
+// {
+//     while (1)
+//     {
+//         cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
+//         if (response)
+//             return response;
+
+//         char dummy;
+//         int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
+//         if (check == 0)
+//         {
+//             endwin();
+//             printf("\n[ERROR] Server disconnected unexpectedly!\n");
+//             close(sock);
+//             exit(1);
+//         }
+//     }
+// }
+
 cJSON *wait_for_response()
 {
-    while (1)
-    {
-        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
-        if (response)
-            return response;
+    pthread_mutex_lock(&sync_mutex);
 
-        char dummy;
-        int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
-        if (check == 0)
-        {
-            endwin();
-            printf("\n[ERROR] Server disconnected unexpectedly!\n");
-            close(sock);
-            exit(1);
-        }
+    waiting_for_result = 1; // Bật cờ báo "Tôi đang chờ"
+
+    // Nếu có dữ liệu cũ chưa xóa, xóa đi
+    if (sync_response)
+    {
+        cJSON_Delete(sync_response);
+        sync_response = NULL;
     }
+
+    // Vòng lặp chờ tín hiệu (Condition Variable)
+    // Nó sẽ NHẢ mutex ra và ngủ. Khi Listener gọi signal(), nó tỉnh dậy và LẤY lại mutex.
+    while (sync_response == NULL)
+    {
+        pthread_cond_wait(&sync_cond, &sync_mutex);
+    }
+
+    cJSON *res = sync_response;
+    sync_response = NULL;   // Reset để lần sau dùng
+    waiting_for_result = 0; // Tắt cờ
+
+    pthread_mutex_unlock(&sync_mutex);
+    return res;
 }
+
 void show_player_status()
 {
     printf("\n========== TRANG THAI HIEN TAI ==========\n");
@@ -107,7 +141,7 @@ int confirm_purchase(const char *item_name, int cost)
 {
     // 1. Tắt chế độ chờ (timeout) để hàm này hoạt động chặn (blocking)
     // Người dùng bắt buộc phải chọn xong mới làm việc khác
-    timeout(-1); 
+    timeout(-1);
 
     int height, width;
     getmaxyx(stdscr, height, width); // Lấy kích thước màn hình
@@ -117,24 +151,24 @@ int confirm_purchase(const char *item_name, int cost)
     {
         clear();
         box(stdscr, 0, 0); // Vẽ khung
-        
+
         // Tiêu đề cảnh báo
         attron(A_BOLD | COLOR_PAIR(1)); // Màu đỏ (Giả sử pair 1 là Red)
-        mvprintw(height/2 - 2, (width - 20) / 2, "!!! INSUFFICIENT FUNDS !!!");
+        mvprintw(height / 2 - 2, (width - 20) / 2, "!!! INSUFFICIENT FUNDS !!!");
         attroff(A_BOLD | COLOR_PAIR(1));
 
         // Thông tin chi tiết
         char msg[100];
         snprintf(msg, sizeof(msg), "Cost: %d | You have: %d", cost, current_coins);
-        mvprintw(height/2, (width - strlen(msg)) / 2, "%s", msg);
+        mvprintw(height / 2, (width - strlen(msg)) / 2, "%s", msg);
 
         // Hướng dẫn thoát
         attron(A_DIM);
-        mvprintw(height/2 + 2, (width - 26) / 2, "Press any key to return...");
+        mvprintw(height / 2 + 2, (width - 26) / 2, "Press any key to return...");
         attroff(A_DIM);
-        
+
         refresh();
-        getch(); // Chờ bấm phím bất kỳ
+        getch();  // Chờ bấm phím bất kỳ
         return 0; // Trả về False
     }
 
@@ -149,30 +183,34 @@ int confirm_purchase(const char *item_name, int cost)
 
         // Tiêu đề
         attron(A_BOLD | COLOR_PAIR(2)); // Màu xanh (Giả sử pair 2 là Green)
-        mvprintw(height/2 - 4, (width - 20) / 2, "=== CONFIRM PURCHASE ===");
+        mvprintw(height / 2 - 4, (width - 20) / 2, "=== CONFIRM PURCHASE ===");
         attroff(A_BOLD | COLOR_PAIR(2));
 
         // Nội dung câu hỏi
         char prompt[100];
         snprintf(prompt, sizeof(prompt), "Buy item: %s", item_name);
-        mvprintw(height/2 - 2, (width - strlen(prompt)) / 2, "%s", prompt);
+        mvprintw(height / 2 - 2, (width - strlen(prompt)) / 2, "%s", prompt);
 
         char price_info[50];
         snprintf(price_info, sizeof(price_info), "Price: %d coins", cost);
-        mvprintw(height/2 - 1, (width - strlen(price_info)) / 2, "%s", price_info);
+        mvprintw(height / 2 - 1, (width - strlen(price_info)) / 2, "%s", price_info);
 
         // Vẽ 2 nút chọn: [ YES ] và [ NO ]
-        int btn_y = height/2 + 2;
-        
+        int btn_y = height / 2 + 2;
+
         // Vẽ nút YES
-        if (choice == 0) attron(A_REVERSE | A_BOLD); // Highlight nếu đang chọn
-        mvprintw(btn_y, width/2 - 10, "[ YES ]");
-        if (choice == 0) attroff(A_REVERSE | A_BOLD);
+        if (choice == 0)
+            attron(A_REVERSE | A_BOLD); // Highlight nếu đang chọn
+        mvprintw(btn_y, width / 2 - 10, "[ YES ]");
+        if (choice == 0)
+            attroff(A_REVERSE | A_BOLD);
 
         // Vẽ nút NO
-        if (choice == 1) attron(A_REVERSE | A_BOLD); // Highlight nếu đang chọn
-        mvprintw(btn_y, width/2 + 4, "[ NO ]");
-        if (choice == 1) attroff(A_REVERSE | A_BOLD);
+        if (choice == 1)
+            attron(A_REVERSE | A_BOLD); // Highlight nếu đang chọn
+        mvprintw(btn_y, width / 2 + 4, "[ NO ]");
+        if (choice == 1)
+            attroff(A_REVERSE | A_BOLD);
 
         // Hướng dẫn
         attron(A_DIM);
@@ -185,23 +223,23 @@ int confirm_purchase(const char *item_name, int cost)
         key = getch();
         switch (key)
         {
-            case KEY_LEFT:
-            case KEY_RIGHT:
-                choice = !choice; // Đảo lựa chọn giữa 0 và 1
-                break;
-            
-            case 10: // Phím Enter
-            case 13: 
-                return (choice == 0); // Nếu chọn YES (0) -> Trả về 1 (True), ngược lại 0
-            
-            case 27: // Phím ESC -> Hủy luôn
-            case 'n':
-            case 'N':
-                return 0;
-            
-            case 'y':
-            case 'Y':
-                return 1;
+        case KEY_LEFT:
+        case KEY_RIGHT:
+            choice = !choice; // Đảo lựa chọn giữa 0 và 1
+            break;
+
+        case 10: // Phím Enter
+        case 13:
+            return (choice == 0); // Nếu chọn YES (0) -> Trả về 1 (True), ngược lại 0
+
+        case 27: // Phím ESC -> Hủy luôn
+        case 'n':
+        case 'N':
+            return 0;
+
+        case 'y':
+        case 'Y':
+            return 1;
         }
     }
 }
@@ -293,12 +331,11 @@ void do_login()
                     if (coin)
                         current_coins = coin->valueint;
 
-                    printf(">> Login success! User ID: %d\n", current_user_id);
+                    printf("\t>> Login success! User ID: %d\n", current_user_id);
                     printf(">> HP: %d | Coins: %d\n", current_hp, current_coins);
 
                     // Start listener thread
                     should_exit = 0;
-                    pthread_create(&listener_thread, NULL, background_listener, NULL);
                     display_response_message(8, 10, 2, status->valueint, msg->valuestring);
                 }
             }
@@ -912,6 +949,11 @@ int main()
     connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
+    if (pthread_create(&listener_thread, NULL, background_listener, NULL) != 0) {
+        perror("Failed to create listener thread");
+        return 1;
+    }
+
     // Khởi tạo ncurses
     initscr();
     start_color();
@@ -1493,4 +1535,136 @@ void show_game_result_screen()
 
     // Reset cờ sau khi đã xem xong
     end_game_flag = 0;
+}
+
+// ============================================================
+// HÀM BACKGROUND LISTENER HOÀN CHỈNH
+// ============================================================
+void *background_listener(void *arg)
+{
+    while (!should_exit)
+    {
+        // 1. Dùng Blocking Mode (Không dùng usleep).
+        // Hàm này sẽ TREO ở đây cho đến khi Server gửi gì đó.
+        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
+        if (response == NULL)
+        {
+            // Nếu NULL thường là do mất kết nối hoặc lỗi mạng nghiêm trọng
+            printf("\n[ERROR] Server disconnected!\n");
+            should_exit = 1;
+            break;
+        }
+
+        cJSON *status = cJSON_GetObjectItem(response, "status");
+        cJSON *data = cJSON_GetObjectItem(response, "data");
+        cJSON *action = cJSON_GetObjectItem(response, "action"); // Nên check thêm action
+
+        int code = status ? status->valueint : 0;
+        int act_code = action ? action->valueint : 0;
+
+        // --- PHÂN LOẠI GÓI TIN ---
+
+        // A. GÓI TIN MÀ MAIN THREAD ĐANG CHỜ (LOGIN, MUA ĐỒ, TẤN CÔNG...)
+        // Kiểm tra xem Main Thread có đang đợi không (biến waiting_for_result)
+        // VÀ gói tin này KHÔNG PHẢI là thông báo bất đồng bộ (như kho báu/end game)
+        int is_sync_msg = 0;
+
+        pthread_mutex_lock(&sync_mutex); // Dùng mutex riêng cho việc đồng bộ
+        if (waiting_for_result &&
+            act_code != ACT_TREASURE_APPEAR &&
+            code != RES_END_GAME &&
+            code != RES_TREASURE_SUCCESS)
+        {
+            // Đây là câu trả lời Main Thread đang cần
+            if (sync_response)
+                cJSON_Delete(sync_response);
+            sync_response = cJSON_Duplicate(response, 1); // Copy dữ liệu
+
+            waiting_for_result = 0;          // Tắt cờ chờ
+            pthread_cond_signal(&sync_cond); // <--- ĐÁNH THỨC MAIN THREAD NGAY LẬP TỨC
+            is_sync_msg = 1;
+        }
+        pthread_mutex_unlock(&sync_mutex);
+
+        if (is_sync_msg)
+        {
+            cJSON_Delete(response);
+            continue; // Đã xử lý xong, quay lại vòng lặp
+        }
+
+        // B. XỬ LÝ CÁC GÓI TIN BẤT ĐỒNG BỘ (ASYNC EVENTS)
+
+        // 1. End Game
+        if (code == RES_END_GAME)
+        {
+            pthread_mutex_lock(&pending_mutex);
+            end_game_flag = 1;
+            if (data)
+            {
+                cJSON *winner_flag = cJSON_GetObjectItem(data, "is_winner");
+                cJSON *w_name = cJSON_GetObjectItem(data, "winner_team_name");
+                if (winner_flag)
+                    last_match_result = winner_flag->valueint;
+                if (w_name)
+                    strncpy(last_winner_name, w_name->valuestring, 49);
+            }
+            // Update UI State an toàn
+            pthread_mutex_lock(&ui_mutex); // Giả sử bạn có ui_mutex
+            current_hp = 1000;
+            pthread_mutex_unlock(&ui_mutex);
+
+            pthread_mutex_unlock(&pending_mutex);
+        }
+
+        // 2. Kho báu xuất hiện
+        else if (code == RES_TREASURE_SUCCESS && cJSON_GetObjectItem(data, "question"))
+        {
+            pthread_mutex_lock(&pending_mutex);
+            pending_treasure.has_pending = 1;
+
+            cJSON *t_id = cJSON_GetObjectItem(data, "treasure_id");
+            cJSON *ques = cJSON_GetObjectItem(data, "question");
+            // ... (Code parse kho báu của bạn giữ nguyên) ...
+            if (t_id)
+                pending_treasure.treasure_id = t_id->valueint;
+            if (ques)
+                strncpy(pending_treasure.question, ques->valuestring, 255);
+            // ...
+            pthread_mutex_unlock(&pending_mutex);
+        }
+
+        // 3. Kho báu bị mở mất
+        else if (code == RES_TREASURE_OPENED)
+        {
+            pthread_mutex_lock(&pending_mutex);
+            pending_treasure.has_pending = 0;
+            pthread_mutex_unlock(&pending_mutex);
+        }
+
+        // 4. Cập nhật HP/Coin thụ động (Real-time update)
+        // (Xảy ra khi bắn trúng, bị bắn, hoặc mở rương thành công)
+        if (data)
+        {
+            cJSON *hp_node = cJSON_GetObjectItem(data, "current_hp");
+            cJSON *coin_node = cJSON_GetObjectItem(data, "current_coin"); // Server thường trả về "coin" hoặc "current_coin"
+            cJSON *total_coin = cJSON_GetObjectItem(data, "total_coins");
+
+            // Dùng UI Mutex để bảo vệ biến toàn cục
+            if (hp_node || coin_node || total_coin)
+            {
+                pthread_mutex_lock(&ui_mutex);
+                if (hp_node)
+                    current_hp = hp_node->valueint;
+                if (coin_node)
+                    current_coins = coin_node->valueint;
+                if (total_coin)
+                    current_coins = total_coin->valueint;
+                pthread_mutex_unlock(&ui_mutex);
+            }
+        }
+
+        cJSON_Delete(response);
+        // KHÔNG CÓ usleep() Ở ĐÂY
+    }
+    return NULL;
 }
