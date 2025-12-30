@@ -1131,3 +1131,35 @@
 [2025-12-30 11:41:30] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-30 11:41:32] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
 [2025-12-30 11:41:33] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:47:19] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:47:23] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:47:42] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 11:47:57] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 11:48:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 11:48:44] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:48:46] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:48:47] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:48:47] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:49:56] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:49:59] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:50:04] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 11:50:17] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 11:51:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 11:52:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:52:25] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:52:26] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:52:29] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:52:29] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:52:35] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:52:38] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:52:52] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:52:55] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:53:08] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:53:18] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:57:07] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:57:10] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:57:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 11:58:14] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:58:17] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:58:18] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:58:19] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
