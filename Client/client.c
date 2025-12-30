@@ -13,7 +13,6 @@
 #include "../Server/handlers/shop/client_state.h"
 #include "../Server/handlers/shop/client_treasure.c"
 #include "main_menu.h"
-#include "menu_shop.h"
 #include "combat_menu.h"
 #include "team_menu.h"
 
@@ -24,6 +23,21 @@ int current_user_id = 0;
 int current_coins = 0;
 int current_hp = 1000;
 char current_username[50] = "";
+
+// Snapshot trang bị
+typedef struct {
+    int weapon;
+    int ammo;
+} ClientWeaponSlot;
+
+typedef struct {
+    int type;
+    int durability;
+} ClientArmorSlot;
+
+ClientWeaponSlot client_cannons[4] = {0};
+ClientWeaponSlot client_missiles[4] = {0};
+ClientArmorSlot client_armor[2] = {0};
 
 char client_buffer[BUFFER_SIZE];
 int client_buf_len = 0;
@@ -54,6 +68,9 @@ volatile int current_team_id = -1;
 pthread_mutex_t sync_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t sync_cond = PTHREAD_COND_INITIALIZER;
 cJSON *sync_response = NULL;
+
+int fetch_and_update_status();
+void print_equipment_status();
 
 void *background_listener(void *arg);
 
@@ -102,9 +119,144 @@ cJSON *wait_for_response() {
 }
 
 void show_player_status() {
-    printf("\n========== TRANG THAI HIEN TAI ==========\n");
-    printf("Coins: %d\n", current_coins);
-    printf("HP: %d/1000\n", current_hp);
+    // Lấy trạng thái mới nhất từ server (hp/coin/weapon/armor)
+    fetch_and_update_status();
+
+    // Hiển thị bằng ncurses thay vì stdout
+    int y = 2;
+    int x = 2;
+
+    attron(A_BOLD);
+    mvprintw(y, x, "=== TRANG THAI HIEN TAI ===");
+    attroff(A_BOLD);
+
+    mvprintw(y + 1, x, "User: %s", current_username);
+    mvprintw(y + 2, x, "HP: %d/1000 | Coins: %d", current_hp, current_coins);
+
+    draw_compact_status(y + 4, x);
+    refresh();
+}
+
+// Hỏi server để cập nhật hp/coin và trang bị
+int fetch_and_update_status() {
+    send_json(sock, ACT_GET_STATUS, NULL);
+    cJSON *res = wait_for_response();
+    if (!res)
+        return 0;
+
+    cJSON *status = cJSON_GetObjectItem(res, "status");
+    cJSON *data = cJSON_GetObjectItem(res, "data");
+    if (status && status->valueint == RES_SHOP_SUCCESS && data) {
+        cJSON *hp = cJSON_GetObjectItem(data, "hp");
+        cJSON *coin = cJSON_GetObjectItem(data, "coin");
+        if (hp)
+            current_hp = hp->valueint;
+        if (coin)
+            current_coins = coin->valueint;
+
+        // Armor
+        cJSON *armor = cJSON_GetObjectItem(data, "armor");
+        if (armor && cJSON_IsArray(armor)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, armor) {
+                if (idx >= 2) break;
+                cJSON *t = cJSON_GetObjectItem(it, "type");
+                cJSON *d = cJSON_GetObjectItem(it, "durability");
+                client_armor[idx].type = t ? t->valueint : 0;
+                client_armor[idx].durability = d ? d->valueint : 0;
+                idx++;
+            }
+        }
+
+        // Cannons
+        cJSON *cans = cJSON_GetObjectItem(data, "cannons");
+        if (cans && cJSON_IsArray(cans)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, cans) {
+                if (idx >= 4) break;
+                cJSON *w = cJSON_GetObjectItem(it, "weapon");
+                cJSON *a = cJSON_GetObjectItem(it, "ammo");
+                client_cannons[idx].weapon = w ? w->valueint : 0;
+                client_cannons[idx].ammo = a ? a->valueint : 0;
+                idx++;
+            }
+        }
+
+        // Missiles
+        cJSON *miss = cJSON_GetObjectItem(data, "missiles");
+        if (miss && cJSON_IsArray(miss)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, miss) {
+                if (idx >= 4) break;
+                cJSON *w = cJSON_GetObjectItem(it, "weapon");
+                cJSON *a = cJSON_GetObjectItem(it, "ammo");
+                client_missiles[idx].weapon = w ? w->valueint : 0;
+                client_missiles[idx].ammo = a ? a->valueint : 0;
+                idx++;
+            }
+        }
+    }
+    cJSON_Delete(res);
+    return 1;
+}
+
+static const char *armor_label(int type) {
+    switch (type) {
+        case ARMOR_BASIC: return "Basic";
+        case ARMOR_HEAVY: return "Heavy";
+        default: return "None";
+    }
+}
+
+static const char *weapon_label(int type) {
+    switch (type) {
+        case WEAPON_CANNON_30MM: return "Cannon";
+        case WEAPON_LASER: return "Laser";
+        case WEAPON_MISSILE: return "Missile";
+        default: return "None";
+    }
+}
+
+void print_equipment_status() {
+    printf("Armor: [%s:%d] [%s:%d]\n",
+           armor_label(client_armor[0].type), client_armor[0].durability,
+           armor_label(client_armor[1].type), client_armor[1].durability);
+
+    printf("Cannons:\n");
+    for (int i = 0; i < 4; i++) {
+        printf("  Slot %d: %s | Ammo: %d\n", i,
+               weapon_label(client_cannons[i].weapon), client_cannons[i].ammo);
+    }
+
+    printf("Missiles:\n");
+    for (int i = 0; i < 4; i++) {
+        printf("  Slot %d: %s | Ammo: %d\n", i,
+               weapon_label(client_missiles[i].weapon), client_missiles[i].ammo);
+    }
+}
+
+// Vẽ panel trang bị gọn nhẹ trên ncurses UI
+void draw_compact_status(int y, int x) {
+    mvprintw(y, x, "Armor: [%s:%d] [%s:%d]",
+             armor_label(client_armor[0].type), client_armor[0].durability,
+             armor_label(client_armor[1].type), client_armor[1].durability);
+
+    mvprintw(y + 1, x, "Cannons:");
+    move(y + 1, x + 10);
+    for (int i = 0; i < 4; i++) {
+        printw("[%d:%s/%d] ", i + 1,
+               weapon_label(client_cannons[i].weapon), client_cannons[i].ammo);
+    }
+
+    mvprintw(y + 2, x, "Missiles:");
+    move(y + 2, x + 10);
+    for (int i = 0; i < 4; i++) {
+        printw("[%d:%s/%d] ", i + 1,
+               weapon_label(client_missiles[i].weapon), client_missiles[i].ammo);
+    }
 }
 
 int main() {
@@ -219,11 +371,11 @@ int main() {
                 if (c != ERR) {
                     switch (c) {
                         case KEY_UP:
-                            dashboard_highlight = (dashboard_highlight == 0) ? 4 : dashboard_highlight - 1;
+                            dashboard_highlight = (dashboard_highlight == 0) ? 3 : dashboard_highlight - 1;
                             need_redraw = 1; // Cần vẽ lại do thay đổi highlight
                             break;
                         case KEY_DOWN:
-                            dashboard_highlight = (dashboard_highlight == 4) ? 0 : dashboard_highlight + 1;
+                            dashboard_highlight = (dashboard_highlight == 3) ? 0 : dashboard_highlight + 1;
                             need_redraw = 1; // Cần vẽ lại do thay đổi highlight
                             break;
                         case 10: // Phím ENTER
@@ -231,18 +383,15 @@ int main() {
 
                             switch (dashboard_highlight) {
                                 case 0:
-                                    menu_shop();
-                                    break;
-                                case 1:
                                     menu_team();
                                     break;
-                                case 2:
+                                case 1:
                                     menu_combat();
                                     break;
-                                case 3:
+                                case 2:
                                     do_treasure_hunt();
                                     break;
-                                case 4:
+                                case 3:
                                     do_logout();
                                     break;
                             }

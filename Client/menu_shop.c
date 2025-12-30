@@ -14,26 +14,34 @@
 
 void do_buy_ammo() {
     lock_ui();
+    clear();
 
-    int quantity;
-    show_player_status();
-
-    printf("\n--- MUA DAN 30MM ---\n");
-    printf("Gia: %d coins/hop (50 vien)\n", COST_AMMO_BOX);
-    printf("So luong (0 de huy): ");
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- MUA DAN 30MM ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    mvprintw(4, 4, "Gia: %d coins/hop (50 vien)", COST_AMMO_BOX);
+    mvprintw(5, 4, "So luong (0 de huy): ");
+    refresh();
 
     char input[20];
-    if (fgets(input, sizeof(input), stdin) == NULL || sscanf(input, "%d", &quantity) != 1 || quantity <= 0) {
-        printf("Huy mua.\n");
+    get_input(5, 28, "", input, sizeof(input), 0);
+    int quantity = atoi(input);
+    if (quantity <= 0) {
+        mvprintw(7, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
 
     int total_cost = COST_AMMO_BOX * quantity;
-    printf("Tong chi phi: %d coins\n", total_cost);
+    mvprintw(7, 4, "Tong chi phi: %d coins", total_cost);
+    refresh();
 
     if (!confirm_purchase("dan 30mm", total_cost)) {
-        printf("Huy mua.\n");
+        mvprintw(9, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -45,11 +53,13 @@ void do_buy_ammo() {
     send_json(sock, ACT_BUY_ITEM, data);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(4, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
@@ -57,26 +67,37 @@ void do_buy_ammo() {
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
                     if (coin) {
                         current_coins = coin->valueint;
-                        printf(">> Coins con lai: %d\n", current_coins);
                     }
                 }
+                fetch_and_update_status(); // đồng bộ trạng thái trang bị sau khi mua
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(4, 4, ">> No response from server");
     }
 
+    mvprintw(8, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(10, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
 void do_buy_laser() {
     lock_ui();
-    show_player_status();
+    clear();
 
-    printf("\n--- MUA PHAO LASER ---\n");
-    printf("Gia: %d coins\n", COST_LASER);
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- MUA PHAO LASER ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    mvprintw(4, 4, "Gia: %d coins", COST_LASER);
+    refresh();
 
     if (!confirm_purchase("phao laser", COST_LASER)) {
-        printf("Huy mua.\n");
+        mvprintw(6, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -87,11 +108,13 @@ void do_buy_laser() {
     send_json(sock, ACT_BUY_ITEM, data);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(4, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
@@ -99,39 +122,53 @@ void do_buy_laser() {
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
                     if (coin) {
                         current_coins = coin->valueint;
-                        printf(">> Coins con lai: %d\n", current_coins);
                     }
                 }
+                fetch_and_update_status(); // đồng bộ trạng thái trang bị sau khi mua
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(4, 4, ">> No response from server");
     }
 
+    mvprintw(8, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(10, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
 void do_buy_laser_battery() {
     lock_ui();
+    clear();
 
-    int quantity;
-    show_player_status();
-
-    printf("\n--- MUA PIN LASER ---\n");
-    printf("Gia: %d coins/bo (10 lan ban)\n", COST_LASER_BATTERY);
-    printf("So luong (0 de huy): ");
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- MUA PIN LASER ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    mvprintw(4, 4, "Gia: %d coins/bo (10 lan ban)", COST_LASER_BATTERY);
+    mvprintw(5, 4, "So luong (0 de huy): ");
+    refresh();
 
     char input[20];
-    if (fgets(input, sizeof(input), stdin) == NULL || sscanf(input, "%d", &quantity) != 1 || quantity <= 0) {
-        printf("Huy mua.\n");
+    get_input(5, 28, "", input, sizeof(input), 0);
+    int quantity = atoi(input);
+    if (quantity <= 0) {
+        mvprintw(7, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
 
     int total_cost = COST_LASER_BATTERY * quantity;
-    printf("Tong chi phi: %d coins\n", total_cost);
+    mvprintw(7, 4, "Tong chi phi: %d coins", total_cost);
+    refresh();
 
     if (!confirm_purchase("pin laser", total_cost)) {
-        printf("Huy mua.\n");
+        mvprintw(9, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -143,11 +180,13 @@ void do_buy_laser_battery() {
     send_json(sock, ACT_BUY_ITEM, data);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(4, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
@@ -155,26 +194,37 @@ void do_buy_laser_battery() {
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
                     if (coin) {
                         current_coins = coin->valueint;
-                        printf(">> Coins con lai: %d\n", current_coins);
                     }
                 }
+                fetch_and_update_status(); // đồng bộ trạng thái trang bị sau khi mua
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(4, 4, ">> No response from server");
     }
 
+    mvprintw(8, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(10, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
 void do_buy_missile() {
     lock_ui();
-    show_player_status();
+    clear();
 
-    printf("\n--- MUA TEN LUA ---\n");
-    printf("Gia: %d coins/qua\n", COST_MISSILE);
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- MUA TEN LUA ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    mvprintw(4, 4, "Gia: %d coins/qua", COST_MISSILE);
+    refresh();
 
     if (!confirm_purchase("ten lua", COST_MISSILE)) {
-        printf("Huy mua.\n");
+        mvprintw(6, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -185,11 +235,13 @@ void do_buy_missile() {
     send_json(sock, ACT_BUY_ITEM, data);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(4, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
@@ -197,43 +249,53 @@ void do_buy_missile() {
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
                     if (coin) {
                         current_coins = coin->valueint;
-                        printf(">> Coins con lai: %d\n", current_coins);
                     }
                 }
+                fetch_and_update_status(); // đồng bộ trạng thái trang bị sau khi mua
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(4, 4, ">> No response from server");
     }
 
+    mvprintw(8, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(10, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
 void do_buy_armor() {
     lock_ui();
+    clear();
 
     int armor_type;
-    show_player_status();
 
-    printf("\n--- MUA GIAP ---\n");
-    printf("1. Giap co ban (%d coins, Amor = %d)\n", COST_BASIC_ARMOR, AMOR_VAL_BASIC);
-    printf("2. Giap tang cuong (%d coins, Amor = %d)\n", COST_HEAVY_ARMOR, AMOR_VAL_HEAVY);
-    printf("Chon (0 de huy): ");
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- MUA GIAP ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+    mvprintw(4, 4, "1. Giap co ban (%d coins, Amor = %d)", COST_BASIC_ARMOR, AMOR_VAL_BASIC);
+    mvprintw(5, 4, "2. Giap tang cuong (%d coins, Amor = %d)", COST_HEAVY_ARMOR, AMOR_VAL_HEAVY);
+    mvprintw(6, 4, "Chon (0 de huy): ");
+    refresh();
 
     char input[20];
-    if (fgets(input, sizeof(input), stdin) == NULL || sscanf(input, "%d", &armor_type) != 1) {
-        printf("Huy mua.\n");
-        unlock_ui();
-        return;
-    }
+    get_input(6, 23, "", input, sizeof(input), 0);
+    armor_type = atoi(input);
 
     if (armor_type == 0) {
-        printf("Huy mua.\n");
+        mvprintw(8, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
 
     if (armor_type != 1 && armor_type != 2) {
-        printf("Lua chon khong hop le!\n");
+        mvprintw(8, 4, "Lua chon khong hop le!");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -243,7 +305,9 @@ void do_buy_armor() {
     const char* armor_name = (armor_type == 1) ? "giap co ban" : "giap tang cuong";
 
     if (!confirm_purchase(armor_name, cost)) {
-        printf("Huy mua.\n");
+        mvprintw(8, 4, "Huy mua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -254,11 +318,13 @@ void do_buy_armor() {
     send_json(sock, ACT_BUY_ITEM, data);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(4, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
@@ -266,38 +332,54 @@ void do_buy_armor() {
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
                     if (coin) {
                         current_coins = coin->valueint;
-                        printf(">> Coins con lai: %d\n", current_coins);
                     }
                 }
+                fetch_and_update_status(); // đồng bộ trạng thái trang bị sau khi mua
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(4, 4, ">> No response from server");
     }
 
+    mvprintw(8, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(10, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
 void do_fix_ship() {
     lock_ui();
-    show_player_status();
+    clear();
 
     int hp_needed = 1000 - current_hp;
 
+    attron(A_BOLD | COLOR_PAIR(2));
+    mvprintw(2, 4, "--- SUA TAU ---");
+    attroff(A_BOLD | COLOR_PAIR(2));
+
     if (hp_needed <= 0) {
-        printf("\n>> Tau da day HP, khong can sua!\n");
+        mvprintw(4, 4, ">> Tau da day HP, khong can sua!");
+        mvprintw(6, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+        mvprintw(8, 4, "Press any key to continue...");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
 
     int repair_cost = hp_needed * COST_REPAIR_PER_HP;
 
-    printf("\n--- SUA TAU ---\n");
-    printf("Gia: %d coin/HP\n", COST_REPAIR_PER_HP);
-    printf("HP can sua: %d\n", hp_needed);
-    printf("Tong chi phi: %d coins\n", repair_cost);
+    mvprintw(4, 4, "Gia: %d coin/HP", COST_REPAIR_PER_HP);
+    mvprintw(5, 4, "HP can sua: %d", hp_needed);
+    mvprintw(6, 4, "Tong chi phi: %d coins", repair_cost);
+    refresh();
 
     if (!confirm_purchase("sua tau", repair_cost)) {
-        printf("Huy sua.\n");
+        mvprintw(8, 4, "Huy sua.");
+        refresh();
+        getch();
         unlock_ui();
         return;
     }
@@ -305,32 +387,44 @@ void do_fix_ship() {
     send_json(sock, ACT_FIX_SHIP, NULL);
     cJSON *res = wait_for_response();
 
+    clear();
     if (res) {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
         cJSON *status = cJSON_GetObjectItem(res, "status");
         if (status && msg) {
-            printf("\n>> Server [%d]: %s\n", status->valueint, msg->valuestring);
+            display_response_message(3, 4, status->valueint == RES_SHOP_SUCCESS ? 2 : 1,
+                                     status->valueint, msg->valuestring);
 
             if (status->valueint == RES_SHOP_SUCCESS) {
                 cJSON *res_data = cJSON_GetObjectItem(res, "data");
                 if (res_data) {
                     cJSON *hp = cJSON_GetObjectItem(res_data, "hp");
+                    cJSON *hp2 = cJSON_GetObjectItem(res_data, "current_hp");
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
+                    cJSON *coin2 = cJSON_GetObjectItem(res_data, "remaining_coin");
 
-                    if (hp) {
+                    if (hp2)
+                        current_hp = hp2->valueint;
+                    else if (hp)
                         current_hp = hp->valueint;
-                        printf(">> HP: %d\n", current_hp);
-                    }
-                    if (coin) {
+
+                    if (coin2)
+                        current_coins = coin2->valueint;
+                    else if (coin)
                         current_coins = coin->valueint;
-                        printf(">> Coins: %d\n", current_coins);
-                    }
                 }
+                fetch_and_update_status(); // đồng bộ sau khi sửa tàu
             }
         }
         cJSON_Delete(res);
+    } else {
+        mvprintw(3, 4, ">> No response from server");
     }
 
+    mvprintw(7, 4, "HP: %d | Coins: %d", current_hp, current_coins);
+    mvprintw(9, 4, "Press any key to continue...");
+    refresh();
+    getch();
     unlock_ui();
 }
 
@@ -349,7 +443,7 @@ void do_mock_equip() {
 
         if (status && status->valueint == RES_SHOP_SUCCESS) {
             // Hiển thị màu xanh lá cây
-            display_response_message(4, 5, 2, status->valueint, msg ? msg->valuestring : "Success");
+            display_response_message(15, 5, 2, status->valueint, msg ? msg->valuestring : "Success");
 
             // Cập nhật lại hiển thị tiền/hp ngay lập tức
             if (data) {
@@ -360,13 +454,14 @@ void do_mock_equip() {
                 if (hp)
                     current_hp = hp->valueint;
             }
+            fetch_and_update_status();
         } else {
-            display_response_message(4, 5, 1, status ? status->valueint : 0, "Failed");
+            display_response_message(15, 5, 1, status ? status->valueint : 0, "Failed");
         }
         cJSON_Delete(res);
     }
     // Dừng màn hình để xem kết quả
-    mvprintw(12, 5, "Press any key...");
+    mvprintw(17, 5, "Press any key...");
     getch();
 }
 

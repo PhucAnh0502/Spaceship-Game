@@ -95,6 +95,9 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
         attroff(A_BOLD | COLOR_PAIR(2));
 
         // 2. Trạng thái User (Sẽ tự cập nhật giá trị mới nhất từ biến toàn cục)
+        int start_y = 7;
+        int line_y = start_y - 2;
+        int is_combat_panel = 0;
         if (current_user_id != 0) {
             // Hiển thị HP với màu sắc cảnh báo nếu máu thấp
             mvprintw(4, 4, "User: %s | ", current_username);
@@ -110,14 +113,25 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
                 attroff(COLOR_PAIR(2));
 
             printw(" | Coin: %d", current_coins);
+
+            // Nếu đang ở combat zone, vẽ thêm panel trang bị
+            if (strstr(title, "COMBAT ZONE") != NULL) {
+                draw_compact_status(5, 4);
+                start_y = 9; // đẩy menu xuống dưới panel
+                line_y = start_y - 1; // kẻ đường phân cách dưới panel
+                is_combat_panel = 1;
+            }
         } else {
             mvprintw(4, 4, "Status: Guest");
         }
 
-        mvwhline(stdscr, 5, 1, ACS_HLINE, width - 2);
+        if (is_combat_panel) {
+            mvwhline(stdscr, line_y, 1, ACS_HLINE, width - 2);
+        } else {
+            mvwhline(stdscr, start_y - 2, 1, ACS_HLINE, width - 2);
+        }
 
         // 3. Menu Options
-        int start_y = 7;
         int start_x = 4;
         for (int i = 0; i < n_opts; i++) {
             if (i == highlight) {
@@ -217,13 +231,12 @@ void print_menu(int highlight) {
 void print_dashboard_menu(int highlight) {
     erase();
     const char *options[] = {
-        "1. Shop System",
-        "2. Team Management",
-        "3. Combat Zone",
-        "4. Treasure Hunt",
-        "5. Logout"
+        "1. Team Management",
+        "2. Combat Zone",
+        "3. Treasure Hunt",
+        "4. Logout"
     };
-    int n_choices = 5;
+    int n_choices = 4;
 
     int height, width;
     getmaxyx(stdscr, height, width);

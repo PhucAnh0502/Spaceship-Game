@@ -57,6 +57,8 @@ int is_ui_locked(void);
 
 // Helper để hiển thị trạng thái
 void show_player_status(void);
+int fetch_and_update_status(void);
+void draw_compact_status(int y, int x);
 
 // Helper để xác nhận mua hàng
 int confirm_purchase(const char* item_name, int cost);

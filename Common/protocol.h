@@ -47,6 +47,7 @@ typedef enum
 
     ACT_BUY_ITEM,
     ACT_FIX_SHIP,
+    ACT_GET_STATUS,
 
     ACT_SEND_CHALLANGE,
     ACT_ACCEPT_CHALLANGE,

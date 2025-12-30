@@ -35,6 +35,7 @@ extern void send_response(int socket_fd, int status, const char *message, cJSON 
 extern void handle_send_challenge(int client_fd, cJSON *payload);
 extern void handle_accept_challenge(int client_fd, cJSON *payload);
 extern void handle_attack(int client_fd, cJSON *payload);
+extern void handle_get_status(int client_fd, cJSON *payload);
 
 extern void handle_mock_equip(int client_fd);
 pthread_t treasure_spawner_thread;
@@ -96,6 +97,9 @@ void process_request(int client_fd, cJSON *root){
             break;
         case ACT_FIX_SHIP:
             handle_fix_ship(client_fd, payload);
+            break;
+        case ACT_GET_STATUS:
+            handle_get_status(client_fd, payload);
             break;
         case ACT_ANSWER:
             handle_answer(client_fd, payload);

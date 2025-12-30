@@ -8,6 +8,7 @@
 #include <pthread.h>
 
 #include "main_menu.h"
+#include "menu_shop.h"
 #include "../Common/protocol.h"
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"
@@ -139,6 +140,9 @@ void do_attack() {
                 mvprintw(18,5,  "Amor slot 2    : %d", armor_slot_2);
                 mvhline(19, 5, ACS_HLINE, 40);
             }
+
+            // Đồng bộ trạng thái trang bị sau khi tấn công thành công
+            fetch_and_update_status();
         } else {
             // LỖI (Hết đạn, sai mục tiêu...)
             display_response_message(9, 5, 1, status ? status->valueint : 0, msg ? msg->valuestring : "Failed");
@@ -207,13 +211,17 @@ void menu_combat() {
         "1. Send Challenge",
         "2. Accept Challenge",
         "3. Attack Opponent",
-        "4. Back"
+        "4. Buy Items",
+        "5. Back"
     };
-    int n_opts = 4;
+    int n_opts = 5;
 
     while (1) {
-        int choice = draw_menu("COMBAT ZONE", options, n_opts);
-        if (choice == -1 || choice == 3)
+        char title[128];
+        snprintf(title, sizeof(title), "COMBAT ZONE | HP: %d | Coins: %d", current_hp, current_coins);
+
+        int choice = draw_menu(title, options, n_opts);
+        if (choice == -1 || choice == 4)
             break;
 
         switch (choice) {
@@ -226,6 +234,9 @@ void menu_combat() {
             case 2:
                 do_attack();
                 break; // Từ client.c
+            case 3:
+                menu_shop();
+                break;
         }
     }
 }

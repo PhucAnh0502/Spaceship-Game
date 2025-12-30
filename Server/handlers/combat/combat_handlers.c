@@ -381,6 +381,53 @@ void handle_attack(int client_fd, cJSON *payload) {
 }
 
 //---------------------------------------------------------
+// 4. GET STATUS (ACT_GET_STATUS)
+//---------------------------------------------------------
+
+void handle_get_status(int client_fd, cJSON *payload) {
+    (void)payload; // unused
+
+    Player *p = get_player_by_fd(client_fd);
+    if (!p) {
+        send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+        return;
+    }
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddNumberToObject(data, "hp", p->ship.hp);
+    cJSON_AddNumberToObject(data, "coin", p->ship.coin);
+
+    cJSON *armor_arr = cJSON_CreateArray();
+    for (int i = 0; i < 2; i++) {
+        cJSON *ar = cJSON_CreateObject();
+        cJSON_AddNumberToObject(ar, "type", p->ship.armor[i].type);
+        cJSON_AddNumberToObject(ar, "durability", p->ship.armor[i].current_durability);
+        cJSON_AddItemToArray(armor_arr, ar);
+    }
+    cJSON_AddItemToObject(data, "armor", armor_arr);
+
+    cJSON *cannon_arr = cJSON_CreateArray();
+    for (int i = 0; i < 4; i++) {
+        cJSON *w = cJSON_CreateObject();
+        cJSON_AddNumberToObject(w, "weapon", p->ship.cannons[i].weapon);
+        cJSON_AddNumberToObject(w, "ammo", p->ship.cannons[i].current_ammo);
+        cJSON_AddItemToArray(cannon_arr, w);
+    }
+    cJSON_AddItemToObject(data, "cannons", cannon_arr);
+
+    cJSON *missile_arr = cJSON_CreateArray();
+    for (int i = 0; i < 4; i++) {
+        cJSON *w = cJSON_CreateObject();
+        cJSON_AddNumberToObject(w, "weapon", p->ship.missiles[i].weapon);
+        cJSON_AddNumberToObject(w, "ammo", p->ship.missiles[i].current_ammo);
+        cJSON_AddItemToArray(missile_arr, w);
+    }
+    cJSON_AddItemToObject(data, "missiles", missile_arr);
+
+    send_response(client_fd, RES_SHOP_SUCCESS, "Status", data);
+}
+
+//---------------------------------------------------------
 // 4. END GAME LOGIC (ACT_END_GAME)
 //---------------------------------------------------------
 
