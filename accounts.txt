@@ -5,6 +5,4 @@
 5 abcde 123
 6 test 123
 7 thaoltn 123
-8  
-9 thaoltn1 
 10 thaoltn2 1234
