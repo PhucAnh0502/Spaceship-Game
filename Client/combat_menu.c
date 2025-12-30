@@ -123,7 +123,10 @@ void do_attack() {
                 int dmg = cJSON_GetObjectItem(d, "damage")->valueint;
                 int hp = cJSON_GetObjectItem(d, "target_hp")->valueint;
                 int armor = cJSON_GetObjectItem(d, "target_armor")->valueint;
+                int armor_slot_hit = cJSON_GetObjectItem(d, "armor_slot_hit")->valueint;
                 int ammo = cJSON_GetObjectItem(d, "remaining_ammo")->valueint;
+                int armor_slot_1 = cJSON_GetObjectItem(d, "armor_slot_0")->valueint;
+                int armor_slot_2 = cJSON_GetObjectItem(d, "armor_slot_1")->valueint;
 
                 // Vẽ bảng kết quả mini
                 mvhline(11, 5, ACS_HLINE, 40);
@@ -131,7 +134,10 @@ void do_attack() {
                 mvprintw(13, 5, "Target HP      : %d", hp);
                 mvprintw(14, 5, "Target Armor   : %d", armor);
                 mvprintw(15, 5, "Ammo Remaining : %d", ammo);
-                mvhline(16, 5, ACS_HLINE, 40);
+                mvprintw(16,5,  "Amor slot hit  : %d", armor_slot_hit+1);
+                mvprintw(17,5,  "Amor slot 1    : %d", armor_slot_1);
+                mvprintw(18,5,  "Amor slot 2    : %d", armor_slot_2);
+                mvhline(19, 5, ACS_HLINE, 40);
             }
         } else {
             // LỖI (Hết đạn, sai mục tiêu...)
@@ -143,7 +149,7 @@ void do_attack() {
     }
 
     attron(A_DIM);
-    mvprintw(18, 5, "Press any key to continue...");
+    mvprintw(20, 5, "Press any key to continue...");
     attroff(A_DIM);
     getch();
 }
