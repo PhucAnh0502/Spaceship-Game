@@ -20,6 +20,7 @@ int sock = 0;
 int current_user_id = 0;
 int current_coins = 0;
 int current_hp = 1000;
+char current_username[50] = "";
 
 char client_buffer[BUFFER_SIZE];
 int client_buf_len = 0;
@@ -322,6 +323,8 @@ void do_login()
                 if (res_data)
                 {
                     current_user_id = cJSON_GetObjectItem(res_data, "id")->valueint;
+
+                    strcpy(current_username, username);
 
                     cJSON *hp = cJSON_GetObjectItem(res_data, "hp");
                     cJSON *coin = cJSON_GetObjectItem(res_data, "coin");

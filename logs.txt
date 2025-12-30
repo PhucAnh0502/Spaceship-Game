@@ -398,3 +398,319 @@
 [2025-12-29 17:12:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 2 players
 [2025-12-29 17:12:14] [SUCCESS] Action: LOGOUT | Input: thaoltn2 | Result: Logged out successfully
 [2025-12-29 17:12:16] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-30 08:08:07] [ERROR] Action: LOGIN | Input: #include "../../services/storage/storage.h" | Result: Account does not exist
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input: #include <string.h> | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input: extern void log_action(const char *status, const  | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     for (int i = 0; i < player_count; i++) { | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     } | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:  | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     cJSON *arr = cJSON_CreateArray(); | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         if (teams[i].current_size > 0) { | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:             cJSON_AddStringToObject(obj, "name",  | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:                 "slots", | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:             cJSON_AddItemToArray(arr, obj); | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, 201, "List empty | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input: } | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     Player *player = get_player_by_fd(client_fd); | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         return; | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     if (!name_node) { | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     if (!team) { | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         if (!p) continue; | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         cJSON_AddNumberToObject(obj, "id", p->id) | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input: } | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input: void handle_create_team(int client_fd, cJSON *pay | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, RES_NOT_LOGGED_I | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:                       "Already in a team", NULL); | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, RES_UNKNOWN_ACTI | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         send_response(client_fd, RES_UNKNOWN_ACTI | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         send_response(client_fd, RES_UNKNOWN_ACTI | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     player->status = STATUS_IN_TEAM; | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     cJSON_AddNumberToObject(data, "team_id", team | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:                   "Create team successfully", dat | Result: Account created successfully
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input: void handle_req_join(int client_fd, cJSON *payloa | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         send_response(client_fd, RES_NOT_LOGGED_I | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:                       "Already in a team", NULL); | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, 611, "Missing or | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     if (!team) { | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         return; | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, 611, "Captain ca | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:                       "Team is full", NULL); | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         return; | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input: } | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     if (!captain) { | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:07] [SUCCESS] Action: REGISTER | Input:     if (!team || team->captain_id != captain->id) | Result: Account created successfully
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:         return; | Result: Account already exists
+[2025-12-30 08:08:07] [ERROR] Action: REGISTER | Input:     if (!name_node) { | Result: Account already exists
+[2025-12-30 08:08:08] [ERROR] Action: REGISTER | Input:         return; | Result: Account already exists
+[2025-12-30 08:08:08] [ERROR] Action: REGISTER | Input:         send_response(client_fd, RES_UNKNOWN_ACTI | Result: Account already exists
+[2025-12-30 08:08:08] [ERROR] Action: REGISTER | Input:     } | Result: Account already exists
+[2025-12-30 08:08:08] [SUCCESS] Action: REGISTER | Input:     if (!target) { | Result: Account created successfully
+[2025-12-30 08:08:08] [ERROR] Action: REGISTER | Input:         return; | Result: Account already exists
+[2025-12-30 08:08:08] [ERROR] Action: REGISTER | Input:  | Result: Account already exists
+[2025-12-30 08:08:08] [SUCCESS] Action: REGISTER | Input:         send_response(client_fd, RES_TEAM_SUCCESS | Result: Account created successfully
+[2025-12-30 08:10:41] [ERROR] Action: LOGIN | Input: test 123 | Result: Account does not exist
+[2025-12-30 08:10:48] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-30 08:11:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 08:11:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 08:12:23] [SUCCESS] Action: LOGOUT | Input: test | Result: Logged out successfully
+[2025-12-30 08:13:14] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-30 08:13:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 08:14:05] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
+[2025-12-30 08:14:47] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-30 08:15:06] [SUCCESS] Action: LOGIN | Input: thaoltn | Result: Logged in successfully
+[2025-12-30 08:15:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:16:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:16:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:17:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:18:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 8 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:19:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 9 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:20:02] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 10 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:21:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 11 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:22:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 12 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:22:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 13 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:23:19] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 14 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:24:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 15 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:24:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 16 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:25:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 17 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:26:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 18 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:27:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 19 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:28:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 20 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:29:09] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 21 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:30:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 22 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:30:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 23 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:31:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 24 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:32:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 25 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:33:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 26 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:34:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 27 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:34:53] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 28 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:35:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 29 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:36:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 30 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:37:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 31 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:38:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 32 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:39:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 33 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:40:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 34 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:40:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 35 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:41:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 36 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:42:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 37 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:42:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 38 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:43:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 39 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:44:19] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 40 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:45:02] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 41 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:45:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 42 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:46:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 43 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:47:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 44 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:48:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 45 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:48:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 46 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:49:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 47 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:50:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 48 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:51:30] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 49 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:52:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 50 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:53:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 51 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:53:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 52 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:54:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 53 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:55:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 54 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:56:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 55 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:57:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 56 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:58:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 57 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:58:41] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 58 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 08:59:27] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 59 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:00:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 60 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:01:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 61 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:02:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 62 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:03:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 63 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:04:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 64 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:04:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 65 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:05:19] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 66 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:06:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 67 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:06:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 68 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:07:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 69 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:08:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 70 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:09:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 71 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:09:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 72 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:10:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 73 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:11:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 74 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:12:16] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 75 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:12:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 76 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:13:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 77 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:14:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 78 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:15:02] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 79 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:15:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 80 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:16:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 81 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:17:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 82 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:18:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 83 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:19:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 84 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:20:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 85 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:21:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 86 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:22:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 87 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:22:30] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 88 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:23:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 89 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:24:20] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 90 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:24:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 91 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:25:34] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 92 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:26:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 93 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:26:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 94 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:27:42] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 95 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:28:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 96 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:29:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 97 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:29:53] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 98 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:30:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 99 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:31:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 100 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:32:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 101 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:33:08] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 102 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:33:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 103 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:34:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 104 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:35:17] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 105 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:35:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 106 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:36:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 107 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:36:53] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 108 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:37:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 109 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:38:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 110 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:38:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 111 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:39:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 112 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:40:33] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 113 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:41:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 114 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:42:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 115 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:42:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 116 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:43:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 117 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:44:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 118 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:44:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 119 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:45:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 120 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:45:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 121 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:46:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 122 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:47:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 123 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:48:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 124 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:49:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 125 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:49:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 126 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:50:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 127 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:51:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 128 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:51:47] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 129 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:52:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 130 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:53:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 131 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:53:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 132 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:54:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 133 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:55:30] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 134 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:56:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 135 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:57:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 136 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:58:02] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 137 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:58:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 138 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:59:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 139 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:00:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 140 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:01:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 141 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:02:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 142 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:02:57] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 143 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:03:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 144 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:04:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 145 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:04:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 146 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:05:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 147 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:06:52] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 148 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:07:33] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 149 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:08:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 150 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:09:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 151 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:09:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 152 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:10:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 153 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:11:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 154 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:12:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 155 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:12:34] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 156 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:13:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 157 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:13:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 158 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:14:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 159 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:15:12] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 160 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:16:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 161 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:16:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 162 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:17:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 163 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:18:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 164 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:19:09] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 165 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:19:46] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 166 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:20:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 167 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:21:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 168 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:22:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 169 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:22:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 170 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:23:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 171 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:24:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 172 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:25:20] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 173 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:25:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 174 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:26:31] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 175 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:27:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 176 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:27:47] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 177 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:28:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 178 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:28:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 179 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:29:57] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 180 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:30:27] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 181 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:31:16] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 182 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:32:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 183 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:32:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 184 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:33:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 185 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:34:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 186 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:35:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 187 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:36:17] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 188 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:36:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 189 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:37:31] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 190 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:38:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 191 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:39:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 192 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:40:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 193 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:40:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 194 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:41:27] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 195 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:42:08] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 196 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:43:08] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 197 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:43:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 198 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:44:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 199 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:45:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 200 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:46:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 201 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:46:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 202 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:47:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 203 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:48:33] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 204 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:49:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 205 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:50:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 206 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:50:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 207 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:51:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 208 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:52:19] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 209 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:53:16] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 210 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:53:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 211 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:54:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 212 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:55:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 213 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:56:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 214 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:57:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 215 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:57:57] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 216 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 10:58:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 217 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:59:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 218 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:00:27] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 219 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 11:01:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 220 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:02:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 221 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:02:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 222 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:03:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 223 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 11:04:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 224 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:04:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 225 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:05:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 226 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:06:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 227 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 11:07:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 228 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:08:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 229 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 11:08:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 230 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:09:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 231 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:10:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 232 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 11:10:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 233 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:11:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 234 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:11:58] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 235 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:12:47] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 236 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 11:13:20] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 237 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 11:13:43] [SUCCESS] Action: LOGOUT | Input: test | Result: Logged out successfully
+[2025-12-30 11:13:46] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
