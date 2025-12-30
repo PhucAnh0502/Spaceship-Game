@@ -245,7 +245,8 @@ void print_dashboard_menu(int highlight) {
             mvprintw(5 + i, 10, "   %s", options[i]);
         }
     }
-
-    // mvprintw(5 + n_choices + 2, 10, "Use UP/DOWN to move, ENTER to select.");
+    attron(A_BOLD | COLOR_PAIR(1)); // Màu
+    mvprintw(height - 3, 10, "Use UP/DOWN to move, ENTER to select.");
+    attron(A_BOLD | COLOR_PAIR(1)); // Màu
     refresh(); // Quan trọng: Đẩy thay đổi lên màn hình
 }

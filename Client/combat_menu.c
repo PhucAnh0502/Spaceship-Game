@@ -12,6 +12,7 @@
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"
 #include "../Server/handlers/shop/client_state.h"
+#include "services/storage/storage.h"
 
 
 // Hàm chấp nhận thách đấu
@@ -73,27 +74,40 @@ void do_attack() {
     mvprintw(2, 5, "=== ATTACK CONTROL ===");
     attroff(A_BOLD | COLOR_PAIR(1));
 
-    char buffer[50];
+    char username[50];
+    char weapon_type[5];
+    char weapon_slot[5];
     int target_uid, wp_type, wp_slot;
 
     // --- FORM NHẬP LIỆU ---
-    // 1. Nhập ID mục tiêu
-    get_input(4, 5, "Target User ID: ", buffer, 50, 0);
-    target_uid = atoi(buffer);
+    // 1. input target username
+    get_input(4, 5, "Target Username: ", username, 50, 0);
+    //buffer will store username,
+    Player *p = find_player_by_username(username);
+
+    if (!p) {
+        clear();
+        mvprintw(4, 5, "No such player!");
+        echo();
+        return;
+    }
+
+    target_uid = p->id;
 
     // 2. Chọn loại vũ khí
-    mvprintw(6, 5, "Weapon Type (1:Cannon, 2:Laser, 3:Missile): ");
+    //mvprintw(6, 5, "Weapon Type (1:Cannon, 2:Laser, 3:Missile): ");
     echo();
-    getnstr(buffer, 49);
+    get_input(6,5,"Weapon Type (1:Cannon, 2:Laser, 3:Missile): ",weapon_type,5,0);
     noecho();
-    wp_type = atoi(buffer);
+    wp_type = atoi(weapon_type);
 
     // 3. Chọn Slot (0-3)
-    mvprintw(7, 5, "Slot (0-3): ");
+    //mvprintw(7, 5, "Slot (0-3): ");
     echo();
-    getnstr(buffer, 49);
+    get_input(7,5,"Slot (0-3): ",weapon_slot,5,0);
+    // getnstr(weapon_slot, 49);
     noecho();
-    wp_slot = atoi(buffer);
+    wp_slot = atoi(weapon_slot);
 
     // Validate cơ bản
     if (wp_slot < 0 || wp_slot > 3) {
