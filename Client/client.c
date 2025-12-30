@@ -1013,10 +1013,11 @@ int main()
         {
             // --- GUEST MENU ---
             const char *options[] = {"1. Register", "2. Login", "3. Exit"};
+            // draw_menu đang set timeout(-1) khi return
             int choice = draw_menu("WELCOME GUEST", options, 3);
 
             if (choice == 2 || choice == -1)
-                break; // Exit
+                break; 
             switch (choice)
             {
             case 0:
@@ -1024,11 +1025,14 @@ int main()
                 break;
             case 1:
                 do_login();
+                // [FIX 2] Reset highlight để menu không bị lệch dòng khi mới vào
+                dashboard_highlight = 0; 
                 break;
             }
         }
         else
         {
+            timeout(100);
             if (end_game_flag)
             {
                 show_game_result_screen();
@@ -1629,23 +1633,26 @@ void *background_listener(void *arg)
 
         cJSON *status = cJSON_GetObjectItem(response, "status");
         cJSON *data = cJSON_GetObjectItem(response, "data");
+
         cJSON *action = cJSON_GetObjectItem(response, "action"); // Nên check thêm action
 
         int code = status ? status->valueint : 0;
         int act_code = action ? action->valueint : 0;
 
         // --- PHÂN LOẠI GÓI TIN ---
-
+        cJSON *ques_node = (data) ? cJSON_GetObjectItem(data, "question") : NULL;
+        int is_treasure_broadcast = (code == RES_TREASURE_SUCCESS && ques_node != NULL);
         // A. GÓI TIN MÀ MAIN THREAD ĐANG CHỜ (LOGIN, MUA ĐỒ, TẤN CÔNG...)
         // Kiểm tra xem Main Thread có đang đợi không (biến waiting_for_result)
         // VÀ gói tin này KHÔNG PHẢI là thông báo bất đồng bộ (như kho báu/end game)
         int is_sync_msg = 0;
 
         pthread_mutex_lock(&sync_mutex); // Dùng mutex riêng cho việc đồng bộ
+
         if (waiting_for_result &&
+            !is_treasure_broadcast &&
             act_code != ACT_TREASURE_APPEAR &&
-            code != RES_END_GAME &&
-            code != RES_TREASURE_SUCCESS)
+            code != RES_END_GAME)
         {
             // Đây là câu trả lời Main Thread đang cần
             if (sync_response)
@@ -1654,7 +1661,9 @@ void *background_listener(void *arg)
 
             waiting_for_result = 0;          // Tắt cờ chờ
             pthread_cond_signal(&sync_cond); // <--- ĐÁNH THỨC MAIN THREAD NGAY LẬP TỨC
+            pthread_mutex_unlock(&sync_mutex);
             is_sync_msg = 1;
+            continue;
         }
         pthread_mutex_unlock(&sync_mutex);
 
@@ -1781,7 +1790,6 @@ void *background_listener(void *arg)
     return NULL;
 }
 
-
 // Hàm này chịu trách nhiệm cho TOÀN BỘ logic của màn hình Treasure (Vẽ + Xử lý)
 void run_treasure_mode(int key)
 {
@@ -1820,16 +1828,20 @@ void run_treasure_mode(int key)
 
     // --- PHẦN 2: XỬ LÝ LOGIC (Update) ---
     // Nếu không có phím bấm (ERR) thì chỉ vẽ thôi, không làm gì cả
-    if (key == ERR){
+    if (key == ERR)
+    {
         return;
     }
-    printf("Key: %d\n",key);
+    printf("Key: %d\n", key);
     if (key >= '0' && key <= '3')
     {
         int ans = key - '0';
         if (ans < pending_treasure.option_count)
         {
-            // Gọi hàm gửi đáp án lên server
+            pthread_mutex_lock(&treasure_mutex);
+            current_treasure_id = pending_treasure.treasure_id;
+            pthread_mutex_unlock(&treasure_mutex);
+
             handle_treasure_answer(ans);
 
             // Xử lý xong -> Tắt popup & Xóa cờ pending
@@ -1837,7 +1849,7 @@ void run_treasure_mode(int key)
             pending_treasure.has_pending = 0;
             pthread_mutex_unlock(&pending_mutex);
 
-            clear(); // Xóa màn hình để chuẩn bị vẽ lại menu chính sạch sẽ
+            clear(); // Xóa màn hình
         }
     }
     else if (key == 'q' || key == 'Q')
