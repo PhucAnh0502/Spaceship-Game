@@ -103,13 +103,12 @@ void handle_create_team(int client_fd, cJSON *payload) {
                       "Missing team_name", NULL);
         return;
     }
-
+    
     if (!name_node || !cJSON_IsString(name_node) || name_node->valuestring == NULL) {
         send_response(client_fd, RES_UNKNOWN_ACTION,
-                      "Missing or invalid target_username", NULL);
+                    "Missing or invalid team_name", NULL);
         return;
     }
-
     Team *team = create_team(name_node->valuestring, player->id);
     if (!team) {
         send_response(client_fd, RES_UNKNOWN_ACTION,
@@ -143,12 +142,11 @@ void handle_req_join(int client_fd, cJSON *payload) {
     }
 
     cJSON *name_node = cJSON_GetObjectItem(payload, "team_name");
-    if (!name_node || name_node->valuestring == NULL ||
-        strlen(name_node->valuestring) == 0) {
-
+     if (!name_node || !cJSON_IsString(name_node) || strlen(name_node->valuestring) == 0) {
         send_response(client_fd, 611, "Missing or empty team_name", NULL);
         return;
     }
+
 
     Team *team = find_team_by_name(name_node->valuestring);
     if (!team) {
@@ -165,6 +163,11 @@ void handle_req_join(int client_fd, cJSON *payload) {
     if (team->current_size >= MAX_MEMBERS) {
         send_response(client_fd, RES_TEAM_FULL,
                       "Team is full", NULL);
+        return;
+    }
+
+     if (is_pending_request_exists(team, player->id)) {
+        send_response(client_fd, 611, "Already sent request", NULL);
         return;
     }
 
@@ -197,11 +200,13 @@ void handle_approve_req(int client_fd, cJSON *payload, int approve) {
                       "Missing target_username", NULL);
         return;
     }
+
     if (!name_node || !cJSON_IsString(name_node) || name_node->valuestring == NULL) {
         send_response(client_fd, RES_UNKNOWN_ACTION,
                       "Missing or invalid target_username", NULL);
         return;
     }
+
     Player *target = find_player_by_username(name_node->valuestring);
     if (!target) {
         send_response(client_fd, RES_ACCOUNT_NOT_FOUND,

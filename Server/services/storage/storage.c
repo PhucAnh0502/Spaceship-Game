@@ -370,10 +370,14 @@ int is_pending_request_exists(Team *team, int user_id) {
 //-2: da la member
 //-3: captain tu join
 int add_pending_request(Team *team, int user_id) {
+    if (!team) return 0;
     if (team->current_size >= MAX_MEMBERS) return -1;
     if (is_member(team, user_id)) return -2;
     if (team->captain_id == user_id) return -3;
-    if (add_pending_request(team, user_id)) return 0;
+
+    for (int i = 0; i < team->pending_size; i++)
+        if (team->pending_requests[i] == user_id)
+            return 0;
 
     team->pending_requests[team->pending_size] = user_id;
     team->pending_size++;
