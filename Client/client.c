@@ -350,6 +350,10 @@ void do_login()
 
     unlock_ui();
     mvprintw(10, 10, "Press any key to continue...");
+
+    flushinp();
+
+    timeout(-1);
     getch();
 }
 
