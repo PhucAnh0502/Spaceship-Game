@@ -14,7 +14,7 @@
 #include "../Lib/cJSON.h"
 #include "services/storage/storage.h"
 #include "services/utils/utils.h"
-
+#include "handlers/combat/combat_handlers.h"
 typedef struct {
     int fd;
     char buffer[BUFFER_SIZE];
@@ -32,7 +32,11 @@ extern void handle_treasure_appear(int client_fd, cJSON *payload);
 extern void handle_answer(int client_fd, cJSON *payload);
 extern int check_auth(int client_fd);
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+extern void handle_send_challenge(int client_fd, cJSON *payload);
+extern void handle_accept_challenge(int client_fd, cJSON *payload);
+extern void handle_attack(int client_fd, cJSON *payload);
 
+extern void handle_mock_equip(int client_fd, cJSON *payload);
 pthread_t treasure_spawner_thread;
 int server_running = 1;
 extern void handle_team_action(int client_fd, int action, cJSON *payload);
@@ -97,7 +101,7 @@ void process_request(int client_fd, cJSON *root){
             handle_answer(client_fd, payload);
             break;
 
-        // TEAM ACTIONS
+        // // TEAM ACTIONS
         case ACT_LIST_TEAMS:
         case ACT_LIST_MEMBERS:
         case ACT_CREATE_TEAM:
@@ -106,12 +110,52 @@ void process_request(int client_fd, cJSON *root){
         case ACT_REFUSE_REQ:
         case ACT_LEAVE_TEAM:
         case ACT_KICK_MEMBER:
+
+        // case ACT_LIST_TEAMS:
+        //     handle_list_teams(client_fd);
+        //     break;
+        // case ACT_LIST_MEMBERS:
+        //     handle_list_members(client_fd, payload);
+        //     break;
+        // case ACT_CREATE_TEAM:
+        //     handle_create_team(client_fd, payload);
+        //     break;
+        // case ACT_REQ_JOIN:
+        //     handle_req_join(client_fd, payload);
+        //     break;
+        // case ACT_APPROVE_REQ:
+        //     handle_approve_req(client_fd, payload, 1);
+        //     break;
+        // case ACT_REFUSE_REQ:
+        //     handle_approve_req(client_fd, payload, 0);
+        //     break;
+        // case ACT_LEAVE_TEAM:
+        //     handle_leave_team(client_fd);
+        //     break;
+        // case ACT_KICK_MEMBER:
+        //     handle_kick_member(client_fd, payload);
+        //     break;
+        // default:
+        //     send_response(client_fd, RES_UNKNOWN_ACTION,
+        //                   "Unknown team action", NULL);
             handle_team_action(client_fd, action, payload);
             break;
-
-        default:
-            send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
-            break;
+        // COMBAT ACTIONS
+    case ACT_SEND_CHALLANGE:
+        handle_send_challenge(client_fd, payload);
+        break;
+    case ACT_ACCEPT_CHALLANGE:
+        handle_accept_challenge(client_fd, payload);
+        break;
+    case ACT_ATTACK:
+        handle_attack(client_fd, payload);
+        break;
+    case ACT_MOCK_EQUIP:          // [THÊM]
+        handle_mock_equip(client_fd, payload);
+        break;
+    default:
+        send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
+        break;
     }
 
 }
