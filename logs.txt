@@ -1121,3 +1121,13 @@
 [2025-12-30 11:22:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 0 players
 [2025-12-30 11:23:11] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-30 11:23:11] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:34:59] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:35:02] [ERROR] Action: LOGIN | Input: admin | Result: Incorrect password
+[2025-12-30 11:35:06] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:40:45] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:40:48] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:41:13] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 11:41:28] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Vang) auto spawned, broadcast to 0 players
+[2025-12-30 11:41:30] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:41:32] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 11:41:33] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully

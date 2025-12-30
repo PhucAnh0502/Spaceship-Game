@@ -39,17 +39,25 @@ void handle_send_challenge(int client_fd, cJSON *payload) {
     }
 
     // 2. Get target team info
-    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_id"); // Get target team Id from payload
+    int target_team_id = -1;
+    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_name"); // Get target team name from payload
+    if (target_team_node && cJSON_IsString(target_team_node)) {
+        Team* team = find_team_by_name(target_team_node->valuestring);
+        if (!team) {
+            send_response(client_fd, RES_NOT_FOUND, "Target team not found", NULL);
+            return;
+        }
 
-    // TODO: Find opponent in teams array
-    int target_team_id = target_team_node->valueint;
-    Team *opponent_team = find_team_by_id(target_team_id);
-
+        target_team_id = team->team_id;
+    }
     // If team not found
-    if (!target_team_node) {
+    if (target_team_id == -1) {
         send_response(client_fd, RES_NOT_FOUND, "Target team not found", NULL);
         return;
     }
+
+    // TODO: Find opponent in teams array
+    Team *opponent_team = find_team_by_id(target_team_id);
 
     if (target_team_id == challenger_team->team_id) {
         send_response(client_fd, RES_INVALID_TARGET, "Cannot challenge your own team", NULL);

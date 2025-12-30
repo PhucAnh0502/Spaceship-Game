@@ -155,22 +155,19 @@ void do_challenge() {
     attroff(A_BOLD | COLOR_PAIR(2));
 
     char buffer[50];
-    int target_id;
-
     // Nhập ID đội muốn thách đấu
-    get_input(4, 5, "Enter Opponent Team ID: ", buffer, 50, 0);
-    target_id = atoi(buffer);
+    get_input(4, 5, "Enter Opponent Team's Name: ", buffer, 50, 0);
 
-    if (target_id <= 0) {
-        mvprintw(6, 5, ">> Invalid Team ID!");
-        mvprintw(8, 5, "Press any key to return...");
-        getch();
-        return;
-    }
+    // if (target_id <= 0) {
+    //     mvprintw(6, 5, ">> Invalid Team ID!");
+    //     mvprintw(8, 5, "Press any key to return...");
+    //     getch();
+    //     return;
+    // }
 
     // 1. Gửi lệnh
     cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "target_team_id", target_id);
+    cJSON_AddStringToObject(data, "target_team_name", buffer);
     send_json(sock, ACT_SEND_CHALLANGE, data);
 
     // 2. Chờ phản hồi
