@@ -320,30 +320,33 @@ void handle_attack(int client_fd, cJSON *payload) {
     }
 
     int current_armor_val = 0;
-    int real_hp_loss = 0;
 
-    // 2. Calculate health/damage reduction
-    if (armour_idx != -1) // If target has armour
-    {
-        current_armor_val = target->ship.armor[armour_idx].current_durability;
+    int remaining_damage = damage;
 
-        if (current_armor_val >= damage) // Armour take all the damage
-        {
-            target->ship.armor[armour_idx].current_durability -= damage; // armour takes all the damage
+    // 2.1 Loop through armour slots
+    for (int i = 0; i < 2; i++) {
+        if (remaining_damage <= 0) break;
 
-            current_armor_val = target->ship.armor[armour_idx].current_durability; // update
-        } else // Damage overflow, broken armour
-        {
-            real_hp_loss = damage - current_armor_val;
-            target->ship.armor[armour_idx].current_durability = 0; // Armour index into 0
-            target->ship.hp -= real_hp_loss;
-            current_armor_val = 0;
+        //Check if this slot still got valid armour
+        if (target->ship.armor[i].type != ARMOR_NONE &&
+            target->ship.armor[i].current_durability > 0) {
+            if (target->ship.armor[i].current_durability >= damage) { //armour takes all the damage
+                target->ship.armor[i].current_durability -= remaining_damage;
+                remaining_damage = 0;
+                current_armor_val = target->ship.armor[i].current_durability;
+            }else { // armour broken
+                remaining_damage -= target->ship.armor[i].current_durability;
+
+                target->ship.armor[i].current_durability = 0;
+                target->ship.armor[i].type = ARMOR_NONE;
+                current_armor_val = 0;
+            }
         }
-    } else // target do not have armour -> damage into health directly
-    {
-        target->ship.hp -= damage;
     }
 
+    if (remaining_damage > 0) {
+        target->ship.hp -= remaining_damage;
+    }
     // prevent damage overflow
     if (target->ship.hp < 0)
         target->ship.hp = 0;
