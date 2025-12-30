@@ -36,7 +36,7 @@ extern void handle_send_challenge(int client_fd, cJSON *payload);
 extern void handle_accept_challenge(int client_fd, cJSON *payload);
 extern void handle_attack(int client_fd, cJSON *payload);
 
-extern void handle_mock_equip(int client_fd, cJSON *payload);
+extern void handle_mock_equip(int client_fd);
 pthread_t treasure_spawner_thread;
 int server_running = 1;
 extern void handle_team_action(int client_fd, int action, cJSON *payload);
@@ -151,7 +151,7 @@ void process_request(int client_fd, cJSON *root){
         handle_attack(client_fd, payload);
         break;
     case ACT_MOCK_EQUIP:          // [THÊM]
-        handle_mock_equip(client_fd, payload);
+        handle_mock_equip(client_fd);
         break;
     default:
         send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);

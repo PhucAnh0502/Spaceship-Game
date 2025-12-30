@@ -365,8 +365,6 @@ void do_approve_req(int approve) {
     }
 
     mvprintw(12, 5, "Press any key...");
-    Player *p = find_player_by_username(username);
-    current_team_id = p->team_id;
     getch();
 }
 
