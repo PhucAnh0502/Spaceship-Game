@@ -473,7 +473,7 @@ void end_game_for_team(int client_fd, Team *team, cJSON *payload) {
     team->opponent_team_id = 0;
 }
 
-void handle_mock_equip(int client_fd, cJSON *payload) {
+void handle_mock_equip(int client_fd) {
     Player *player = find_player_by_socket(client_fd);
     if (!player) {
         send_response(client_fd, RES_NOT_LOGGED_IN, "Player not found", NULL);
@@ -485,11 +485,11 @@ void handle_mock_equip(int client_fd, cJSON *payload) {
     player->ship.hp = 1000; // Full máu
 
     // 2. Trang bị Vũ khí (Slot 0: Laser, Slot 1: Cannon)
-    // Slot 0: Laser xịn (999 đạn)
+    // Slot 0: Laser (999 đạn)
     player->ship.cannons[0].weapon = WEAPON_LASER;
     player->ship.cannons[0].current_ammo = 999;
 
-    // Slot 1: Cannon thường (999 đạn)
+    // Slot 1: Cannon (999 đạn)
     player->ship.cannons[1].weapon = WEAPON_CANNON_30MM;
     player->ship.cannons[1].current_ammo = 999;
 
@@ -502,6 +502,10 @@ void handle_mock_equip(int client_fd, cJSON *payload) {
     // 4. Trang bị Giáp (Heavy Armor)
     player->ship.armor[0].type = ARMOR_HEAVY;
     player->ship.armor[0].current_durability = AMOR_VAL_HEAVY;
+
+    // 4.1. Trang bị Giáp (Normal Armor)
+    player->ship.armor[1].type = ARMOR_BASIC;
+    player->ship.armor[1].current_durability = AMOR_VAL_BASIC;
 
     // Lưu lại vào file
     update_player_to_file(player);
