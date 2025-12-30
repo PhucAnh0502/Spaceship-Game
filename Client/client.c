@@ -591,10 +591,21 @@ void do_req_join()
     cJSON *res = wait_for_response();
     if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+
+        display_response_message(8, 5,
+                                 (status && status->valueint == RES_TEAM_SUCCESS) ? 2 : 1,
+                                 status ? status->valueint : 0,
+                                 msg ? msg->valuestring : "Unknown response");
+
         cJSON_Delete(res);
     }
+
+    mvprintw(12, 5, "Press any key to continue...");
+    getch();
 }
+
 
 void do_approve_req(int approve)
 {
@@ -612,25 +623,54 @@ void do_approve_req(int approve)
     cJSON *res = wait_for_response();
     if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+
+        display_response_message(8, 5,
+                                 (status && status->valueint == RES_TEAM_SUCCESS) ? 2 : 1,
+                                 status ? status->valueint : 0,
+                                 msg ? msg->valuestring : "Unknown");
+
         cJSON_Delete(res);
     }
+
+    mvprintw(12, 5, "Press any key...");
+    getch();
 }
+
 
 void do_leave_team()
 {
-    clear();
-    send_json(sock, ACT_LEAVE_TEAM, NULL);
+    clear();    // Xóa màn hình ncurses
+
+    cJSON *data = cJSON_CreateObject();
+    send_json(sock, ACT_LEAVE_TEAM, data);
+
     cJSON *res = wait_for_response();
     if (res)
     {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+
+        // Hiển thị message với màu sắc
+        display_response_message(
+            6, 5,
+            (status && status->valueint == RES_TEAM_SUCCESS) ? 2 : 1,
+            status ? status->valueint : 0,
+            msg ? msg->valuestring : "Unknown"
+        );
+
         cJSON_Delete(res);
     }
+
+    mvprintw(10, 5, "Press any key to continue...");
+    getch();    // Đợi người dùng đọc message
 }
+
 
 void do_kick_member()
 {
+    clear();
     char name[50];
     get_input(4, 5, "Username to kick: ", name, 50, 0);
 
@@ -642,11 +682,21 @@ void do_kick_member()
     cJSON *res = wait_for_response();
     if (res)
     {
-        printf(">> %s\n",
-               cJSON_GetObjectItem(res, "message")->valuestring);
+        cJSON *msg = cJSON_GetObjectItem(res, "message");
+        cJSON *status = cJSON_GetObjectItem(res, "status");
+
+        display_response_message(6, 5,
+                                 (status && status->valueint == RES_TEAM_SUCCESS) ? 2 : 1,
+                                 status ? status->valueint : 0,
+                                 msg ? msg->valuestring : "Unknown");
+
         cJSON_Delete(res);
     }
+
+    mvprintw(8, 5, "Press any key to continue...");
+    getch();
 }
+
 
 void print_menu(int highlight)
 {
@@ -733,7 +783,7 @@ int draw_menu(const char *title, const char *options[], int n_opts)
         if (current_user_id != 0)
         {
             // Hiển thị HP với màu sắc cảnh báo nếu máu thấp
-            mvprintw(4, 4, "User: %d | ", current_user_id);
+            mvprintw(4, 4, "User: %s | ", current_username);
 
             if (current_hp < 300)
                 attron(COLOR_PAIR(1)); // Màu đỏ nếu máu < 300
@@ -955,7 +1005,7 @@ void print_dashboard_menu(int highlight)
     // Vẽ Header
     attron(A_BOLD | COLOR_PAIR(2)); // Màu xanh lá
     mvprintw(2, 10, "=== MAIN DASHBOARD ===");
-    mvprintw(3, 10, "User ID: %d | HP: %d | Coins: %d", current_user_id, current_hp, current_coins);
+    mvprintw(3, 10, "User: %s | HP: %d | Coins: %d", current_username, current_hp, current_coins);
     attroff(A_BOLD | COLOR_PAIR(2));
 
     // Vẽ danh sách lựa chọn
