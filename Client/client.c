@@ -59,6 +59,7 @@ void do_treasure_hunt();
 void do_mock_equip();
 void show_game_result_screen();
 void *background_listener(void *arg);
+void run_treasure_mode(int key);
 
 void lock_ui()
 {
@@ -938,6 +939,44 @@ void menu_combat()
     }
 }
 
+void print_dashboard_menu(int highlight)
+{
+    clear();
+    const char *options[] = {
+        "1. Shop System",
+        "2. Team Management",
+        "3. Combat Zone",
+        "4. Treasure Hunt", // Tùy chọn xem lại/trả lời nếu lỡ tắt popup
+        "5. Logout"};
+    int n_choices = 5;
+
+    erase(); // Xóa màn hình cũ
+
+    // Vẽ Header
+    attron(A_BOLD | COLOR_PAIR(2)); // Màu xanh lá
+    mvprintw(2, 10, "=== MAIN DASHBOARD ===");
+    mvprintw(3, 10, "User ID: %d | HP: %d | Coins: %d", current_user_id, current_hp, current_coins);
+    attroff(A_BOLD | COLOR_PAIR(2));
+
+    // Vẽ danh sách lựa chọn
+    for (int i = 0; i < n_choices; i++)
+    {
+        if (highlight == i)
+        {
+            attron(A_REVERSE); // Highlight dòng đang chọn
+            mvprintw(5 + i, 10, "-> %s", options[i]);
+            attroff(A_REVERSE);
+        }
+        else
+        {
+            mvprintw(5 + i, 10, "   %s", options[i]);
+        }
+    }
+
+    // mvprintw(5 + n_choices + 2, 10, "Use UP/DOWN to move, ENTER to select.");
+    refresh(); // Quan trọng: Đẩy thay đổi lên màn hình
+}
+
 int main()
 {
     struct sockaddr_in serv_addr;
@@ -952,7 +991,8 @@ int main()
     connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
-    if (pthread_create(&listener_thread, NULL, background_listener, NULL) != 0) {
+    if (pthread_create(&listener_thread, NULL, background_listener, NULL) != 0)
+    {
         perror("Failed to create listener thread");
         return 1;
     }
@@ -966,18 +1006,21 @@ int main()
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
-
+    timeout(100);
+    int dashboard_highlight = 0;
     // MENU CHÍNH
     while (1)
     {
+
         if (current_user_id == 0)
         {
             // --- GUEST MENU ---
             const char *options[] = {"1. Register", "2. Login", "3. Exit"};
+            // draw_menu đang set timeout(-1) khi return
             int choice = draw_menu("WELCOME GUEST", options, 3);
 
             if (choice == 2 || choice == -1)
-                break; // Exit
+                break; 
             switch (choice)
             {
             case 0:
@@ -985,11 +1028,14 @@ int main()
                 break;
             case 1:
                 do_login();
+                // [FIX 2] Reset highlight để menu không bị lệch dòng khi mới vào
+                dashboard_highlight = 0; 
                 break;
             }
         }
         else
         {
+            timeout(100);
             if (end_game_flag)
             {
                 show_game_result_screen();
@@ -1026,35 +1072,65 @@ int main()
                 continue;
             }
 
-            // --- USER DASHBOARD ---
-            const char *options[] = {
-                "1. Shop System",
-                "2. Team Management",
-                "3. Combat Zone",
-                "4. Treasure Hunt", // [THÊM]
-                "5. Logout"};
-            int choice = draw_menu("MAIN DASHBOARD", options, 5);
+            // 1. Kiểm tra trạng thái
+            int is_treasure_mode = 0;
+            pthread_mutex_lock(&pending_mutex);
+            is_treasure_mode = pending_treasure.has_pending;
+            pthread_mutex_unlock(&pending_mutex);
 
-            switch (choice)
+            // 2. Đọc phím bấm (Input) - Chỉ gọi 1 lần duy nhất ở đây
+            int c = getch();
+
+            // 3. Điều phối xử lý (Update & Draw)
+            if (is_treasure_mode)
             {
-            case 0:
-                menu_shop();
-                break;
-            case 1:
-                menu_team();
-                break;
-            case 2:
-                menu_combat();
-                break;
-            case 3:
-                do_treasure_hunt();
-                break; // [GỌI HÀM]
-            case 4:
-                do_logout();
-                break;
-            case -1:
-                do_logout();
-                break;
+                // Chuyển phím bấm và quyền kiểm soát cho màn hình Treasure
+                run_treasure_mode(c);
+            }
+            else
+            {
+                // --- LOGIC MENU CHÍNH ---
+                // Vẽ menu
+                print_dashboard_menu(dashboard_highlight);
+
+                // Xử lý phím cho menu
+                if (c != ERR)
+                {
+                    switch (c)
+                    {
+                    case KEY_UP:
+                        dashboard_highlight = (dashboard_highlight == 0) ? 4 : dashboard_highlight - 1;
+                        break;
+                    case KEY_DOWN:
+                        dashboard_highlight = (dashboard_highlight == 4) ? 0 : dashboard_highlight + 1;
+                        break;
+                    case 10: // Phím ENTER
+                        timeout(-1);
+
+                        switch (dashboard_highlight)
+                        {
+                        case 0:
+                            menu_shop();
+                            break;
+                        case 1:
+                            menu_team();
+                            break;
+                        case 2:
+                            menu_combat();
+                            break;
+                        case 3:
+                            do_treasure_hunt();
+                            break;
+                        case 4:
+                            do_logout();
+                            break;
+                        }
+
+                        timeout(100);
+                        clear(); // Xóa màn hình menu con
+                        break;
+                    }
+                }
             }
         }
     }
@@ -1560,23 +1636,26 @@ void *background_listener(void *arg)
 
         cJSON *status = cJSON_GetObjectItem(response, "status");
         cJSON *data = cJSON_GetObjectItem(response, "data");
+
         cJSON *action = cJSON_GetObjectItem(response, "action"); // Nên check thêm action
 
         int code = status ? status->valueint : 0;
         int act_code = action ? action->valueint : 0;
 
         // --- PHÂN LOẠI GÓI TIN ---
-
+        cJSON *ques_node = (data) ? cJSON_GetObjectItem(data, "question") : NULL;
+        int is_treasure_broadcast = (code == RES_TREASURE_SUCCESS && ques_node != NULL);
         // A. GÓI TIN MÀ MAIN THREAD ĐANG CHỜ (LOGIN, MUA ĐỒ, TẤN CÔNG...)
         // Kiểm tra xem Main Thread có đang đợi không (biến waiting_for_result)
         // VÀ gói tin này KHÔNG PHẢI là thông báo bất đồng bộ (như kho báu/end game)
         int is_sync_msg = 0;
 
         pthread_mutex_lock(&sync_mutex); // Dùng mutex riêng cho việc đồng bộ
+
         if (waiting_for_result &&
+            !is_treasure_broadcast &&
             act_code != ACT_TREASURE_APPEAR &&
-            code != RES_END_GAME &&
-            code != RES_TREASURE_SUCCESS)
+            code != RES_END_GAME)
         {
             // Đây là câu trả lời Main Thread đang cần
             if (sync_response)
@@ -1585,7 +1664,9 @@ void *background_listener(void *arg)
 
             waiting_for_result = 0;          // Tắt cờ chờ
             pthread_cond_signal(&sync_cond); // <--- ĐÁNH THỨC MAIN THREAD NGAY LẬP TỨC
+            pthread_mutex_unlock(&sync_mutex);
             is_sync_msg = 1;
+            continue;
         }
         pthread_mutex_unlock(&sync_mutex);
 
@@ -1619,6 +1700,46 @@ void *background_listener(void *arg)
             pthread_mutex_unlock(&pending_mutex);
         }
 
+        if (status && status->valueint == RES_TREASURE_SUCCESS)
+        {
+            if (data)
+            {
+                cJSON *treasure_id = cJSON_GetObjectItem(data, "treasure_id");
+                cJSON *question = cJSON_GetObjectItem(data, "question");
+                cJSON *options = cJSON_GetObjectItem(data, "options");
+                cJSON *reward = cJSON_GetObjectItem(data, "reward");
+                cJSON *chest_type = cJSON_GetObjectItem(data, "chest_type");
+
+                if (treasure_id && question && options)
+                {
+                    // LOGIC MỚI: Chỉ lưu dữ liệu vào pending_treasure và bật cờ
+                    pthread_mutex_lock(&pending_mutex);
+
+                    pending_treasure.has_pending = 1; // Bật cờ để Main Loop biết
+                    pending_treasure.treasure_id = treasure_id->valueint;
+                    strncpy(pending_treasure.question, question->valuestring, 255);
+
+                    if (chest_type)
+                        strncpy(pending_treasure.chest_type, chest_type->valuestring, 49);
+                    if (reward)
+                        pending_treasure.reward = reward->valueint;
+
+                    int idx = 0;
+                    cJSON *option = NULL;
+                    cJSON_ArrayForEach(option, options)
+                    {
+                        if (idx < 4)
+                        {
+                            strncpy(pending_treasure.options[idx], option->valuestring, 99);
+                            idx++;
+                        }
+                    }
+                    pending_treasure.option_count = idx;
+
+                    pthread_mutex_unlock(&pending_mutex);
+                }
+            }
+        }
         // 2. Kho báu xuất hiện
         else if (code == RES_TREASURE_SUCCESS && cJSON_GetObjectItem(data, "question"))
         {
@@ -1627,6 +1748,7 @@ void *background_listener(void *arg)
 
             cJSON *t_id = cJSON_GetObjectItem(data, "treasure_id");
             cJSON *ques = cJSON_GetObjectItem(data, "question");
+
             // ... (Code parse kho báu của bạn giữ nguyên) ...
             if (t_id)
                 pending_treasure.treasure_id = t_id->valueint;
@@ -1667,7 +1789,78 @@ void *background_listener(void *arg)
         }
 
         cJSON_Delete(response);
-        // KHÔNG CÓ usleep() Ở ĐÂY
     }
     return NULL;
+}
+
+// Hàm này chịu trách nhiệm cho TOÀN BỘ logic của màn hình Treasure (Vẽ + Xử lý)
+void run_treasure_mode(int key)
+{
+    // --- PHẦN 1: VẼ GIAO DIỆN (Draw) ---
+    erase();
+    refresh(); // Làm sạch nền
+
+    int height = 15;
+    int width = 60;
+
+    // Tạo window popup
+    WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
+    if (win == NULL)
+        return;
+
+    box(win, 0, 0); // Vẽ khung
+
+    // Vẽ nội dung
+    wattron(win, A_BOLD | COLOR_PAIR(1));
+    mvwprintw(win, 1, (width - 23) / 2, "!!! KHO BAU XUAT HIEN !!!");
+    wattroff(win, A_BOLD | COLOR_PAIR(1));
+
+    mvwprintw(win, 3, 2, "Loai: %s", pending_treasure.chest_type);
+    mvwprintw(win, 3, 30, "Thuong: %d coins", pending_treasure.reward);
+    mvwprintw(win, 5, 2, "Cau hoi: %.45s...", pending_treasure.question);
+
+    for (int i = 0; i < pending_treasure.option_count; i++)
+    {
+        mvwprintw(win, 7 + i, 4, "[%d] %s", i, pending_treasure.options[i]);
+    }
+
+    mvwprintw(win, height - 2, 2, "Nhan 0-3 de chon, Q de bo qua.");
+
+    wrefresh(win); // Đẩy nội dung lên màn hình
+    delwin(win);   // Xóa cấu trúc window (chỉ xóa trong bộ nhớ)
+
+    // --- PHẦN 2: XỬ LÝ LOGIC (Update) ---
+    // Nếu không có phím bấm (ERR) thì chỉ vẽ thôi, không làm gì cả
+    if (key == ERR)
+    {
+        return;
+    }
+    printf("Key: %d\n", key);
+    if (key >= '0' && key <= '3')
+    {
+        int ans = key - '0';
+        if (ans < pending_treasure.option_count)
+        {
+            pthread_mutex_lock(&treasure_mutex);
+            current_treasure_id = pending_treasure.treasure_id;
+            pthread_mutex_unlock(&treasure_mutex);
+
+            handle_treasure_answer(ans);
+
+            // Xử lý xong -> Tắt popup & Xóa cờ pending
+            pthread_mutex_lock(&pending_mutex);
+            pending_treasure.has_pending = 0;
+            pthread_mutex_unlock(&pending_mutex);
+
+            clear(); // Xóa màn hình
+        }
+    }
+    else if (key == 'q' || key == 'Q')
+    {
+        // Bỏ qua rương
+        pthread_mutex_lock(&pending_mutex);
+        pending_treasure.has_pending = 0;
+        pthread_mutex_unlock(&pending_mutex);
+        clear();
+    }
 }
