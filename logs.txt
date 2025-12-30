@@ -560,3 +560,4 @@
 [2025-12-30 04:48:26] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Dong, nhan 100 coins
 [2025-12-30 04:48:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 2 players
 [2025-12-30 04:49:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 04:50:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Bac) auto spawned, broadcast to 2 players
