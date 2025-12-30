@@ -345,3 +345,42 @@
 [2025-12-29 00:53:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 11 (Dong) auto spawned, broadcast to 1 players
 [2025-12-29 00:53:27] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-29 00:53:28] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-29 23:34:25] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-29 23:34:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 1 players
+[2025-12-29 23:35:13] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 00:04:01] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:04:48] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:05:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 00:06:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:07:00] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 00:07:41] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:08:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:08:44] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 00:09:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 00:09:49] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 00:09:54] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:10:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 00:10:26] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 00:10:49] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:10:55] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 00:10:56] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 00:15:54] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:16:31] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:17:03] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 00:17:18] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:17:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:17:53] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 00:18:02] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:18:35] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 00:18:44] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:22:13] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:22:24] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:23:37] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:23:41] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:26:31] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:26:38] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:26:44] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 00:26:48] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:31:27] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 00:31:31] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 00:32:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 2 players
