@@ -930,3 +930,140 @@
 [2025-12-30 12:08:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 22 (Dong) auto spawned, broadcast to 2 players
 [2025-12-30 12:09:08] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-30 12:09:10] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 08:35:22] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 08:35:33] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 08:35:54] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 08:35:59] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-30 08:36:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:36:10] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-30 08:36:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 08:37:01] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-30 08:37:16] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 08:37:17] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 08:37:18] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 08:37:19] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 08:48:26] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 08:48:30] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 08:48:33] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 08:48:38] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-30 08:48:51] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 08:48:55] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 08:49:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 08:49:20] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-30 08:50:02] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 08:50:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 08:50:04] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 08:50:06] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-30 08:50:11] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 08:50:12] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 09:03:01] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 09:03:05] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 09:03:08] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 09:03:11] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-30 09:03:34] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:03:38] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-30 09:04:20] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:04:45] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 09:04:46] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 09:04:48] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 09:04:48] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 09:07:46] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 09:07:50] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 09:08:08] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 09:08:33] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:08:51] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 09:08:53] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 09:08:53] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 09:12:49] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 09:12:52] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 09:12:56] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 09:13:05] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 09:13:32] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 09:13:34] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 09:13:38] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 09:14:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 09:15:08] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 09:15:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 09:16:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 09:17:16] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 09:17:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 09:18:27] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 09:18:32] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 09:18:49] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 09:18:57] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 09:19:06] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 09:19:12] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:20:12] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:20:15] [SUCCESS] Action: ANSWER | Input: pa | Result: Mo ruong Bac, nhan 500 coins
+[2025-12-30 09:20:26] [SUCCESS] Action: BUY_AMMO | Input: admin | Result: Mua 1 hop dan, con 99900 coins
+[2025-12-30 09:20:29] [SUCCESS] Action: BUY_LASER | Input: admin | Result: Mua phao laser
+[2025-12-30 09:20:31] [SUCCESS] Action: BUY_LASER | Input: admin | Result: Mua phao laser
+[2025-12-30 09:20:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:21:01] [ERROR] Action: ANSWER | Input: pa | Result: Tra loi sai treasure 3
+[2025-12-30 09:21:10] [SUCCESS] Action: ANSWER | Input: admin | Result: Mo ruong Dong, nhan 100 coins
+[2025-12-30 09:21:41] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:22:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:23:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:23:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:24:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 8 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:25:10] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 9 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:25:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 10 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:26:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 11 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:26:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 12 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:27:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 13 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:28:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 14 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:28:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 15 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:29:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 16 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:30:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 17 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:30:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 18 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:31:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 19 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:31:56] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 20 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:32:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 21 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:33:26] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 22 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:34:14] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 23 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:35:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 24 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:35:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 25 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:36:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 26 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:36:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 27 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:37:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 28 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:38:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 29 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:38:39] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 30 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:39:30] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 31 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:40:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 32 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:41:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 33 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:41:42] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 34 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:42:32] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 35 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:43:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 36 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:44:21] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 37 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:45:04] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 38 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:45:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 39 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:46:23] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 40 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:47:11] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 41 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:47:48] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 42 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:48:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 43 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:49:20] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 44 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:50:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 45 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:50:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 46 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:51:16] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 47 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:51:58] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 48 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:52:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 49 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:53:42] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 50 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:54:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 51 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:55:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 52 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:56:18] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 53 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:56:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 54 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:57:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 55 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 09:58:09] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 56 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 09:58:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 57 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 09:59:33] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 58 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:00:31] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 59 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:01:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 60 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:02:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 61 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:02:46] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 62 (Bac) auto spawned, broadcast to 2 players
+[2025-12-30 10:03:43] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 63 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:04:13] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 64 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 10:04:59] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 10:05:05] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 10:05:07] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 65 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 10:05:09] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 10:05:10] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found

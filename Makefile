@@ -11,7 +11,7 @@ CJSON = Lib/cJSON.c
 SERVER_HANDLERS = $(shell find Server/handlers -name "*.c" ! -name "client_*.c")
 SERVER_SRC = Server/server.c Server/services/storage/storage.c Server/services/utils/utils.c $(SERVER_HANDLERS)
 
-CLIENT_SRC = $(shell find Client -name "*.c")
+CLIENT_SRC = $(shell find Client -name "*.c") Server/services/storage/storage.c
 
 .PHONY: all clean
 
