@@ -1,8 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g -I Common -I Lib -I Server -I Client
-LDFLAGS = -lm -lpthread
 
-LDFLAGS_COMMON = -lm
+LDFLAGS_COMMON = -lm -lpthread
 
 LDFLAGS_CLIENT = -lncurses
 

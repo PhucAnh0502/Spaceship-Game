@@ -79,6 +79,20 @@ TreasureChest* find_treasure(int treasure_id) {
     return NULL;
 }
 
+int can_receive_treasure(Player *player) {
+    if (!player || !player->is_online) {
+        return 0;
+    }
+    
+    // CHỈ gửi treasure cho người đang TRONG TRẬN ĐẤU
+    // Nếu muốn gửi cho cả người có đội, thêm: || player->status == STATUS_IN_TEAM
+    if (player->status == STATUS_IN_BATTLE) {
+        return 1;
+    }
+    
+    return 0;
+}
+
 // Thả rương
 void handle_treasure_appear(int client_fd, cJSON *payload) {
     // Random loại rương (50% Bronze, 35% Silver, 15% Gold)
@@ -140,7 +154,7 @@ void handle_treasure_appear(int client_fd, cJSON *payload) {
     
     int broadcast_count = 0;
     for (int i = 0; i < player_count; i++) {
-        if (players[i].is_online) {
+        if (can_receive_treasure(&players[i])) {
             send_response(players[i].socket_fd, RES_TREASURE_SUCCESS, 
                          "Ruong kho bau xuat hien!", cJSON_Duplicate(data, 1));
             broadcast_count++;
@@ -164,6 +178,11 @@ void handle_answer(int client_fd, cJSON *payload) {
     Player *player = find_player_by_socket(client_fd);
     if (!player) {
         send_response(client_fd, RES_NOT_LOGGED_IN, "Chua dang nhap", NULL);
+        return;
+    }
+    
+    if (player->status != STATUS_IN_BATTLE) {
+        send_response(client_fd, RES_TREASURE_SUCCESS, "Ban phai dang trong tran dau!", NULL);
         return;
     }
     
@@ -234,7 +253,7 @@ void handle_answer(int client_fd, cJSON *payload) {
     extern int player_count;
     
     for (int i = 0; i < player_count; i++) {
-        if (players[i].is_online && players[i].socket_fd != client_fd) {
+        if (can_receive_treasure(&players[i]) && players[i].socket_fd != client_fd) {
             cJSON *notif = cJSON_CreateObject();
             cJSON_AddNumberToObject(notif, "treasure_id", treasure_id);
             cJSON_AddStringToObject(notif, "opened_by", player->username);
