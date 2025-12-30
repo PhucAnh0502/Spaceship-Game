@@ -154,7 +154,7 @@ void handle_treasure_answer(int answer) {
     pthread_mutex_lock(&treasure_mutex);
     int treasure_id = current_treasure_id;
     pthread_mutex_unlock(&treasure_mutex);
-    
+    printf("Answer: %d\n", answer);
     if (treasure_id <= 0) {
         printf("Khong co ruong nao dang cho tra loi!\n");
         return;
