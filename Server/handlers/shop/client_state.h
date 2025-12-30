@@ -61,15 +61,4 @@ void show_player_status(void);
 // Helper để xác nhận mua hàng
 int confirm_purchase(const char* item_name, int cost);
 
-extern cJSON *treasure_response_data; 
-extern volatile int waiting_for_result;
-
-extern volatile int end_game_flag;
-extern volatile int last_match_result;
-extern char last_winner_name[50];
-
-// Các biến trạng thái người chơi
-extern int current_hp;
-extern int current_coins;
-
 #endif // CLIENT_STATE_H

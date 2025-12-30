@@ -268,17 +268,12 @@ void handle_attack(int client_fd, cJSON *payload)
     }
 
     // 1. Check attacker status
-    if (attacker->status != STATUS_IN_BATTLE)
+    if (attacker->status != STATUS_IN_BATTLE || attacker->ship.hp <= 0)
     {
-        send_response(client_fd, RES_UNKNOWN_ACTION, "You are not in combat", NULL);
+        send_response(client_fd, RES_UNKNOWN_ACTION, "You are dead or not in combat", NULL);
         return;
     }
 
-    if (attacker->ship.hp <= 0)
-    {
-        send_response(client_fd, RES_UNKNOWN_ACTION, "You are dead", NULL);
-        return;
-    }
     // 2. Check if target is teamate
     if (attacker->team_id == target->team_id)
     {
@@ -317,6 +312,7 @@ void handle_attack(int client_fd, cJSON *payload)
                 damage = DMG_CANNON; // 10
             else if (weapon_type == WEAPON_LASER)
                 damage = DMG_LASER; // 100
+
         }
     }
 
@@ -387,15 +383,6 @@ void handle_attack(int client_fd, cJSON *payload)
     cJSON_AddNumberToObject(res_data, "remaining_ammo", found_slot->current_ammo); // Update reamining ammo for better UX
     send_response(client_fd, RES_BATTLE_SUCCESS, "Attack successfully", res_data);
 
-    // 3.1 Notification target that they have been attacked
-    if (target->is_online && target->socket_fd > 0)
-    {
-        cJSON *victim_data = cJSON_CreateObject();
-        cJSON_AddNumberToObject(victim_data, "current_hp", target->ship.hp); // Update HP
-        cJSON_AddNumberToObject(victim_data, "damage_taken", damage);
-        cJSON_AddStringToObject(victim_data, "attacker_name", attacker->username);
-        send_response(target->socket_fd, RES_BATTLE_SUCCESS, "Warning: You are under attack!", victim_data);
-    }
     // 4. Check end game condition
     // TODO: Implement end game condition
     if (target->ship.hp == 0)
@@ -413,7 +400,6 @@ void check_end_game(int client_fd, int team_id)
     Team *losing_team = find_team_by_id(team_id);
     if (!losing_team)
     {
-        printf("Losing team: %s\n", losing_team->team_name);
         send_response(client_fd, RES_NOT_FOUND, "Team not found", NULL);
         return;
     }
@@ -429,23 +415,14 @@ void check_end_game(int client_fd, int team_id)
         Player *p = find_player_by_id(member_id);
 
         // If player found and HP > 0 -> alive
-        if (p)
+        if (p && p->ship.hp > 0)
         {
-            if (p->ship.hp > 0 && p->is_online)
-            {
-                printf("Player %s is alive\n", p->username);
-                alive_count++;
-            }
-            else if (p->ship.hp <= 0 && p->is_online)
-            {
-                printf("Player %s is dead\n", p->username);
-                cJSON *death_note = cJSON_CreateObject();
-                cJSON_AddStringToObject(death_note, "status", "DEAD");
-                cJSON_AddStringToObject(death_note, "info", "Waiting for teammates...");
-
-                send_response(p->socket_fd, RES_END_GAME, "YOU DIED! Spectating...", death_note);
-                cJSON_Delete(death_note);
-            }
+            alive_count++;
+        }
+        else if (!p)
+        {
+            send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+            continue;
         }
     }
 
@@ -467,18 +444,10 @@ void check_end_game(int client_fd, int team_id)
     // ---------------------------------------------------------
     cJSON *end_game_data = cJSON_CreateObject();
     cJSON_AddNumberToObject(end_game_data, "winner_team_id", winning_team_id);
-    if (winning_team) {
-        cJSON_AddStringToObject(end_game_data, "winner_team_name", winning_team->team_name);
-    }
 
     // Send notification for both team and reset status
     end_game_for_team(client_fd, losing_team, end_game_data);
     end_game_for_team(client_fd, winning_team, end_game_data);
-
-    cJSON_Delete(end_game_data);
-
-    if (losing_team) losing_team->opponent_team_id = 0;
-    if (winning_team) winning_team->opponent_team_id = 0;
 }
 
 void end_game_for_team(int client_fd, Team *team, cJSON *payload)
@@ -506,55 +475,10 @@ void end_game_for_team(int client_fd, Team *team, cJSON *payload)
             member->status = STATUS_IN_TEAM;
             member->ship.hp = 1000;
             // 2. Send result notification
-            send_response(member->socket_fd, RES_END_GAME, "Game Over", payload);
+            send_response(member->socket_fd, RES_BATTLE_SUCCESS, "Game Over", payload);
         }
     }
 
     // Delete opponent team link
     team->opponent_team_id = 0;
-}
-
-void handle_mock_equip(int client_fd, cJSON *payload)
-{
-    Player *player = find_player_by_socket(client_fd);
-    if (!player)
-    {
-        send_response(client_fd, RES_NOT_LOGGED_IN, "Player not found", NULL);
-        return;
-    }
-
-    // 1. Bơm tiền và Máu
-    player->ship.coin += 100000; // Cho 100k coin
-    player->ship.hp = 1000;      // Full máu
-
-    // 2. Trang bị Vũ khí (Slot 0: Laser, Slot 1: Cannon)
-    // Slot 0: Laser xịn (999 đạn)
-    player->ship.cannons[0].weapon = WEAPON_LASER;
-    player->ship.cannons[0].current_ammo = 999;
-
-    // Slot 1: Cannon thường (999 đạn)
-    player->ship.cannons[1].weapon = WEAPON_CANNON_30MM;
-    player->ship.cannons[1].current_ammo = 999;
-
-    // 3. Trang bị Tên lửa (Full 4 slot)
-    for (int i = 0; i < 4; i++)
-    {
-        player->ship.missiles[i].weapon = WEAPON_MISSILE;
-        player->ship.missiles[i].current_ammo = 5; // Max đạn mỗi slot
-    }
-
-    // 4. Trang bị Giáp (Heavy Armor)
-    player->ship.armor[0].type = ARMOR_HEAVY;
-    player->ship.armor[0].current_durability = AMOR_VAL_HEAVY;
-
-    // Lưu lại vào file
-    update_player_to_file(player);
-
-    // Gửi phản hồi kèm data mới nhất để client cập nhật UI
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "coin", player->ship.coin);
-    cJSON_AddNumberToObject(data, "hp", player->ship.hp);
-
-    log_action("SUCCESS", "MOCK_EQUIP", player->username, "Used cheat command");
-    send_response(client_fd, RES_SHOP_SUCCESS, "CHEAT ACTIVATED: Full Gear & Money!", data);
 }
