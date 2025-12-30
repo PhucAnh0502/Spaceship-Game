@@ -215,7 +215,7 @@ void handle_attack(int client_fd, cJSON *payload) {
     }
 
     // Get target and weapong from payload
-    cJSON *target_node = cJSON_GetObjectItem(payload, "target_user_id");
+    cJSON *target_node = cJSON_GetObjectItem(payload, "target_username");
     cJSON *weapon_node = cJSON_GetObjectItem(payload, "weapon_id");
     cJSON *weapon_slot_node = cJSON_GetObjectItem(payload, "weapon_slot");
 
@@ -224,8 +224,12 @@ void handle_attack(int client_fd, cJSON *payload) {
         send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid parameters", NULL);
         return;
     }
-
-    int target_id = target_node->valueint;
+    Player *p = find_player_by_username(target_node->valuestring);
+    if (!p) {
+        send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+        return;
+    }
+    int target_id = p->id;
     int weapon_type = weapon_node->valueint; // 1: Cannon, 2: Laser, 3: Missile
     int weapon_slot = weapon_slot_node->valueint;
 

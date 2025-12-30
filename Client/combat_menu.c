@@ -77,36 +77,19 @@ void do_attack() {
     char username[50];
     char weapon_type[5];
     char weapon_slot[5];
-    int target_uid, wp_type, wp_slot;
+    int  wp_type, wp_slot;
 
     // --- FORM NHẬP LIỆU ---
     // 1. input target username
     get_input(4, 5, "Target Username: ", username, 50, 0);
-    //buffer will store username,
-    Player *p = find_player_by_username(username);
 
-    if (!p) {
-        clear();
-        mvprintw(4, 5, "No such player!");
-        echo();
-        return;
-    }
-
-    target_uid = p->id;
 
     // 2. Chọn loại vũ khí
-    //mvprintw(6, 5, "Weapon Type (1:Cannon, 2:Laser, 3:Missile): ");
-    echo();
-    get_input(6,5,"Weapon Type (1:Cannon, 2:Laser, 3:Missile): ",weapon_type,5,0);
-    noecho();
+    get_input(6, 5, "Weapon Type (1:Cannon, 2:Laser, 3:Missile): ", weapon_type, 5, 0);
     wp_type = atoi(weapon_type);
 
     // 3. Chọn Slot (0-3)
-    //mvprintw(7, 5, "Slot (0-3): ");
-    echo();
-    get_input(7,5,"Slot (0-3): ",weapon_slot,5,0);
-    // getnstr(weapon_slot, 49);
-    noecho();
+    get_input(7, 5, "Slot (0-3): ", weapon_slot, 5, 0);
     wp_slot = atoi(weapon_slot);
 
     // Validate cơ bản
@@ -118,7 +101,7 @@ void do_attack() {
 
     // Gửi lệnh
     cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "target_user_id", target_uid);
+    cJSON_AddStringToObject(data, "target_username", username);
     cJSON_AddNumberToObject(data, "weapon_id", wp_type);
     cJSON_AddNumberToObject(data, "weapon_slot", wp_slot);
     send_json(sock, ACT_ATTACK, data);

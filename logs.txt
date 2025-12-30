@@ -1108,3 +1108,16 @@
 [2025-12-30 11:10:29] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
 [2025-12-30 11:10:43] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
 [2025-12-30 11:10:43] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:14:30] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:14:52] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:15:02] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 11:15:20] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 11:15:37] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 11:15:53] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 11:15:55] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:22:26] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 11:22:28] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 11:22:32] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 11:22:50] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 0 players
+[2025-12-30 11:23:11] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 11:23:11] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
