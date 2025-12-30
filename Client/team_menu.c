@@ -12,8 +12,6 @@
 #include "../Lib/cJSON.h"
 #include "Utils/utils.h"
 #include "../Server/handlers/shop/client_state.h"
-#include "../Server/handlers/shop/client_treasure.c"
-#include "../Server/handlers/shop/client_shop.c"
 #include "services/storage/storage.h"
 
 
