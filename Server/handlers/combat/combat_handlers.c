@@ -328,9 +328,10 @@ void handle_attack(int client_fd, cJSON *payload) {
         if (remaining_damage <= 0) break;
 
         //Check if this slot still got valid armour
-        if (target->ship.armor[i].type != ARMOR_NONE &&
-            target->ship.armor[i].current_durability > 0) {
-            if (target->ship.armor[i].current_durability >= damage) { //armour takes all the damage
+        if (target->ship.armor[i].current_durability > 0) {
+            armour_idx = i;
+
+            if (target->ship.armor[i].current_durability >= remaining_damage) { //armour takes all the damage
                 target->ship.armor[i].current_durability -= remaining_damage;
                 remaining_damage = 0;
                 current_armor_val = target->ship.armor[i].current_durability;
@@ -358,6 +359,8 @@ void handle_attack(int client_fd, cJSON *payload) {
     cJSON_AddNumberToObject(res_data, "target_hp", target->ship.hp);
     cJSON_AddNumberToObject(res_data, "target_armor", current_armor_val); // Update target armour for better UX
     cJSON_AddNumberToObject(res_data, "armor_slot_hit", armour_idx); // Update armour slot that take dmg
+    cJSON_AddNumberToObject(res_data, "armor_slot_0", target->ship.armor[0].current_durability);
+    cJSON_AddNumberToObject(res_data, "armor_slot_1", target->ship.armor[1].current_durability);
     cJSON_AddNumberToObject(res_data, "remaining_ammo", found_slot->current_ammo);
     // Update reamining ammo for better UX
     send_response(client_fd, RES_BATTLE_SUCCESS, "Attack successfully", res_data);

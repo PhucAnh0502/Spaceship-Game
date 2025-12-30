@@ -1163,3 +1163,35 @@
 [2025-12-30 11:58:17] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
 [2025-12-30 11:58:18] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
 [2025-12-30 11:58:19] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 12:10:50] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 12:10:53] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 12:11:07] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 12:11:11] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 12:11:29] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-30 12:11:52] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 12:12:08] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 12:12:17] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 12:13:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 12:13:49] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 12:14:38] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Vang) auto spawned, broadcast to 1 players
+[2025-12-30 12:15:25] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Bac) auto spawned, broadcast to 1 players
+[2025-12-30 12:16:01] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Dong) auto spawned, broadcast to 1 players
+[2025-12-30 12:19:15] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 12:19:18] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 12:19:21] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 12:19:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 12:20:19] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-30 12:20:20] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 12:20:22] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-30 12:20:22] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-30 12:22:59] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 12:23:03] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-30 12:23:10] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 12:23:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 12:24:24] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Vang) auto spawned, broadcast to 2 players
+[2025-12-30 12:24:45] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-30 12:24:48] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-30 12:24:55] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-30 12:25:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
+[2025-12-30 12:25:31] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-30 12:26:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 2 players
