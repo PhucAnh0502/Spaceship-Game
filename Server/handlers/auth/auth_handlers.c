@@ -6,13 +6,14 @@
 #include <stdlib.h>
 
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+
 extern void log_action(const char *status, const char *action, const char *input, const char *result);
 
 void handle_register(int client_fd, cJSON *payload) {
     cJSON *user_node = cJSON_GetObjectItem(payload, "username");
     cJSON *pass_node = cJSON_GetObjectItem(payload, "password");
 
-    if(!user_node || !pass_node) {
+    if (!user_node || !pass_node) {
         send_response(client_fd, RES_MISSING_CREDENTIALS, "Missing username/password", NULL);
         log_action("ERROR", "REGISTER", "NULL", "Missing input");
         return;
@@ -20,11 +21,11 @@ void handle_register(int client_fd, cJSON *payload) {
 
     int result = register_player(user_node->valuestring, pass_node->valuestring);
 
-    if(result == 1){
+    if (result == 1) {
         printf("[LOG] Account created: %s\n", user_node->valuestring);
         log_action("SUCCESS", "REGISTER", user_node->valuestring, "Account created successfully");
         send_response(client_fd, RES_AUTH_SUCCESS, "Registered successfully", NULL);
-    } else if(result == 0){
+    } else if (result == 0) {
         log_action("ERROR", "REGISTER", user_node->valuestring, "Account already exists");
         send_response(client_fd, RES_ACCOUNT_EXISTS, "Username already exists", NULL);
     } else {
@@ -37,7 +38,7 @@ void handle_login(int client_fd, cJSON *payload) {
     cJSON *user_node = cJSON_GetObjectItem(payload, "username");
     cJSON *pass_node = cJSON_GetObjectItem(payload, "password");
 
-    if(!user_node || !pass_node) {
+    if (!user_node || !pass_node) {
         send_response(client_fd, RES_MISSING_CREDENTIALS, "Missing username/password", NULL);
         log_action("ERROR", "LOGIN", "NULL", "Missing input");
         return;
@@ -47,19 +48,19 @@ void handle_login(int client_fd, cJSON *payload) {
     char *password = pass_node->valuestring;
     Player *player = find_player_by_username(username);
 
-    if(!player) {
+    if (!player) {
         log_action("ERROR", "LOGIN", username, "Account does not exist");
         send_response(client_fd, RES_ACCOUNT_NOT_FOUND, "Account does not exist", NULL);
         return;
     }
 
-    if(strcmp(player->password, password) != 0) {
+    if (strcmp(player->password, password) != 0) {
         log_action("ERROR", "LOGIN", username, "Incorrect password");
         send_response(client_fd, RES_INVALID_PASSWORD, "Incorrect password", NULL);
         return;
     }
 
-    if(player->is_online) {
+    if (player->is_online) {
         log_action("ERROR", "LOGIN", username, "Account already logged in");
         send_response(client_fd, RES_ACCOUNT_ALREADY_LOGGED_IN, "Account already logged in", NULL);
         return;
@@ -82,38 +83,45 @@ void handle_login(int client_fd, cJSON *payload) {
 void handle_logout(int client_fd) {
     Player *target = NULL;
 
-    extern Player* players;
+    extern Player *players;
     extern int player_count;
 
-    if(players) {
-        for(int i = 0; i < player_count; i++) {
-            if(players[i].socket_fd == client_fd && players[i].is_online) {
+    if (players) {
+        for (int i = 0; i < player_count; i++) {
+            if (players[i].socket_fd == client_fd && players[i].is_online) {
                 target = &players[i];
                 break;
             }
         }
     }
 
-    if(target){
+    if (target) {
         char username[50];
         strcpy(username, target->username);
         target->is_online = 0;
         target->socket_fd = 0;
         target->status = STATUS_OFFLINE;
-        Team* team = find_team_by_id(target->team_id);
-        if(team) {
-            for(int i = 0; i < team->current_size; i++) {
-                if(team->member_ids[i] == target->id) {
-                    for(int j = i; j < team->current_size - 1; j++) {
+        Team *team = find_team_by_id(target->team_id);
+        if (team) {
+            for (int i = 0; i < team->current_size; i++) {
+                if (team->member_ids[i] == target->id) {
+                    for (int j = i; j < team->current_size - 1; j++) {
                         team->member_ids[j] = team->member_ids[j + 1];
                     }
                     team->current_size--;
                     break;
                 }
-                if(team->captain_id == target->id) {
+                if (team->captain_id == target->id) {
                     team->current_size = 0;
                     team->captain_id = -1;
                     break;
+                }
+            }
+            if (team->current_size == 0) {
+                if (delete_team(team->team_id)) {
+                    printf("Delete team successfully\n");
+                } else {
+                    printf("Delete team failed\n");
                 }
             }
         }
@@ -128,15 +136,15 @@ void handle_logout(int client_fd) {
 }
 
 int check_auth(int client_fd) {
-    extern Player* players;
+    extern Player *players;
     extern int player_count;
 
-    if(players) {
-        for(int i = 0; i < player_count; i++) {
-            if(players[i].socket_fd == client_fd && players[i].is_online) {
-                return 1; 
+    if (players) {
+        for (int i = 0; i < player_count; i++) {
+            if (players[i].socket_fd == client_fd && players[i].is_online) {
+                return 1;
             }
         }
     }
-    return 0; 
+    return 0;
 }
