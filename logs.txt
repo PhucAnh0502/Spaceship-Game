@@ -446,3 +446,31 @@
 [2025-12-31 11:32:16] [SUCCESS] Action: SEND CHALLENGE | Input: UNKNOWN | Result: Send challenge success
 [2025-12-31 11:32:24] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
 [2025-12-31 11:33:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:33:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Vang) auto spawned, broadcast to 0 players
+[2025-12-31 11:34:34] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:35:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Vang) auto spawned, broadcast to 0 players
+[2025-12-31 11:35:55] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 6 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:36:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 7 (Dong) auto spawned, broadcast to 0 players
+[2025-12-31 11:37:25] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 11:37:26] [SUCCESS] Action: LOGOUT | Input: test | Result: Logged out successfully
+[2025-12-31 11:37:26] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 11:37:41] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:37:45] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 11:37:49] [ERROR] Action: LOGIN | Input: tét | Result: Account does not exist
+[2025-12-31 11:37:51] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-31 11:38:15] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 11:38:17] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:38:18] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:38:28] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 11:38:28] [SUCCESS] Action: LOGOUT | Input: test | Result: Logged out successfully
+[2025-12-31 11:38:29] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 11:39:05] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:39:09] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 11:39:27] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-31 11:39:41] [SUCCESS] Action: MOCK_EQUIP | Input: test | Result: Used cheat command
+[2025-12-31 11:39:45] [SUCCESS] Action: SEND CHALLENGE | Input: UNKNOWN | Result: Send challenge success
+[2025-12-31 11:39:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 3 players
+[2025-12-31 11:40:36] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:41:07] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 11:41:07] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 11:41:08] [SUCCESS] Action: LOGOUT | Input: test | Result: Logged out successfully

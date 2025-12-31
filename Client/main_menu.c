@@ -249,3 +249,46 @@ void print_dashboard_menu(int highlight) {
     attron(A_BOLD | COLOR_PAIR(1)); 
     refresh(); 
 }
+
+void draw_dead_popup() {
+    int h, w;
+    getmaxyx(stdscr, h, w); // Lấy kích thước màn hình
+
+    int box_h = 10;
+    int box_w = 40;
+    int start_y = (h - box_h) / 2;
+    int start_x = (w - box_w) / 2;
+
+    // 1. Xóa vùng bên trong popup (để che text của background bên dưới)
+    attron(COLOR_PAIR(0)); // Màu mặc định
+    for(int i = 0; i < box_h; i++) {
+        mvhline(start_y + i, start_x, ' ', box_w);
+    }
+
+    // 2. Vẽ viền khung (Màu đỏ đậm)
+    attron(COLOR_PAIR(1) | A_BOLD);
+    // Vẽ các đường ngang/dọc
+    mvhline(start_y, start_x, ACS_HLINE, box_w);
+    mvhline(start_y + box_h - 1, start_x, ACS_HLINE, box_w);
+    mvvline(start_y, start_x, ACS_VLINE, box_h);
+    mvvline(start_y, start_x + box_w - 1, ACS_VLINE, box_h);
+
+    // Vẽ 4 góc
+    mvaddch(start_y, start_x, ACS_ULCORNER);
+    mvaddch(start_y, start_x + box_w - 1, ACS_URCORNER);
+    mvaddch(start_y + box_h - 1, start_x, ACS_LLCORNER);
+    mvaddch(start_y + box_h - 1, start_x + box_w - 1, ACS_LRCORNER);
+
+    // 3. Viết nội dung thông báo
+    const char* title = "YOU ARE DEAD!";
+    mvprintw(start_y + 2, start_x + (box_w - strlen(title)) / 2, "%s", title);
+    attroff(COLOR_PAIR(1) | A_BOLD); // Tắt màu đỏ
+
+    mvprintw(start_y + 4, start_x + 3, "HP reached 0.");
+    mvprintw(start_y + 5, start_x + 3, "Spectating teammates...");
+
+    // Hướng dẫn thoát
+    attron(A_DIM);
+    mvprintw(start_y + 8, start_x + (box_w - 20) / 2, "Press [Q] to Logout");
+    attroff(A_DIM);
+}

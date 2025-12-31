@@ -97,7 +97,7 @@ int is_ui_locked() {
 cJSON *wait_for_response() {
     pthread_mutex_lock(&sync_mutex);
 
-    waiting_for_result = 1; 
+    waiting_for_result = 1;
 
     if (sync_response) {
         cJSON_Delete(sync_response);
@@ -109,8 +109,8 @@ cJSON *wait_for_response() {
     }
 
     cJSON *res = sync_response;
-    sync_response = NULL; 
-    waiting_for_result = 0; 
+    sync_response = NULL;
+    waiting_for_result = 0;
 
     pthread_mutex_unlock(&sync_mutex);
     return res;
@@ -255,7 +255,7 @@ void draw_compact_status(int y, int x) {
 
 int main(int argc, char *argv[]) {
     struct sockaddr_in serv_addr;
-    if (argc !=2) {
+    if (argc != 2) {
         printf("Invalid Argument: \n Usage: %s <server_IP>", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -280,13 +280,13 @@ int main(int argc, char *argv[]) {
     start_color();
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK); 
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
     timeout(100);
     int dashboard_highlight = 0;
-    int need_redraw = 1; 
+    int need_redraw = 1;
     // MENU CHÍNH
     while (1) {
         if (current_user_id == 0) {
@@ -304,30 +304,19 @@ int main(int argc, char *argv[]) {
                 case 1:
                     do_login();
                     dashboard_highlight = 0;
-                    need_redraw = 1; 
+                    need_redraw = 1;
                     break;
             }
         } else {
             timeout(100);
             if (end_game_flag) {
                 show_game_result_screen();
-                need_redraw = 1; 
+                need_redraw = 1;
                 continue;
             }
             if (current_hp <= 0) {
-                timeout(100); 
-                erase();
-
-                attron(A_BOLD | COLOR_PAIR(1));
-                mvprintw(5, 10, "=================================");
-                mvprintw(6, 10, "          YOU ARE DEAD!          ");
-                mvprintw(7, 10, "=================================");
-                attroff(A_BOLD | COLOR_PAIR(1));
-
-                mvprintw(9, 10, "Your HP reached 0.");
-                mvprintw(10, 10, "Spectating teammates...");
-
-                mvprintw(12, 10, "[Q] Quit / Logout");
+                timeout(100);
+                draw_dead_popup();
 
                 refresh();
 
@@ -352,20 +341,20 @@ int main(int argc, char *argv[]) {
                 // --- LOGIC MENU CHÍNH ---
                 if (need_redraw) {
                     print_dashboard_menu(dashboard_highlight);
-                    need_redraw = 0; 
+                    need_redraw = 0;
                 }
 
                 if (c != ERR) {
                     switch (c) {
                         case KEY_UP:
                             dashboard_highlight = (dashboard_highlight == 0) ? 3 : dashboard_highlight - 1;
-                            need_redraw = 1; 
+                            need_redraw = 1;
                             break;
                         case KEY_DOWN:
                             dashboard_highlight = (dashboard_highlight == 3) ? 0 : dashboard_highlight + 1;
-                            need_redraw = 1; 
+                            need_redraw = 1;
                             break;
-                        case 10: 
+                        case 10:
                             timeout(-1);
 
                             switch (dashboard_highlight) {
@@ -384,8 +373,8 @@ int main(int argc, char *argv[]) {
                             }
 
                             timeout(100);
-                            clear(); 
-                            need_redraw = 1; 
+                            clear();
+                            need_redraw = 1;
                             break;
                     }
                 }
@@ -411,7 +400,7 @@ void *background_listener(void *arg) {
         cJSON *status = cJSON_GetObjectItem(response, "status");
         cJSON *data = cJSON_GetObjectItem(response, "data");
 
-        cJSON *action = cJSON_GetObjectItem(response, "action"); 
+        cJSON *action = cJSON_GetObjectItem(response, "action");
 
         int code = status ? status->valueint : 0;
         int act_code = action ? action->valueint : 0;
@@ -421,7 +410,7 @@ void *background_listener(void *arg) {
         // GÓI TIN MÀ MAIN THREAD ĐANG CHỜ (LOGIN, MUA ĐỒ, TẤN CÔNG...)
         int is_sync_msg = 0;
 
-        pthread_mutex_lock(&sync_mutex); 
+        pthread_mutex_lock(&sync_mutex);
 
         if (waiting_for_result &&
             !is_treasure_broadcast &&
@@ -429,10 +418,10 @@ void *background_listener(void *arg) {
             code != RES_END_GAME) {
             if (sync_response)
                 cJSON_Delete(sync_response);
-            sync_response = cJSON_Duplicate(response, 1); 
+            sync_response = cJSON_Duplicate(response, 1);
 
-            waiting_for_result = 0; 
-            pthread_cond_signal(&sync_cond); 
+            waiting_for_result = 0;
+            pthread_cond_signal(&sync_cond);
             pthread_mutex_unlock(&sync_mutex);
             is_sync_msg = 1;
             continue;
@@ -441,7 +430,7 @@ void *background_listener(void *arg) {
 
         if (is_sync_msg) {
             cJSON_Delete(response);
-            continue; 
+            continue;
         }
 
         // XỬ LÝ CÁC GÓI TIN BẤT ĐỒNG BỘ (ASYNC EVENTS)
@@ -458,7 +447,7 @@ void *background_listener(void *arg) {
                 if (w_name)
                     strncpy(last_winner_name, w_name->valuestring, 49);
             }
-            pthread_mutex_lock(&ui_mutex); 
+            pthread_mutex_lock(&ui_mutex);
             current_hp = 1000;
             pthread_mutex_unlock(&ui_mutex);
 
@@ -482,7 +471,7 @@ void *background_listener(void *arg) {
                 if (treasure_id && question && options) {
                     pthread_mutex_lock(&pending_mutex);
 
-                    pending_treasure.has_pending = 1; 
+                    pending_treasure.has_pending = 1;
                     pending_treasure.treasure_id = treasure_id->valueint;
                     strncpy(pending_treasure.question, question->valuestring, 255);
 
@@ -504,8 +493,7 @@ void *background_listener(void *arg) {
                     pthread_mutex_unlock(&pending_mutex);
                 }
             }
-        }
-        else if (code == RES_TREASURE_SUCCESS && cJSON_GetObjectItem(data, "question")) {
+        } else if (code == RES_TREASURE_SUCCESS && cJSON_GetObjectItem(data, "question")) {
             pthread_mutex_lock(&pending_mutex);
             pending_treasure.has_pending = 1;
 
@@ -517,9 +505,7 @@ void *background_listener(void *arg) {
             if (ques)
                 strncpy(pending_treasure.question, ques->valuestring, 255);
             pthread_mutex_unlock(&pending_mutex);
-        }
-
-        else if (code == RES_TREASURE_OPENED) {
+        } else if (code == RES_TREASURE_OPENED) {
             pthread_mutex_lock(&pending_mutex);
             pending_treasure.has_pending = 0;
             pthread_mutex_unlock(&pending_mutex);
@@ -552,4 +538,3 @@ void *background_listener(void *arg) {
     }
     return NULL;
 }
-
