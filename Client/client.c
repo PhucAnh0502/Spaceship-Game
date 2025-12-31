@@ -253,18 +253,23 @@ void draw_compact_status(int y, int x) {
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     struct sockaddr_in serv_addr;
+    if (argc !=2) {
+        printf("Invalid Argument: \n Usage: %s <server_IP>", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
+    char *server_ip = argv[1];
     memset(client_buffer, 0, BUFFER_SIZE);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
-    inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
+    inet_pton(AF_INET, server_ip, &serv_addr.sin_addr);
 
     connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-    printf("Connected to server %s:%d\n", SERVER_IP, PORT);
+    printf("Connected to server %s:%d\n", server_ip, PORT);
 
     if (pthread_create(&listener_thread, NULL, background_listener, NULL) != 0) {
         perror("Failed to create listener thread");
