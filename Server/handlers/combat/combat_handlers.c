@@ -237,7 +237,7 @@ void handle_attack(int client_fd, cJSON *payload) {
     int weapon_type = weapon_node->valueint; 
     int weapon_slot = weapon_slot_node->valueint;
 
-    if (weapon_slot < 0 || weapon_slot >= 8) {
+    if (weapon_slot < 0 || weapon_slot >= 4) {
         send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid weapon slot", NULL);
         log_action("ERROR", "ATTACK","UNKNOWN", "Invalid weapon slot");
         return;
@@ -360,7 +360,7 @@ void handle_attack(int client_fd, cJSON *payload) {
     cJSON_AddNumberToObject(res_data, "remaining_ammo", found_slot->current_ammo);
     // Update reamining ammo for better UX
     send_response(client_fd, RES_BATTLE_SUCCESS, "Attack successfully", res_data);
-
+    cJSON_Delete(res_data);
     // 3.1 Notification target that they have been attacked
     if (target->is_online && target->socket_fd > 0) {
         cJSON *victim_data = cJSON_CreateObject();
@@ -372,6 +372,7 @@ void handle_attack(int client_fd, cJSON *payload) {
         cJSON_AddNumberToObject(victim_data, "armor_slot_1", target->ship.armor[1].current_durability);
         cJSON_AddStringToObject(victim_data, "attacker_name", attacker->username);
         send_response(target->socket_fd, RES_BATTLE_SUCCESS, "Warning: You are under attack!", victim_data);
+        cJSON_Delete(victim_data);
     }
     // 4. Check end game condition
     // TODO: Implement end game condition
@@ -433,12 +434,13 @@ void handle_get_status(int client_fd, cJSON *payload) {
 
 void check_end_game(int client_fd, int team_id) {
     Team *losing_team = find_team_by_id(team_id);
-    printf("Losing team: %s\n", losing_team->team_name);
 
     if (!losing_team) {
         send_response(client_fd, RES_NOT_FOUND, "Team not found", NULL);
         return;
     }
+
+    printf("Losing team: %s\n", losing_team->team_name);
 
     if (losing_team->opponent_team_id == 0) {
         return;
@@ -490,6 +492,8 @@ void check_end_game(int client_fd, int team_id) {
     // Send notification for both team and reset status
     end_game_for_team(client_fd, losing_team, end_game_data);
     end_game_for_team(client_fd, winning_team, end_game_data);
+
+    cJSON_Delete(end_game_data);
 }
 
 void end_game_for_team(int client_fd, Team *team, cJSON *payload) {

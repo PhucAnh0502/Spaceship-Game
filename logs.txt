@@ -433,3 +433,16 @@
 [2025-12-31 11:24:18] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
 [2025-12-31 11:24:23] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
 [2025-12-31 11:24:25] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-31 11:24:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-31 11:24:59] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 11:25:03] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:25:32] [SUCCESS] Action: SEND CHALLENGE | Input: UNKNOWN | Result: Send challenge success
+[2025-12-31 11:25:37] [SUCCESS] Action: MOCK_EQUIP | Input: test | Result: Used cheat command
+[2025-12-31 11:25:40] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 2 players
+[2025-12-31 11:31:48] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:31:51] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 11:31:54] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-31 11:32:08] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 0 players
+[2025-12-31 11:32:16] [SUCCESS] Action: SEND CHALLENGE | Input: UNKNOWN | Result: Send challenge success
+[2025-12-31 11:32:24] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-31 11:33:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 0 players
