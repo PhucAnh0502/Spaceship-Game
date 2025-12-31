@@ -23,18 +23,21 @@ void handle_send_challenge(int client_fd, cJSON *payload) {
     Player *challenger = get_player_by_fd(client_fd);
     if (!challenger) {
         send_response(client_fd, RES_NOT_FOUND, "challenger not found", NULL);
+        log_action("ERROR", "SEND CHALLENGE","UNKNOWN", "challenger not found");
         return;
     }
 
     Team *challenger_team = find_team_by_id(challenger->team_id);
     if (!challenger_team) {
         send_response(client_fd, RES_TEAM_NO_EXIST, "You are not in a team", NULL);
+        log_action("ERROR", "SEND CHALLENGE","UNKNOWN", "You are not in a team");
         return;
     }
 
     // Check captain privillege
     if (challenger_team->captain_id != challenger->id) {
         send_response(client_fd, RES_NOT_TEAM_CAPTAIN, "Only captain can send challenge", NULL);
+        log_action("ERROR", "SEND CHALLENGE","UNKNOWN", "Only captain can send challenge");
         return;
     }
 
@@ -87,7 +90,10 @@ void handle_send_challenge(int client_fd, cJSON *payload) {
         cJSON_AddNumberToObject(invite_data, "challenger_team_id", challenger_team->team_id);
         cJSON_AddStringToObject(invite_data, "challenger_team_name", challenger_team->team_name);
         send_response(target_captain->socket_fd, ACT_SEND_CHALLANGE, "Incoming challenge request!", invite_data);
+
     }
+    log_action("SUCCESS", "SEND CHALLENGE","UNKNOWN", "Send challenge success");
+
 }
 
 void handle_accept_challenge(int client_fd, cJSON *payload) {
@@ -206,6 +212,7 @@ void handle_attack(int client_fd, cJSON *payload) {
     Player *attacker = get_player_by_fd(client_fd);
     if (!attacker) {
         send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+        log_action("ERROR", "ATTACK","UNKNOWN", "Player not found");
         return;
     }
 
@@ -217,11 +224,13 @@ void handle_attack(int client_fd, cJSON *payload) {
     // Validate input
     if (!target_node || !weapon_node || !weapon_slot_node) {
         send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid parameters", NULL);
+        log_action("ERROR", "ATTACK","UNKNOWN", "Invalid parameters");
         return;
     }
     Player *p = find_player_by_username(target_node->valuestring);
     if (!p) {
         send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
+        log_action("ERROR", "ATTACK","UNKNOWN", "Player not found");
         return;
     }
     int target_id = p->id;
@@ -230,6 +239,7 @@ void handle_attack(int client_fd, cJSON *payload) {
 
     if (weapon_slot < 0 || weapon_slot >= 8) {
         send_response(client_fd, RES_UNKNOWN_ACTION, "Invalid weapon slot", NULL);
+        log_action("ERROR", "ATTACK","UNKNOWN", "Invalid weapon slot");
         return;
     }
 
@@ -498,7 +508,7 @@ void end_game_for_team(int client_fd, Team *team, cJSON *payload) {
             member->status = STATUS_IN_TEAM;
             member->ship.hp = 1000;
             // 2. Send result notification
-            send_response(member->socket_fd, RES_BATTLE_SUCCESS, "Game Over", payload);
+            send_response(member->socket_fd, RES_END_GAME, "Game Over", payload);
         }
     }
 
