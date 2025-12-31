@@ -15,6 +15,7 @@
 #include "main_menu.h"
 #include "combat_menu.h"
 #include "team_menu.h"
+#include "menu_shop.h"
 
 #define SERVER_IP "127.0.0.1"
 
