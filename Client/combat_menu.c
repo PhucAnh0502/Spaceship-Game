@@ -90,12 +90,12 @@ void do_attack() {
     wp_type = atoi(weapon_type);
 
     // 3. Chọn Slot (0-3)
-    get_input(7, 5, "Slot (0-3): ", weapon_slot, 5, 0);
-    wp_slot = atoi(weapon_slot);
+    get_input(7, 5, "Slot (1-4): ", weapon_slot, 5, 0);
+    wp_slot = atoi(weapon_slot) - 1;
 
     // Validate cơ bản
     if (wp_slot < 0 || wp_slot > 3) {
-        mvprintw(9, 5, ">> Invalid Slot! Must be 0-3.");
+        mvprintw(9, 5, ">> Invalid Slot! Must be 1-4.");
         getch();
         return;
     }
