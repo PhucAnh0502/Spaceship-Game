@@ -460,7 +460,7 @@ void check_end_game(int client_fd, int team_id) {
                 cJSON_AddStringToObject(death_note, "status", "DEAD");
                 cJSON_AddStringToObject(death_note, "info", "Waiting for teammates...");
 
-                send_response(p->socket_fd, RES_END_GAME, "YOU DIED! Spectating...", death_note);
+                //send_response(p->socket_fd, RES_END_GAME, "YOU DIED! Spectating...", death_note);
                 cJSON_Delete(death_note);
             }
         }

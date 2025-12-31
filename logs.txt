@@ -399,3 +399,11 @@
 [2025-12-29 17:12:14] [SUCCESS] Action: LOGOUT | Input: thaoltn2 | Result: Logged out successfully
 [2025-12-29 17:12:16] [SUCCESS] Action: LOGOUT | Input: thaoltn | Result: Logged out successfully
 
+[2025-12-31 11:10:38] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 11:10:40] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 11:10:43] [SUCCESS] Action: LOGIN | Input: test | Result: Logged in successfully
+[2025-12-31 11:11:06] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 0 players
+[2025-12-31 11:11:06] [SUCCESS] Action: SEND CHALLENGE | Input: UNKNOWN | Result: Send challenge success
+[2025-12-31 11:11:17] [SUCCESS] Action: MOCK_EQUIP | Input: test | Result: Used cheat command
+[2025-12-31 11:11:51] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 3 players
+[2025-12-31 11:12:45] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Dong) auto spawned, broadcast to 0 players
