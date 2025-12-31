@@ -294,6 +294,7 @@ void handle_attack(int client_fd, cJSON *payload) {
                 damage = DMG_CANNON; // 10
             else if (weapon_type == WEAPON_LASER)
                 damage = DMG_LASER; // 100
+
         }
     }
 
@@ -484,18 +485,10 @@ void check_end_game(int client_fd, int team_id) {
     // ---------------------------------------------------------
     cJSON *end_game_data = cJSON_CreateObject();
     cJSON_AddNumberToObject(end_game_data, "winner_team_id", winning_team_id);
-    if (winning_team) {
-        cJSON_AddStringToObject(end_game_data, "winner_team_name", winning_team->team_name);
-    }
 
     // Send notification for both team and reset status
     end_game_for_team(client_fd, losing_team, end_game_data);
     end_game_for_team(client_fd, winning_team, end_game_data);
-
-    cJSON_Delete(end_game_data);
-
-    if (losing_team) losing_team->opponent_team_id = 0;
-    if (winning_team) winning_team->opponent_team_id = 0;
 }
 
 void end_game_for_team(int client_fd, Team *team, cJSON *payload) {
@@ -518,7 +511,7 @@ void end_game_for_team(int client_fd, Team *team, cJSON *payload) {
             member->status = STATUS_IN_TEAM;
             member->ship.hp = 1000;
             // 2. Send result notification
-            send_response(member->socket_fd, RES_END_GAME, "Game Over", payload);
+            send_response(member->socket_fd, RES_BATTLE_SUCCESS, "Game Over", payload);
         }
     }
 

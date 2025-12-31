@@ -64,6 +64,7 @@ void draw_compact_status(int y, int x);
 int confirm_purchase(const char* item_name, int cost);
 void handle_treasure_answer(int answer);
 
+
 extern cJSON *treasure_response_data; 
 extern volatile int waiting_for_result;
 

@@ -407,10 +407,10 @@ int main() {
         }
     }
 
-    // Dọn dẹp
-    endwin();
-    close(sock);
-    return 0;
+        endwin();
+        close(sock);
+        return 0;
+    }
 }
 
 

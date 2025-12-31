@@ -149,6 +149,7 @@ void show_pending_treasure() {
 //     return NULL;
 // }
 
+
 // Xử lý trả lời treasure
 void handle_treasure_answer(int answer) {
     pthread_mutex_lock(&treasure_mutex);
