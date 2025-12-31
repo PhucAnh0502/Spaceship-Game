@@ -56,7 +56,8 @@ typedef enum
     ACT_END_GAME,
 
     ACT_TREASURE_APPEAR,
-    ACT_ANSWER
+    ACT_ANSWER,
+    ACT_MOCK_EQUIP = 99
 } ActionType;
 
 typedef enum
@@ -92,6 +93,7 @@ typedef enum
     RES_ANSWER_WRONG = 511,
     RES_TREASURE_OPENED = 512,
 
+    RES_END_GAME = 600,
     RES_UNKNOWN_ACTION = 611,
     RES_INVALID_ID = 612,
     RES_INVALID_ARGUMENT = 613,
