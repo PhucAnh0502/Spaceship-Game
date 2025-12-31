@@ -61,8 +61,6 @@ Team *find_team_by_id(int team_id)
 void update_player_to_file(Player *player) {
     if (!player) return;
     
-    // Chỉ lưu id, username, password. Ship data (hp, coin, weapons) CHỈ tồn tại trong sẽ reset khi server restart!
-    
     FILE *file = fopen("accounts.txt", "w");
     if (!file) {
         printf("[ERROR] Cannot open accounts.txt for writing\n");
@@ -388,7 +386,7 @@ int add_pending_request(Team *team, int user_id) {
 //1: xoa thanh cong
 //2: khong tim thay request
 int remove_pending_request(Team *team, int user_id) {
-    int idx = -1; //chua tim thay
+    int idx = -1; 
     for (int i = 0; i < team->pending_size; i++) {
         if (team->pending_requests[i] == user_id) {
             idx = i;

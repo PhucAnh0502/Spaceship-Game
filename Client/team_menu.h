@@ -1,6 +1,3 @@
-//
-// Created by kali on 12/30/25.
-//
 
 #ifndef SPACESHIP_GAME_TEAM_MENU_H
 void do_register();

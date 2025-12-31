@@ -33,7 +33,7 @@ void do_accept() {
     cJSON *res = wait_for_response();
 
     move(4, 0);
-    clrtoeol(); // Xóa dòng "Sending..."
+    clrtoeol(); 
 
     if (res) {
         cJSON *status = cJSON_GetObjectItem(res, "status");
@@ -71,7 +71,7 @@ void do_accept() {
 
 void do_attack() {
     clear();
-    attron(A_BOLD | COLOR_PAIR(1)); // Màu đỏ cho Combat
+    attron(A_BOLD | COLOR_PAIR(1)); 
     mvprintw(2, 5, "=== ATTACK CONTROL ===");
     attroff(A_BOLD | COLOR_PAIR(1));
 
@@ -141,10 +141,8 @@ void do_attack() {
                 mvhline(19, 5, ACS_HLINE, 40);
             }
 
-            // Đồng bộ trạng thái trang bị sau khi tấn công thành công
             fetch_and_update_status();
         } else {
-            // LỖI (Hết đạn, sai mục tiêu...)
             display_response_message(9, 5, 1, status ? status->valueint : 0, msg ? msg->valuestring : "Failed");
         }
         cJSON_Delete(res);
@@ -165,7 +163,6 @@ void do_challenge() {
     attroff(A_BOLD | COLOR_PAIR(2));
 
     char buffer[50];
-    // Nhập ID đội muốn thách đấu
     get_input(4, 5, "Enter Opponent Team's Name: ", buffer, 50, 0);
 
     // if (target_id <= 0) {
@@ -187,7 +184,6 @@ void do_challenge() {
         cJSON *msg = cJSON_GetObjectItem(res, "message");
 
         if (status) {
-            // RES_BATTLE_SUCCESS = 400
             if (status->valueint == RES_BATTLE_SUCCESS) {
                 display_response_message(6, 5, 2, status->valueint, msg->valuestring);
             } else {
@@ -227,13 +223,13 @@ void menu_combat() {
         switch (choice) {
             case 0:
                 do_challenge();
-                break; // Từ client.c
+                break; 
             case 1:
                 do_accept();
-                break; // Từ client.c
+                break; 
             case 2:
                 do_attack();
-                break; // Từ client.c
+                break; 
             case 3:
                 menu_shop();
                 break;

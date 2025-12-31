@@ -1,6 +1,4 @@
-//
-// Created by kali on 12/30/25.
-//
+
 
 #ifndef SPACESHIP_GAME_MAIN_MENU_H
 void show_game_result_screen();

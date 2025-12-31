@@ -154,7 +154,7 @@ void process_request(int client_fd, cJSON *root){
     case ACT_ATTACK:
         handle_attack(client_fd, payload);
         break;
-    case ACT_MOCK_EQUIP:          // [THÊM]
+    case ACT_MOCK_EQUIP:          
         handle_mock_equip(client_fd);
         break;
     default:
@@ -168,11 +168,9 @@ void* auto_spawn_treasure(void* arg) {
     srand(time(NULL));
     
     while (server_running) {
-        // Chờ 30-60 giây random
         int wait_time = 30 + (rand() % 31);
         sleep(wait_time);
         
-        // Kiểm tra có player online không
         extern Player* players;
         extern int player_count;
         
@@ -183,7 +181,6 @@ void* auto_spawn_treasure(void* arg) {
             }
         }
         
-        // Chỉ thả nếu có player online
         if (online_count > 0) {
             printf("\n[AUTO] Spawning treasure... (%d players online)\n", online_count);
             handle_treasure_appear(-1, NULL);

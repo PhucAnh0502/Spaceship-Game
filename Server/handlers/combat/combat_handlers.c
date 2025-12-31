@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include "combat_handlers.h"
 
-extern Player *players; // Player array
-extern Team teams[MAX_TEAMS]; // Teams array
+extern Player *players; 
+extern Team teams[MAX_TEAMS]; 
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
 
 extern Team *find_team_by_id(int team_id);
@@ -40,7 +40,7 @@ void handle_send_challenge(int client_fd, cJSON *payload) {
 
     // 2. Get target team info
     int target_team_id = -1;
-    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_name"); // Get target team name from payload
+    cJSON *target_team_node = cJSON_GetObjectItem(payload, "target_team_name"); 
     if (target_team_node && cJSON_IsString(target_team_node)) {
         Team* team = find_team_by_name(target_team_node->valuestring);
         if (!team) {
@@ -56,7 +56,6 @@ void handle_send_challenge(int client_fd, cJSON *payload) {
         return;
     }
 
-    // TODO: Find opponent in teams array
     Team *opponent_team = find_team_by_id(target_team_id);
 
     if (target_team_id == challenger_team->team_id) {
@@ -114,7 +113,6 @@ void handle_accept_challenge(int client_fd, cJSON *payload) {
 
     // 3. Check team binding
     if (my_team->opponent_team_id == 0) {
-        // this mean that there is no challenger
         send_response(client_fd, RES_OPONENT_NOT_FOUND, "No pending challenge found", NULL);
         return;
     }
@@ -122,8 +120,7 @@ void handle_accept_challenge(int client_fd, cJSON *payload) {
     // Get opponent team from binded ID
     Team *opponent_team = find_team_by_id(my_team->opponent_team_id);
     if (!opponent_team) {
-        // Case that enemy team quit or disband while pending for accept
-        my_team->opponent_team_id = 0; // Reset
+        my_team->opponent_team_id = 0; 
         send_response(client_fd, RES_OPONENT_NOT_FOUND, "Opponent team no longer exists", NULL);
         return;
     }
@@ -133,7 +130,6 @@ void handle_accept_challenge(int client_fd, cJSON *payload) {
 }
 
 void handle_game_start(Team *my_team, Team *opponent_team) {
-    // Loop through my team to update in battel status
     for (int i = 0; i < my_team->current_size; i++) {
         int mem_id = my_team->member_ids[i];
         if (mem_id > 0) {
@@ -143,7 +139,6 @@ void handle_game_start(Team *my_team, Team *opponent_team) {
         }
     }
 
-    // Loop through enemy team to update in battle status
     for (int i = 0; i < opponent_team->current_size; i++) {
         int mem_id = opponent_team->member_ids[i];
         if (mem_id > 0) {
@@ -167,41 +162,33 @@ void handle_game_start(Team *my_team, Team *opponent_team) {
 //---------------------------------------------------------
 
 void handle_fix_ship(int client_fd, cJSON *payload) {
-    // Get requested player infomation
     Player *p = get_player_by_fd(client_fd);
-    // If not found any player
     if (!p) {
         send_response(client_fd, RES_NOT_FOUND, "Player not found", NULL);
         return;
     }
 
-    // If player hp is full, abort this command
     if (p->ship.hp >= 1000) {
         send_response(client_fd, RES_HP_IS_FULL, "HP is full", NULL);
         return;
     }
 
-    // Cap max heal hp at 1000
     int hp_missing = 1000 - p->ship.hp;
     int cost = hp_missing * COST_REPAIR_PER_HP;
 
-    // If player do not have enough money, heal to the maximum ammount available
     if (p->ship.coin < cost) {
         cost = p->ship.coin;
         hp_missing = cost / COST_REPAIR_PER_HP;
     }
 
-    // Case that player do not have enough coin for heal for just 1 HP
     if (p->ship.coin < COST_REPAIR_PER_HP) {
         send_response(client_fd, RES_NOT_ENOUGH_COIN, "Not enough coin", NULL);
         return;
     }
 
-    // Update
     p->ship.coin -= cost;
     p->ship.hp += hp_missing;
 
-    // Create response data
     cJSON *data = cJSON_CreateObject();
     cJSON_AddNumberToObject(data, "healed_amount", hp_missing);
     cJSON_AddNumberToObject(data, "current_hp", p->ship.hp);
@@ -238,7 +225,7 @@ void handle_attack(int client_fd, cJSON *payload) {
         return;
     }
     int target_id = p->id;
-    int weapon_type = weapon_node->valueint; // 1: Cannon, 2: Laser, 3: Missile
+    int weapon_type = weapon_node->valueint; 
     int weapon_slot = weapon_slot_node->valueint;
 
     if (weapon_slot < 0 || weapon_slot >= 8) {
@@ -246,7 +233,7 @@ void handle_attack(int client_fd, cJSON *payload) {
         return;
     }
 
-    Player *target = find_player_by_id(target_id); // Get target information
+    Player *target = find_player_by_id(target_id); 
     if (!target) {
         send_response(client_fd, RES_INVALID_TARGET, "Invalid Target", NULL);
         return;
@@ -297,8 +284,6 @@ void handle_attack(int client_fd, cJSON *payload) {
         }
     }
 
-    // TODO: add return RES_OUT_OF_AMMO logic
-    // If can NOT found any weapon or out of ammo
     if (found_slot == NULL) {
         send_response(client_fd, RES_OUT_OF_AMMO, "Out of ammo or weapon not equipped", NULL);
         return;
@@ -477,7 +462,6 @@ void check_end_game(int client_fd, int team_id) {
     int winning_team_id = losing_team->opponent_team_id;
     Team *winning_team = find_team_by_id(winning_team_id);
 
-    // TODO: Logging informations
 
     // ---------------------------------------------------------
     // 3. Send response
@@ -504,7 +488,6 @@ void end_game_for_team(int client_fd, Team *team, cJSON *payload) {
         return;
     }
 
-    // Loop through every member of teams
     for (int i = 0; i < team->current_size; i++) {
         int member_id = team->member_ids[i];
         if (member_id <= 0) {
