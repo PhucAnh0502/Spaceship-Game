@@ -1,8 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g -I Common -I Lib -I Server -I Client
-LDFLAGS = -lm -lpthread
 
-LDFLAGS_COMMON = -lm
+LDFLAGS_COMMON = -lm -lpthread
 
 LDFLAGS_CLIENT = -lncurses
 
@@ -11,7 +10,7 @@ CJSON = Lib/cJSON.c
 SERVER_HANDLERS = $(shell find Server/handlers -name "*.c" ! -name "client_*.c")
 SERVER_SRC = Server/server.c Server/services/storage/storage.c Server/services/utils/utils.c $(SERVER_HANDLERS)
 
-CLIENT_SRC = $(shell find Client -name "*.c")
+CLIENT_SRC = $(shell find Client -name "*.c") Server/services/storage/storage.c
 
 .PHONY: all clean
 

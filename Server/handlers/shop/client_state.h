@@ -57,8 +57,26 @@ int is_ui_locked(void);
 
 // Helper để hiển thị trạng thái
 void show_player_status(void);
+int fetch_and_update_status(void);
+void draw_compact_status(int y, int x);
 
 // Helper để xác nhận mua hàng
 int confirm_purchase(const char* item_name, int cost);
+void handle_treasure_answer(int answer);
+
+
+extern cJSON *treasure_response_data; 
+extern volatile int waiting_for_result;
+
+extern char last_winner_name[50];
+
+// Các biến trạng thái người chơi
+extern int current_hp;
+extern int current_coins;
+
+extern volatile int end_game_flag; // 0: Bình thường, 1: Có kết quả trận đấu
+extern char current_username[50];
+extern volatile int winner_team_id;
+extern volatile int current_team_id;
 
 #endif // CLIENT_STATE_H

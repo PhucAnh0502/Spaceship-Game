@@ -32,7 +32,12 @@ extern void handle_treasure_appear(int client_fd, cJSON *payload);
 extern void handle_answer(int client_fd, cJSON *payload);
 extern int check_auth(int client_fd);
 extern void send_response(int socket_fd, int status, const char *message, cJSON *data);
+extern void handle_send_challenge(int client_fd, cJSON *payload);
+extern void handle_accept_challenge(int client_fd, cJSON *payload);
+extern void handle_attack(int client_fd, cJSON *payload);
+extern void handle_get_status(int client_fd, cJSON *payload);
 
+extern void handle_mock_equip(int client_fd);
 pthread_t treasure_spawner_thread;
 int server_running = 1;
 extern void handle_team_action(int client_fd, int action, cJSON *payload);
@@ -93,6 +98,9 @@ void process_request(int client_fd, cJSON *root){
         case ACT_FIX_SHIP:
             handle_fix_ship(client_fd, payload);
             break;
+        case ACT_GET_STATUS:
+            handle_get_status(client_fd, payload);
+            break;
         case ACT_ANSWER:
             handle_answer(client_fd, payload);
             break;
@@ -108,10 +116,22 @@ void process_request(int client_fd, cJSON *root){
         case ACT_KICK_MEMBER:
             handle_team_action(client_fd, action, payload);
             break;
-
-        default:
-            send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
-            break;
+        // COMBAT ACTIONS
+    case ACT_SEND_CHALLANGE:
+        handle_send_challenge(client_fd, payload);
+        break;
+    case ACT_ACCEPT_CHALLANGE:
+        handle_accept_challenge(client_fd, payload);
+        break;
+    case ACT_ATTACK:
+        handle_attack(client_fd, payload);
+        break;
+    case ACT_MOCK_EQUIP:          // [THÊM]
+        handle_mock_equip(client_fd);
+        break;
+    default:
+        send_response(client_fd, RES_UNKNOWN_ACTION, "Unknown action", NULL);
+        break;
     }
 
 }

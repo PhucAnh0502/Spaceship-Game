@@ -100,7 +100,24 @@ void handle_logout(int client_fd) {
         target->is_online = 0;
         target->socket_fd = 0;
         target->status = STATUS_OFFLINE;
-
+        Team* team = find_team_by_id(target->team_id);
+        if(team) {
+            for(int i = 0; i < team->current_size; i++) {
+                if(team->member_ids[i] == target->id) {
+                    for(int j = i; j < team->current_size - 1; j++) {
+                        team->member_ids[j] = team->member_ids[j + 1];
+                    }
+                    team->current_size--;
+                    break;
+                }
+                if(team->captain_id == target->id) {
+                    team->current_size = 0;
+                    team->captain_id = -1;
+                    break;
+                }
+            }
+        }
+        target->team_id = 0;
         printf("[LOG] Player logged out: %s\n", username);
         log_action("SUCCESS", "LOGOUT", username, "Logged out successfully");
         send_response(client_fd, RES_AUTH_SUCCESS, "Logged out successfully", NULL);

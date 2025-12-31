@@ -244,14 +244,7 @@ int register_player(const char *username, const char *password)
     return 1;
 }
 
-void init_teams()
-{
-    if (teams == NULL)
-    {
-        // Cấp phát bộ nhớ cho 10 đội (theo MAX_TEAMS trong protocol.h)
-        printf("[STORAGE] Allocated memory for teams.\n");
-    }
-}
+
 
 
 

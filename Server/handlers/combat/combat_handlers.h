@@ -31,6 +31,7 @@ void handle_fix_ship(int client_fd, cJSON *payload);
  * @param payload request body
  */
 void handle_attack(int client_fd, cJSON *payload);
+void handle_get_status(int client_fd, cJSON *payload);
 
 /**
  * @brief Function for checking end game condidtion

@@ -12,6 +12,10 @@
 #include "Utils/utils.h"
 #include "../Server/handlers/shop/client_state.h"
 #include "../Server/handlers/shop/client_treasure.c"
+#include "main_menu.h"
+#include "combat_menu.h"
+#include "team_menu.h"
+#include "menu_shop.h"
 
 #define SERVER_IP "127.0.0.1"
 
@@ -19,6 +23,22 @@ int sock = 0;
 int current_user_id = 0;
 int current_coins = 0;
 int current_hp = 1000;
+char current_username[50] = "";
+
+// Snapshot trang bị
+typedef struct {
+    int weapon;
+    int ammo;
+} ClientWeaponSlot;
+
+typedef struct {
+    int type;
+    int durability;
+} ClientArmorSlot;
+
+ClientWeaponSlot client_cannons[4] = {0};
+ClientWeaponSlot client_missiles[4] = {0};
+ClientArmorSlot client_armor[2] = {0};
 
 char client_buffer[BUFFER_SIZE];
 int client_buf_len = 0;
@@ -39,425 +59,208 @@ pthread_mutex_t treasure_mutex = PTHREAD_MUTEX_INITIALIZER;
 PendingTreasure pending_treasure = {0};
 pthread_mutex_t pending_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void do_attack();
-void do_challenge();
-void do_accept();
+cJSON *treasure_response_data = NULL;
+volatile int waiting_for_result = 0;
 
-void lock_ui()
-{
+volatile int end_game_flag = 0; // 0: Bình thường, 1: Có kết quả trận đấu
+char last_winner_name[50] = "Unknown";
+volatile int winner_team_id = -1;
+volatile int current_team_id = -1;
+pthread_mutex_t sync_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t sync_cond = PTHREAD_COND_INITIALIZER;
+cJSON *sync_response = NULL;
+
+int fetch_and_update_status();
+void print_equipment_status();
+
+void *background_listener(void *arg);
+
+void lock_ui() {
     pthread_mutex_lock(&ui_mutex);
     ui_locked = 1;
     pthread_mutex_unlock(&ui_mutex);
 }
 
-void unlock_ui()
-{
+void unlock_ui() {
     pthread_mutex_lock(&ui_mutex);
     ui_locked = 0;
     pthread_mutex_unlock(&ui_mutex);
 }
 
-int is_ui_locked()
-{
+int is_ui_locked() {
     pthread_mutex_lock(&ui_mutex);
     int locked = ui_locked;
     pthread_mutex_unlock(&ui_mutex);
     return locked;
 }
 
-cJSON *wait_for_response()
-{
-    while (1)
-    {
-        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
-        if (response)
-            return response;
+cJSON *wait_for_response() {
+    pthread_mutex_lock(&sync_mutex);
 
-        char dummy;
-        int check = recv(sock, &dummy, 1, MSG_PEEK | MSG_DONTWAIT);
-        if (check == 0)
-        {
-            endwin();
-            printf("\n[ERROR] Server disconnected unexpectedly!\n");
-            close(sock);
-            exit(1);
-        }
-    }
-}
+    waiting_for_result = 1; // Bật cờ báo "Tôi đang chờ"
 
-void show_player_status()
-{
-    printf("\n========== TRANG THAI HIEN TAI ==========\n");
-    printf("Coins: %d\n", current_coins);
-    printf("HP: %d/1000\n", current_hp);
-}
-
-int confirm_purchase(const char *item_name, int cost)
-{
-    if (current_coins < cost)
-    {
-        printf("\n>> Khong du coins! Can %d, hien co %d\n", cost, current_coins);
-        return 0;
+    // Nếu có dữ liệu cũ chưa xóa, xóa đi
+    if (sync_response) {
+        cJSON_Delete(sync_response);
+        sync_response = NULL;
     }
 
-    printf("\nXac nhan mua %s voi gia %d coins? (y/n): ", item_name, cost);
-    fflush(stdout);
-
-    char confirm[10];
-    if (fgets(confirm, sizeof(confirm), stdin) == NULL)
-        return 0;
-
-    return (confirm[0] == 'y' || confirm[0] == 'Y');
-}
-
-void do_register()
-{
-    lock_ui();
-
-    char username[50], password[50];
-    clear();
-    mvprintw(2, 10, "--- REGISTER ---");
-    get_input(4, 10, "Username: ", username, 50, 0);
-    get_input(5, 10, "Password: ", password, 50, 1);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "username", username);
-    cJSON_AddStringToObject(data, "password", password);
-
-    send_json(sock, ACT_REGISTER, data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-        cJSON *status = cJSON_GetObjectItem(res, "status");
-        if (status && msg)
-        {
-            if (status->valueint == RES_AUTH_SUCCESS)
-            {
-                display_response_message(8, 10, 2, status->valueint, msg->valuestring);
-            }
-            else
-            {
-                display_response_message(8, 10, 1, status->valueint, msg->valuestring);
-            }
-        }
-        cJSON_Delete(res);
+    // Vòng lặp chờ tín hiệu (Condition Variable)
+    // Nó sẽ NHẢ mutex ra và ngủ. Khi Listener gọi signal(), nó tỉnh dậy và LẤY lại mutex.
+    while (sync_response == NULL) {
+        pthread_cond_wait(&sync_cond, &sync_mutex);
     }
 
-    unlock_ui();
-    mvprintw(10, 10, "Press any key to continue...");
-    getch();
+    cJSON *res = sync_response;
+    sync_response = NULL; // Reset để lần sau dùng
+    waiting_for_result = 0; // Tắt cờ
+
+    pthread_mutex_unlock(&sync_mutex);
+    return res;
 }
 
-void do_login()
-{
-    if (current_user_id != 0)
-    {
-        display_response_message(10, 10, 1, 0, "You are already logged in!");
-        getch();
-        return;
-    }
+void show_player_status() {
+    // Lấy trạng thái mới nhất từ server (hp/coin/weapon/armor)
+    fetch_and_update_status();
 
-    lock_ui();
+    // Hiển thị bằng ncurses thay vì stdout
+    int y = 2;
+    int x = 2;
 
-    char username[50], password[50];
-    erase();
-    mvprintw(2, 10, "=== LOGIN ===");
-    get_input(4, 10, "Username: ", username, 50, 0);
-    get_input(5, 10, "Password: ", password, 50, 1);
+    attron(A_BOLD);
+    mvprintw(y, x, "=== TRANG THAI HIEN TAI ===");
+    attroff(A_BOLD);
 
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "username", username);
-    cJSON_AddStringToObject(data, "password", password);
+    mvprintw(y + 1, x, "User: %s", current_username);
+    mvprintw(y + 2, x, "HP: %d/1000 | Coins: %d", current_hp, current_coins);
 
-    send_json(sock, ACT_LOGIN, data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-        cJSON *status = cJSON_GetObjectItem(res, "status");
-
-        if (status && msg)
-        {
-            if (status->valueint == RES_AUTH_SUCCESS)
-            {
-                cJSON *res_data = cJSON_GetObjectItem(res, "data");
-                if (res_data)
-                {
-                    current_user_id = cJSON_GetObjectItem(res_data, "id")->valueint;
-
-                    cJSON *hp = cJSON_GetObjectItem(res_data, "hp");
-                    cJSON *coin = cJSON_GetObjectItem(res_data, "coin");
-
-                    if (hp)
-                        current_hp = hp->valueint;
-                    if (coin)
-                        current_coins = coin->valueint;
-
-                    printf(">> Login success! User ID: %d\n", current_user_id);
-                    printf(">> HP: %d | Coins: %d\n", current_hp, current_coins);
-
-                    // Start listener thread
-                    should_exit = 0;
-                    pthread_create(&listener_thread, NULL, background_listener, NULL);
-                    display_response_message(8, 10, 2, status->valueint, msg->valuestring);
-                }
-            }
-            else
-            {
-                display_response_message(8, 10, 1, status->valueint, msg->valuestring);
-            }
-        }
-        cJSON_Delete(res);
-    }
-
-    unlock_ui();
-    mvprintw(10, 10, "Press any key to continue...");
-    getch();
+    draw_compact_status(y + 4, x);
+    refresh();
 }
 
-void do_logout()
-{
-    send_json(sock, ACT_LOGOUT, NULL);
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        current_user_id = 0;
-        cJSON_Delete(res);
-    }
-}
-
-void do_list_teams()
-{
-    send_json(sock, ACT_LIST_TEAMS, NULL);
+// Hỏi server để cập nhật hp/coin và trang bị
+int fetch_and_update_status() {
+    send_json(sock, ACT_GET_STATUS, NULL);
     cJSON *res = wait_for_response();
     if (!res)
-        return;
+        return 0;
 
-    int status = cJSON_GetObjectItem(res, "status")->valueint;
-    if (status != 200)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
-        if (current_user_id == 0)
-        {
-            display_response_message(10, 10, 1, 0, "You are not logged in.");
-            getch();
-            return;
+    cJSON *status = cJSON_GetObjectItem(res, "status");
+    cJSON *data = cJSON_GetObjectItem(res, "data");
+    if (status && status->valueint == RES_SHOP_SUCCESS && data) {
+        cJSON *hp = cJSON_GetObjectItem(data, "hp");
+        cJSON *coin = cJSON_GetObjectItem(data, "coin");
+        if (hp)
+            current_hp = hp->valueint;
+        if (coin)
+            current_coins = coin->valueint;
+
+        // Armor
+        cJSON *armor = cJSON_GetObjectItem(data, "armor");
+        if (armor && cJSON_IsArray(armor)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, armor) {
+                if (idx >= 2) break;
+                cJSON *t = cJSON_GetObjectItem(it, "type");
+                cJSON *d = cJSON_GetObjectItem(it, "durability");
+                client_armor[idx].type = t ? t->valueint : 0;
+                client_armor[idx].durability = d ? d->valueint : 0;
+                idx++;
+            }
         }
 
-        //     should_exit = 1;
-        //     pthread_join(listener_thread, NULL);
-
-        //     send_json(sock, ACT_LOGOUT, NULL);
-        cJSON *arr = cJSON_GetObjectItem(res, "data");
-        printf("\n--- TEAM LIST ---\n");
-        cJSON *team;
-        cJSON_ArrayForEach(team, arr)
-        {
-            printf("ID: %d | Name: %s | Slots: %d\n",
-                   cJSON_GetObjectItem(team, "id")->valueint,
-                   cJSON_GetObjectItem(team, "name")->valuestring,
-                   cJSON_GetObjectItem(team, "slots")->valueint);
+        // Cannons
+        cJSON *cans = cJSON_GetObjectItem(data, "cannons");
+        if (cans && cJSON_IsArray(cans)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, cans) {
+                if (idx >= 4) break;
+                cJSON *w = cJSON_GetObjectItem(it, "weapon");
+                cJSON *a = cJSON_GetObjectItem(it, "ammo");
+                client_cannons[idx].weapon = w ? w->valueint : 0;
+                client_cannons[idx].ammo = a ? a->valueint : 0;
+                idx++;
+            }
         }
-        cJSON_Delete(res);
-    }
-}
 
-void do_create_team()
-{
-    char name[50];
-    get_input(4, 5, "Team name: ", name, 50, 0);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "team_name", name);
-
-    send_json(sock, ACT_CREATE_TEAM, data);
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-        if (msg)
-        {
-            display_response_message(8, 10, 2, 0, msg->valuestring);
+        // Missiles
+        cJSON *miss = cJSON_GetObjectItem(data, "missiles");
+        if (miss && cJSON_IsArray(miss)) {
+            int idx = 0;
+            cJSON *it = NULL;
+            cJSON_ArrayForEach(it, miss) {
+                if (idx >= 4) break;
+                cJSON *w = cJSON_GetObjectItem(it, "weapon");
+                cJSON *a = cJSON_GetObjectItem(it, "ammo");
+                client_missiles[idx].weapon = w ? w->valueint : 0;
+                client_missiles[idx].ammo = a ? a->valueint : 0;
+                idx++;
+            }
         }
-        current_user_id = 0;
-        current_coins = 0;
-        current_hp = 1000;
-        cJSON_Delete(res);
     }
-    mvprintw(10, 10, "Press any key to continue...");
-    getch();
-}
-
-void do_list_members()
-{
-    char team_name[50];
-    get_input(4, 5, "Enter team name: ", team_name, 50, 0);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "team_name", team_name);
-
-    send_json(sock, ACT_LIST_MEMBERS, data);
-
-    cJSON *res = wait_for_response();
-    if (!res)
-        return;
-
-    if (cJSON_GetObjectItem(res, "status")->valueint != 200)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
-        return;
-    }
-
-    cJSON *members = cJSON_GetObjectItem(res, "data");
-    cJSON *mem;
-
-    printf("\n--- MEMBERS OF TEAM '%s' ---\n", team_name);
-    cJSON_ArrayForEach(mem, members)
-    {
-        printf("ID: %d | Name: %s | Captain: %s\n",
-               cJSON_GetObjectItem(mem, "id")->valueint,
-               cJSON_GetObjectItem(mem, "name")->valuestring,
-               cJSON_GetObjectItem(mem, "is_captain")->valueint ? "YES" : "NO");
-    }
-
     cJSON_Delete(res);
+    return 1;
 }
 
-void do_req_join()
-{
-    char name[50];
-    get_input(4, 5, "Team name to join: ", name, 50, 0);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "team_name", name);
-
-    send_json(sock, ACT_REQ_JOIN, data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
+static const char *armor_label(int type) {
+    switch (type) {
+        case ARMOR_BASIC: return "Basic";
+        case ARMOR_HEAVY: return "Heavy";
+        default: return "None";
     }
 }
 
-void do_approve_req(int approve)
-{
-    char username[50];
-    get_input(4, 5, "Target username: ", username, 50, 0);
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "target_username", username);
-
-    send_json(sock,
-              approve ? ACT_APPROVE_REQ : ACT_REFUSE_REQ,
-              data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
+static const char *weapon_label(int type) {
+    switch (type) {
+        case WEAPON_CANNON_30MM: return "Cannon";
+        case WEAPON_LASER: return "Laser";
+        case WEAPON_MISSILE: return "Missile";
+        default: return "None";
     }
 }
 
-void do_leave_team()
-{
-    send_json(sock, ACT_LEAVE_TEAM, NULL);
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n", cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
+void print_equipment_status() {
+    printf("Armor: [%s:%d] [%s:%d]\n",
+           armor_label(client_armor[0].type), client_armor[0].durability,
+           armor_label(client_armor[1].type), client_armor[1].durability);
+
+    printf("Cannons:\n");
+    for (int i = 0; i < 4; i++) {
+        printf("  Slot %d: %s | Ammo: %d\n", i,
+               weapon_label(client_cannons[i].weapon), client_cannons[i].ammo);
+    }
+
+    printf("Missiles:\n");
+    for (int i = 0; i < 4; i++) {
+        printf("  Slot %d: %s | Ammo: %d\n", i,
+               weapon_label(client_missiles[i].weapon), client_missiles[i].ammo);
     }
 }
 
-void do_kick_member()
-{
-    char name[50];
-    get_input(4, 5, "Username to kick: ", name, 50, 0);
+// Vẽ panel trang bị gọn nhẹ trên ncurses UI
+void draw_compact_status(int y, int x) {
+    mvprintw(y, x, "Armor: [%s:%d] [%s:%d]",
+             armor_label(client_armor[0].type), client_armor[0].durability,
+             armor_label(client_armor[1].type), client_armor[1].durability);
 
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddStringToObject(data, "target_username", name);
+    mvprintw(y + 1, x, "Cannons:");
+    move(y + 1, x + 10);
+    for (int i = 0; i < 4; i++) {
+        printw("[%d:%s/%d] ", i + 1,
+               weapon_label(client_cannons[i].weapon), client_cannons[i].ammo);
+    }
 
-    send_json(sock, ACT_KICK_MEMBER, data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        printf(">> %s\n",
-               cJSON_GetObjectItem(res, "message")->valuestring);
-        cJSON_Delete(res);
+    mvprintw(y + 2, x, "Missiles:");
+    move(y + 2, x + 10);
+    for (int i = 0; i < 4; i++) {
+        printw("[%d:%s/%d] ", i + 1,
+               weapon_label(client_missiles[i].weapon), client_missiles[i].ammo);
     }
 }
 
-void print_menu(int highlight)
-{
-    const char *choices_guest[] = {
-        "1. Register",
-        "2. Login",
-        "3. Exit"
-    };
-
-    const char *choices_user[] = {
-        "1. Logout",
-        "2. Create Team",
-        "3. List Teams",
-        "4. Join Team",
-        "5. Exit" 
-        
-    };
-    int n_choices;
-    char **current_choices;
-
-    erase();
-    mvprintw(1, 10, "=== SPACE BATTLE ONLINE ===");
-    if (current_user_id != 0)
-    {
-        attron(COLOR_PAIR(2));
-        mvprintw(2, 10, "Logged in as User ID: %d", current_user_id);
-        mvprintw(3, 10, "Coins: %d | HP: %d", current_coins, current_hp);
-        attroff(COLOR_PAIR(2));
-
-        current_choices = (char **)choices_user;
-        n_choices = sizeof(choices_user) / sizeof(choices_user[0]);
-    }
-    else
-    {
-        mvprintw(2, 10, "Status: Guest (Not Logged In)");
-        current_choices = (char **)choices_guest;
-        n_choices = sizeof(choices_guest) / sizeof(choices_guest[0]);
-    }
-
-
-    for (int i = 0; i < n_choices; i++)
-    {
-        refresh();
-        if (highlight == i)
-        {
-            attron(A_REVERSE);
-            mvprintw(5 + i, 10, "-> %s", current_choices[i]);
-            attroff(A_REVERSE);
-        }
-        else
-        {
-            mvprintw(5 + i, 10, "   %s", current_choices[i]);
-        }
-    }
-    
-    mvprintw(5 + n_choices + 2, 10, "Use arrow keys to move, Enter to select.");
-    refresh(); 
-}
-
-int main()
-{
+int main() {
     struct sockaddr_in serv_addr;
 
     memset(client_buffer, 0, BUFFER_SIZE);
@@ -467,145 +270,142 @@ int main()
     serv_addr.sin_port = htons(PORT);
     inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
 
-    connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
     printf("Connected to server %s:%d\n", SERVER_IP, PORT);
 
-    // char buf[16];
+    if (pthread_create(&listener_thread, NULL, background_listener, NULL) != 0) {
+        perror("Failed to create listener thread");
+        return 1;
+    }
 
-    while (1)
-    {
-        //     // Kiểm tra và hiển thị treasure pending (nếu có)
-        //     show_pending_treasure();
-        //
-        //     // Kiểm tra trạng thái treasure trước khi hiển thị menu
-        //     pthread_mutex_lock(&treasure_mutex);
-        //     int is_waiting = waiting_for_treasure_answer;
-        //     pthread_mutex_unlock(&treasure_mutex);
-        //
-        //     if (!is_waiting) {
-        //         print_menu();
-        //     }
-        //
-        //     if (fgets(buf, sizeof(buf), stdin) == NULL) break;
-        //
-        //     // Nếu đang chờ trả lời treasure
-        //     pthread_mutex_lock(&treasure_mutex);
-        //     is_waiting = waiting_for_treasure_answer;
-        //     pthread_mutex_unlock(&treasure_mutex);
-        //
-        //     if (is_waiting) {
-        //         // Kiểm tra nếu người dùng muốn bỏ qua
-        //         if (buf[0] == 'q' || buf[0] == 'Q') {
-        //             pthread_mutex_lock(&treasure_mutex);
-        //             waiting_for_treasure_answer = 0;
-        //             current_treasure_id = 0;
-        //             pthread_mutex_unlock(&treasure_mutex);
-        //             printf("Bo qua ruong kho bau.\n");
-        //             continue;
-        //         }
-        //
-        //         int answer;
-        //         if (sscanf(buf, "%d", &answer) == 1) {
-        //             if (answer >= 0 && answer <= 3) {
-        //                 handle_treasure_answer(answer);
-        //             } else {
-        //                 printf("Dap an khong hop le! Nhap 0-3 hoac 'q' de bo qua: ");
-        //             }
-        //         } else {
-        //             printf("Dap an khong hop le! Nhap 0-3 hoac 'q' de bo qua: ");
-        //         }
-        //         continue;
-        //     }
-        //
-        //     // Xử lý menu bình thường
-        //     if (sscanf(buf, "%d", &choice) != 1) continue;
-        //     print_menu();
-        //     if (!fgets(buf, sizeof(buf), stdin)) break;
-        //     choice = atoi(buf);
-        //
-        //     switch (choice) {
-        //         case 1: do_register(); break;
-        //         case 2: do_login(); break;
-        //         case 3: do_logout(); break;
-        //         case 4: do_buy_ammo(); break;
-        //         case 5: do_buy_laser(); break;
-        //         case 6: do_buy_laser_battery(); break;
-        //         case 7: do_buy_missile(); break;
-        //         case 8: do_buy_armor(); break;
-        //         case 9: do_fix_ship(); break;
-        //         case 0:
-        //             printf("Exiting...\n");
-        //             if (current_user_id != 0) {
-        //                 should_exit = 1;
-        //                 pthread_join(listener_thread, NULL);
-        //             }
-        //             close(sock);
-        //             return 0;
-        //
-        //         case 12: do_list_teams(); break;
-        //         case 13: do_create_team(); break;
-        //         case 14: do_list_members(); break;
-        //         case 15: do_req_join(); break;
-        //         case 16: do_approve_req(1); break;
-        //         case 17: do_approve_req(0); break;
-        //         case 10: do_leave_team(); break;
-        //         case 11: do_kick_member(); break;
-        //          default:
-        //              printf("Invalid choice\n");
-        //     }
-        // }
-        initscr();
-        start_color();
-        init_pair(1, COLOR_RED, COLOR_BLACK);
-        init_pair(2, COLOR_GREEN, COLOR_BLACK);
-        cbreak();
-        noecho();
-        keypad(stdscr, TRUE);
+    // Khởi tạo ncurses
+    initscr();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK); // [THÊM] Màu vàng cho Kho báu
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    timeout(100);
+    int dashboard_highlight = 0;
+    int need_redraw = 1; // Biến cờ để kiểm soát việc vẽ lại màn hình
+    // MENU CHÍNH
+    while (1) {
+        if (current_user_id == 0) {
+            // --- GUEST MENU ---
+            const char *options[] = {"1. Register", "2. Login", "3. Exit"};
+            // draw_menu đang set timeout(-1) khi return
+            int choice = draw_menu("WELCOME GUEST", options, 3);
 
-        int choice = -1;
-        int highlight = 0;
-
-        while (1)
-        {
-            print_menu(highlight);
-            int c = getch();
-
-            switch (c)
-            {
-            case KEY_UP:
-                highlight = (highlight == 0) ? 3 : highlight - 1;
+            if (choice == 2 || choice == -1)
                 break;
-            case KEY_DOWN:
-                highlight = (highlight == 3) ? 0 : highlight + 1;
-                break;
-            case 10:
-                choice = highlight;
-                break;
-            default:
-                break;
-            }
-
-            if (choice != -1)
-            {
-                if (choice == 0)
-                {
+            switch (choice) {
+                case 0:
                     do_register();
-                }
-                else if (choice == 1)
-                {
+                    break;
+                case 1:
                     do_login();
-                }
-                else if (choice == 2)
-                {
+                    // [FIX 2] Reset highlight để menu không bị lệch dòng khi mới vào
+                    dashboard_highlight = 0;
+                    need_redraw = 1; // Đánh dấu cần vẽ lại sau login
+                    break;
+            }
+        } else {
+            timeout(100);
+            if (end_game_flag) {
+                show_game_result_screen();
+                // Sau khi xem xong kết quả, continue để vẽ lại dashboard mới
+                need_redraw = 1; // Đánh dấu cần vẽ lại
+                continue;
+            }
+            if (current_hp <= 0) {
+                // Hiển thị màn hình "Đã chết / Đang xem"
+                timeout(100); // Non-blocking để cập nhật nếu được hồi sinh
+                erase();
+
+                attron(A_BOLD | COLOR_PAIR(1));
+                mvprintw(5, 10, "=================================");
+                mvprintw(6, 10, "          YOU ARE DEAD!          ");
+                mvprintw(7, 10, "=================================");
+                attroff(A_BOLD | COLOR_PAIR(1));
+
+                mvprintw(9, 10, "Your HP reached 0.");
+                mvprintw(10, 10, "Spectating teammates...");
+
+                // Nút thoát khẩn cấp
+                mvprintw(12, 10, "[Q] Quit / Logout");
+
+                refresh();
+
+                int ch = getch();
+                if (ch == 'q' || ch == 'Q') {
                     do_logout();
                 }
-                else if (choice == 3)
-                {
-                    break;
+
+                // Nếu server gửi lệnh reset game (hồi máu), vòng lặp sau sẽ tự thoát if này
+                continue;
+            }
+
+            // 1. Kiểm tra trạng thái
+            int is_treasure_mode = 0;
+            pthread_mutex_lock(&pending_mutex);
+            is_treasure_mode = pending_treasure.has_pending;
+            pthread_mutex_unlock(&pending_mutex);
+
+            // 2. Đọc phím bấm (Input) - Chỉ gọi 1 lần duy nhất ở đây
+            int c = getch();
+
+            // 3. Điều phối xử lý (Update & Draw)
+            if (is_treasure_mode) {
+                // Chuyển phím bấm và quyền kiểm soát cho màn hình Treasure
+                run_treasure_mode(c);
+            } else {
+                // --- LOGIC MENU CHÍNH ---
+                // Vẽ menu chỉ khi cần
+                if (need_redraw) {
+                    print_dashboard_menu(dashboard_highlight);
+                    need_redraw = 0; // Reset cờ
                 }
-                choice = -1;
+
+                // Xử lý phím cho menu
+                if (c != ERR) {
+                    switch (c) {
+                        case KEY_UP:
+                            dashboard_highlight = (dashboard_highlight == 0) ? 3 : dashboard_highlight - 1;
+                            need_redraw = 1; // Cần vẽ lại do thay đổi highlight
+                            break;
+                        case KEY_DOWN:
+                            dashboard_highlight = (dashboard_highlight == 3) ? 0 : dashboard_highlight + 1;
+                            need_redraw = 1; // Cần vẽ lại do thay đổi highlight
+                            break;
+                        case 10: // Phím ENTER
+                            timeout(-1);
+
+                            switch (dashboard_highlight) {
+                                case 0:
+                                    menu_team();
+                                    break;
+                                case 1:
+                                    menu_combat();
+                                    break;
+                                case 2:
+                                    do_treasure_hunt();
+                                    break;
+                                case 3:
+                                    do_logout();
+                                    break;
+                            }
+
+                            timeout(100);
+                            clear(); // Xóa màn hình menu con
+                            need_redraw = 1; // Cần vẽ lại sau khi thoát menu con
+                            break;
+                    }
+                }
             }
         }
+    }
 
         endwin();
         close(sock);
@@ -613,172 +413,175 @@ int main()
     }
 }
 
-void do_challenge()
-{
-    int target_id;
-    printf("\n--- SEND CHALLENGE ---\n");
-    printf("Enter Opponent Team ID: ");
 
-    // Kiểm tra nhập liệu để tránh trôi lệnh
-    if (scanf("%d", &target_id) != 1)
-    {
-        printf("[ERROR] Invalid input!\n");
-        while (getchar() != '\n')
-            ; // Xóa buffer nếu nhập sai
-        return;
-    }
-    getchar(); // Quan trọng: Xóa ký tự \n thừa trong buffer
 
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "target_team_id", target_id);
 
-    // Gửi lệnh đi
-    send_json(sock, ACT_SEND_CHALLANGE, data);
-
-    // Chờ phản hồi
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        cJSON *status = cJSON_GetObjectItem(res, "status");
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-
-        if (status)
-        {
-            if (status->valueint == RES_BATTLE_SUCCESS)
-            {
-                // Thành công: Server báo "Challenge sent..."
-                printf("[SUCCESS] %s\n", msg ? msg->valuestring : "Request sent.");
-            }
-            else
-            {
-                // Thất bại: Server báo lỗi (VD: Team not found, Team busy...)
-                printf("[ERROR] Failed to send challenge: %s (Code: %d)\n",
-                       msg ? msg->valuestring : "Unknown error",
-                       status->valueint);
-            }
+// ============================================================
+// HÀM BACKGROUND LISTENER HOÀN CHỈNH
+// ============================================================
+void *background_listener(void *arg) {
+    while (!should_exit) {
+        // 1. Dùng Blocking Mode (Không dùng usleep).
+        // Hàm này sẽ TREO ở đây cho đến khi Server gửi gì đó.
+        cJSON *response = receive_json(sock, client_buffer, &client_buf_len, BUFFER_SIZE);
+        if (response == NULL) {
+            // Nếu NULL thường là do mất kết nối hoặc lỗi mạng nghiêm trọng
+            printf("\n[ERROR] Server disconnected!\n");
+            should_exit = 1;
+            break;
         }
-        cJSON_Delete(res);
-    }
-}
 
-// Hàm chấp nhận thách đấu
-void do_accept()
-{
-    printf("\n--- ACCEPT CHALLENGE ---\n");
+        cJSON *status = cJSON_GetObjectItem(response, "status");
+        cJSON *data = cJSON_GetObjectItem(response, "data");
 
-    // Gửi lệnh chấp nhận (không cần payload)
-    send_json(sock, ACT_ACCEPT_CHALLANGE, NULL);
+        cJSON *action = cJSON_GetObjectItem(response, "action"); // Nên check thêm action
 
-    // Chờ phản hồi (Server sẽ trả về thông báo Start Game)
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        cJSON *status = cJSON_GetObjectItem(res, "status");
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-        cJSON *data = cJSON_GetObjectItem(res, "data");
+        int code = status ? status->valueint : 0;
+        int act_code = action ? action->valueint : 0;
 
-        if (status)
-        {
-            if (status->valueint == RES_BATTLE_SUCCESS)
-            {
-                // Thành công: Bắt đầu trận đấu
-                printf("[GAME START] %s\n", msg ? msg->valuestring : "Battle started!");
+        // --- PHÂN LOẠI GÓI TIN ---
+        cJSON *ques_node = (data) ? cJSON_GetObjectItem(data, "question") : NULL;
+        int is_treasure_broadcast = (code == RES_TREASURE_SUCCESS && ques_node != NULL);
+        // A. GÓI TIN MÀ MAIN THREAD ĐANG CHỜ (LOGIN, MUA ĐỒ, TẤN CÔNG...)
+        // Kiểm tra xem Main Thread có đang đợi không (biến waiting_for_result)
+        // VÀ gói tin này KHÔNG PHẢI là thông báo bất đồng bộ (như kho báu/end game)
+        int is_sync_msg = 0;
 
-                // Nếu có dữ liệu kèm theo (Ví dụ: Tên đối thủ)
-                if (data && !cJSON_IsNull(data))
-                {
-                    cJSON *opp_name = cJSON_GetObjectItem(data, "opponent_name");
-                    cJSON *match_id = cJSON_GetObjectItem(data, "match_id");
+        pthread_mutex_lock(&sync_mutex); // Dùng mutex riêng cho việc đồng bộ
 
-                    if (opp_name)
-                        printf("Your Opponent: %s\n", opp_name->valuestring);
-                    if (match_id)
-                        printf("Match ID: %d\n", match_id->valueint);
-                }
-            }
-            else
-            {
-                // Thất bại: Có thể do hết thời gian, lỗi hệ thống...
-                printf("❌ [ERROR] Cannot start game: %s\n", msg ? msg->valuestring : "Unknown error");
-            }
+        if (waiting_for_result &&
+            !is_treasure_broadcast &&
+            act_code != ACT_TREASURE_APPEAR &&
+            code != RES_END_GAME) {
+            // Đây là câu trả lời Main Thread đang cần
+            if (sync_response)
+                cJSON_Delete(sync_response);
+            sync_response = cJSON_Duplicate(response, 1); // Copy dữ liệu
+
+            waiting_for_result = 0; // Tắt cờ chờ
+            pthread_cond_signal(&sync_cond); // <--- ĐÁNH THỨC MAIN THREAD NGAY LẬP TỨC
+            pthread_mutex_unlock(&sync_mutex);
+            is_sync_msg = 1;
+            continue;
         }
-        cJSON_Delete(res);
-    }
-}
+        pthread_mutex_unlock(&sync_mutex);
 
-void do_attack()
-{
-    int target_uid, wp_type, wp_slot;
-    printf("Enter Target User ID: ");
-    if (scanf("%d", &target_uid) != 1)
-        return; // Kiểm tra nhập liệu
+        if (is_sync_msg) {
+            cJSON_Delete(response);
+            continue; // Đã xử lý xong, quay lại vòng lặp
+        }
 
-    printf("Enter weapon slots: ");
-    if (scanf("%d", &wp_slot) != 1)
-        return; // Kiểm tra nhập liệu
+        // B. XỬ LÝ CÁC GÓI TIN BẤT ĐỒNG BỘ (ASYNC EVENTS)
 
-    if (0 < wp_slot && wp_slot < 4)
-    {
-        printf("Weapon (1:Cannon, 2:Laser): ");
-    }
-    else if (4 <= wp_slot && wp_slot < 8)
-    {
-        printf("Weapon (3:Missile): ");
-    }
-    else
-    {
-        printf("Invalid weapon slot\n");
-        return;
-    }
-
-    if (scanf("%d", &wp_type) != 1)
-        return;
-
-    // Xóa bộ nhớ đệm bàn phím để tránh lỗi trôi lệnh menu sau này
-    getchar();
-
-    cJSON *data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "target_user_id", target_uid);
-    cJSON_AddNumberToObject(data, "weapon_id", wp_type);
-    cJSON_AddNumberToObject(data, "weapon_slot", wp_slot);
-    send_json(sock, ACT_ATTACK, data);
-
-    cJSON *res = wait_for_response();
-    if (res)
-    {
-        // 1. Kiểm tra trạng thái phản hồi từ Server
-        cJSON *status = cJSON_GetObjectItem(res, "status");
-        cJSON *msg = cJSON_GetObjectItem(res, "message");
-
-        if (status && status->valueint == RES_BATTLE_SUCCESS) // RES_BATTLE_SUCCESS = 400
-        {
-            cJSON *d = cJSON_GetObjectItem(res, "data");
-
-            // 2. Kiểm tra data có hợp lệ và không phải NULL không
-            if (d && !cJSON_IsNull(d))
-            {
-                cJSON *dmg_node = cJSON_GetObjectItem(d, "damage");
-                cJSON *hp_node = cJSON_GetObjectItem(d, "target_hp");
-
-                // 3. Chỉ in ra nếu các trường tồn tại
-                if (dmg_node && hp_node)
-                {
-                    printf(">> HIT! Damage: %d | Target HP: %d\n",
-                           dmg_node->valueint,
-                           hp_node->valueint);
+        // 1. End Game
+        if (code == RES_END_GAME) {
+            pthread_mutex_lock(&pending_mutex);
+            end_game_flag = 1;
+            if (data) {
+                cJSON *winner_flag = cJSON_GetObjectItem(data, "winner_team_id");
+                cJSON *w_name = cJSON_GetObjectItem(data, "winner_team_name");
+                if (winner_flag) {
+                    winner_team_id = winner_flag->valueint;
                 }
-                else
-                {
-                    printf(">> Attack success but no damage data returned.\n");
+                if (w_name)
+                    strncpy(last_winner_name, w_name->valuestring, 49);
+            }
+            // Update UI State an toàn
+            pthread_mutex_lock(&ui_mutex); // Giả sử bạn có ui_mutex
+            current_hp = 1000;
+            pthread_mutex_unlock(&ui_mutex);
+
+            pthread_mutex_unlock(&pending_mutex);
+            pthread_mutex_lock(&sync_mutex);
+            if (waiting_for_result) {
+                waiting_for_result = 0; // Hủy cờ chờ
+                pthread_cond_broadcast(&sync_cond);
+            }
+            pthread_mutex_unlock(&sync_mutex);
+        }
+
+        if (status && status->valueint == RES_TREASURE_SUCCESS) {
+            if (data) {
+                cJSON *treasure_id = cJSON_GetObjectItem(data, "treasure_id");
+                cJSON *question = cJSON_GetObjectItem(data, "question");
+                cJSON *options = cJSON_GetObjectItem(data, "options");
+                cJSON *reward = cJSON_GetObjectItem(data, "reward");
+                cJSON *chest_type = cJSON_GetObjectItem(data, "chest_type");
+
+                if (treasure_id && question && options) {
+                    // LOGIC MỚI: Chỉ lưu dữ liệu vào pending_treasure và bật cờ
+                    pthread_mutex_lock(&pending_mutex);
+
+                    pending_treasure.has_pending = 1; // Bật cờ để Main Loop biết
+                    pending_treasure.treasure_id = treasure_id->valueint;
+                    strncpy(pending_treasure.question, question->valuestring, 255);
+
+                    if (chest_type)
+                        strncpy(pending_treasure.chest_type, chest_type->valuestring, 49);
+                    if (reward)
+                        pending_treasure.reward = reward->valueint;
+
+                    int idx = 0;
+                    cJSON *option = NULL;
+                    cJSON_ArrayForEach(option, options) {
+                        if (idx < 4) {
+                            strncpy(pending_treasure.options[idx], option->valuestring, 99);
+                            idx++;
+                        }
+                    }
+                    pending_treasure.option_count = idx;
+
+                    pthread_mutex_unlock(&pending_mutex);
                 }
             }
         }
-        else
-        {
-            // Trường hợp tấn công thất bại (Sai mục tiêu, hết đạn...)
-            printf(">> Attack Failed: %s\n", msg ? msg->valuestring : "Unknown error");
+        // 2. Kho báu xuất hiện
+        else if (code == RES_TREASURE_SUCCESS && cJSON_GetObjectItem(data, "question")) {
+            pthread_mutex_lock(&pending_mutex);
+            pending_treasure.has_pending = 1;
+
+            cJSON *t_id = cJSON_GetObjectItem(data, "treasure_id");
+            cJSON *ques = cJSON_GetObjectItem(data, "question");
+
+            // ... (Code parse kho báu của bạn giữ nguyên) ...
+            if (t_id)
+                pending_treasure.treasure_id = t_id->valueint;
+            if (ques)
+                strncpy(pending_treasure.question, ques->valuestring, 255);
+            // ...
+            pthread_mutex_unlock(&pending_mutex);
         }
 
-        cJSON_Delete(res);
+        // 3. Kho báu bị mở mất
+        else if (code == RES_TREASURE_OPENED) {
+            pthread_mutex_lock(&pending_mutex);
+            pending_treasure.has_pending = 0;
+            pthread_mutex_unlock(&pending_mutex);
+        }
+
+        // 4. Cập nhật HP/Coin thụ động (Real-time update)
+        // (Xảy ra khi bắn trúng, bị bắn, hoặc mở rương thành công)
+        if (data) {
+            cJSON *hp_node = cJSON_GetObjectItem(data, "current_hp");
+            cJSON *coin_node = cJSON_GetObjectItem(data, "current_coin");
+            // Server thường trả về "coin" hoặc "current_coin"
+            cJSON *total_coin = cJSON_GetObjectItem(data, "total_coins");
+
+            // Dùng UI Mutex để bảo vệ biến toàn cục
+            if (hp_node || coin_node || total_coin) {
+                pthread_mutex_lock(&ui_mutex);
+                if (hp_node)
+                    current_hp = hp_node->valueint;
+                if (coin_node)
+                    current_coins = coin_node->valueint;
+                if (total_coin)
+                    current_coins = total_coin->valueint;
+                pthread_mutex_unlock(&ui_mutex);
+            }
+        }
+
+        cJSON_Delete(response);
     }
+    return NULL;
 }
+
