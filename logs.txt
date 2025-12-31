@@ -876,3 +876,32 @@
 [2025-12-30 12:25:22] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Dong) auto spawned, broadcast to 2 players
 [2025-12-30 12:25:31] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
 [2025-12-30 12:26:05] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Dong) auto spawned, broadcast to 2 players
+[2025-12-31 09:25:12] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 09:25:19] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 09:25:20] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-31 09:31:32] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 09:31:35] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 09:31:54] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 1 (Bac) auto spawned, broadcast to 2 players
+[2025-12-31 09:31:57] [SUCCESS] Action: MOCK_EQUIP | Input: admin | Result: Used cheat command
+[2025-12-31 09:32:02] [SUCCESS] Action: MOCK_EQUIP | Input: pa | Result: Used cheat command
+[2025-12-31 09:32:07] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 09:32:11] [SUCCESS] Action: LOGIN | Input: pa | Result: Logged in successfully
+[2025-12-31 09:32:42] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 2 (Bac) auto spawned, broadcast to 1 players
+[2025-12-31 09:33:15] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 3 (Vang) auto spawned, broadcast to 1 players
+[2025-12-31 09:34:03] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 4 (Bac) auto spawned, broadcast to 2 players
+[2025-12-31 09:34:59] [SUCCESS] Action: AUTO_TREASURE | Input: SYSTEM | Result: Treasure 5 (Dong) auto spawned, broadcast to 2 players
+[2025-12-31 09:35:29] [SUCCESS] Action: LOGOUT | Input: pa | Result: Logged out successfully
+[2025-12-31 09:35:30] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-31 09:35:35] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 09:35:36] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-31 09:47:36] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 09:47:42] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 09:47:44] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 09:47:57] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 09:47:58] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-31 09:48:41] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 09:48:46] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 09:48:48] [SUCCESS] Action: LOGIN | Input: admin | Result: Logged in successfully
+[2025-12-31 09:48:53] [SUCCESS] Action: LOGOUT | Input: admin | Result: Logged out successfully
+[2025-12-31 09:48:53] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
+[2025-12-31 09:48:55] [ERROR] Action: LOGOUT | Input: UNKNOWN | Result: No active session found
