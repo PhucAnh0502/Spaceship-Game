@@ -214,7 +214,7 @@ void menu_combat() {
 
     while (1) {
         char title[128];
-        snprintf(title, sizeof(title), "COMBAT ZONE | HP: %d | Coins: %d", current_hp, current_coins);
+        snprintf(title, sizeof(title), "COMBAT ZONE");
 
         int choice = draw_menu(title, options, n_opts);
         if (choice == -1 || choice == 4)
