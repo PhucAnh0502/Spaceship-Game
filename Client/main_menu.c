@@ -14,17 +14,16 @@
 
 
 void show_game_result_screen() {
-    // Tắt chế độ non-blocking để chờ người dùng ấn phím
     timeout(-1);
 
     clear();
-    box(stdscr, 0, 0); // Vẽ khung viền
+    box(stdscr, 0, 0); 
 
     int height, width;
     getmaxyx(stdscr, height, width);
 
     if (winner_team_id == current_team_id) {
-        // --- MÀN HÌNH CHIẾN THẮNG (Màu Xanh) ---
+        // --- MÀN HÌNH CHIẾN THẮNG  ---
         attron(A_BOLD | COLOR_PAIR(2));
         mvprintw(height / 2 - 4, (width - 20) / 2, "**********************");
         mvprintw(height / 2 - 3, (width - 20) / 2, "* VICTORY!      *");
@@ -33,7 +32,7 @@ void show_game_result_screen() {
 
         mvprintw(height / 2, (width - 40) / 2, "Congratulations! Your team has won.");
     } else if (winner_team_id != current_team_id) {
-        // --- MÀN HÌNH THẤT BẠI (Màu Đỏ) ---
+        // --- MÀN HÌNH THẤT BẠI  ---
         attron(A_BOLD | COLOR_PAIR(1));
         mvprintw(height / 2 - 4, (width - 20) / 2, "######################");
         mvprintw(height / 2 - 3, (width - 20) / 2, "#       DEFEAT       #");
@@ -53,38 +52,30 @@ void show_game_result_screen() {
 
     refresh();
 
-    // Chờ người dùng ấn Enter để thoát
     while (1) {
         int ch = getch();
         if (ch == 10 || ch == 13)
-            break; // Enter key
+            break; 
     }
 
-    // Reset cờ sau khi đã xem xong
     end_game_flag = 0;
 }
 
-// Hàm tiện ích để vẽ menu và trả về lựa chọn của người dùng
 int draw_menu(const char *title, const char *options[], int n_opts) {
     clear();
     int highlight = 0;
     int c;
     int height, width;
-
-    // Cài đặt timeout: getch() sẽ chờ 100ms.
-    // Nếu không có phím nào được ấn, nó trả về ERR nhưng vòng lặp vẫn chạy tiếp -> UI được vẽ lại.
     timeout(100);
 
     while (1) {
         if (end_game_flag) {
-            show_game_result_screen(); // Hiển thị Pop-up kết quả ngay lập tức
+            show_game_result_screen(); 
 
-            // Sau khi xem kết quả xong, buộc thoát khỏi menu con để về Lobby
             timeout(-1);
             return -1;
         }
         // --- VẼ UI ---
-        // (Xóa màn hình và vẽ lại toàn bộ khung, bao gồm cả HP/Coin mới nhất)
         erase();
         getmaxyx(stdscr, height, width);
         box(stdscr, 0, 0);
@@ -94,16 +85,15 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
         mvprintw(2, (width - strlen(title)) / 2, "%s", title);
         attroff(A_BOLD | COLOR_PAIR(2));
 
-        // 2. Trạng thái User (Sẽ tự cập nhật giá trị mới nhất từ biến toàn cục)
+        // 2. Trạng thái User 
         int start_y = 7;
         int line_y = start_y - 2;
         int is_combat_panel = 0;
         if (current_user_id != 0) {
-            // Hiển thị HP với màu sắc cảnh báo nếu máu thấp
             mvprintw(4, 4, "User: %s | ", current_username);
 
             if (current_hp < 300)
-                attron(COLOR_PAIR(1)); // Màu đỏ nếu máu < 300
+                attron(COLOR_PAIR(1)); 
             else
                 attron(COLOR_PAIR(2));
             printw("HP: %d", current_hp);
@@ -114,11 +104,10 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
 
             printw(" | Coin: %d", current_coins);
 
-            // Nếu đang ở combat zone, vẽ thêm panel trang bị
             if (strstr(title, "COMBAT ZONE") != NULL) {
                 draw_compact_status(5, 4);
-                start_y = 9; // đẩy menu xuống dưới panel
-                line_y = start_y - 1; // kẻ đường phân cách dưới panel
+                start_y = 9; 
+                line_y = start_y - 1; 
                 is_combat_panel = 1;
             }
         } else {
@@ -147,18 +136,15 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
         mvprintw(height - 2, 2, "[UP/DOWN]: Move | [ENTER]: Select | [BACKSPACE]: Back");
         attroff(COLOR_PAIR(1));
 
-        refresh(); // Đẩy thay đổi lên màn hình
+        refresh(); 
 
         // --- XỬ LÝ NHẬP LIỆU ---
-        c = getch(); // Hàm này giờ chỉ chờ 100ms
+        c = getch(); 
 
         if (c == ERR) {
-            // Không có phím nào được ấn (Timeout)
-            // Tiếp tục vòng lặp để vẽ lại UI với dữ liệu mới (nếu có)
             continue;
         }
 
-        // Nếu có phím ấn, xử lý như bình thường
         switch (c) {
             case KEY_UP:
                 highlight = (highlight == 0) ? n_opts - 1 : highlight - 1;
@@ -166,12 +152,12 @@ int draw_menu(const char *title, const char *options[], int n_opts) {
             case KEY_DOWN:
                 highlight = (highlight == n_opts - 1) ? 0 : highlight + 1;
                 break;
-            case 10: // Enter
-                timeout(-1); // Tắt timeout trước khi return để các hàm nhập liệu khác hoạt động bình thường
+            case 10: 
+                timeout(-1); 
                 return highlight;
             case KEY_BACKSPACE:
             case 127:
-                timeout(-1); // Tắt timeout
+                timeout(-1); 
                 return -1;
             default:
                 break;
@@ -243,7 +229,7 @@ void print_dashboard_menu(int highlight) {
     box(stdscr, 0, 0);
 
     // Vẽ Header
-    attron(A_BOLD | COLOR_PAIR(2)); // Màu xanh lá
+    attron(A_BOLD | COLOR_PAIR(2)); 
     mvprintw(2, 10, "=== MAIN DASHBOARD ===");
     mvprintw(3, 10, "User: %s | HP: %d | Coins: %d", current_username, current_hp, current_coins);
     attroff(A_BOLD | COLOR_PAIR(2));
@@ -251,15 +237,15 @@ void print_dashboard_menu(int highlight) {
     // Vẽ danh sách lựa chọn
     for (int i = 0; i < n_choices; i++) {
         if (highlight == i) {
-            attron(A_REVERSE); // Highlight dòng đang chọn
+            attron(A_REVERSE); 
             mvprintw(5 + i, 10, "-> %s", options[i]);
             attroff(A_REVERSE);
         } else {
             mvprintw(5 + i, 10, "   %s", options[i]);
         }
     }
-    attron(A_BOLD | COLOR_PAIR(1)); // Màu
+    attron(A_BOLD | COLOR_PAIR(1)); 
     mvprintw(height - 3, 10, "Use UP/DOWN to move, ENTER to select.");
-    attron(A_BOLD | COLOR_PAIR(1)); // Màu
-    refresh(); // Quan trọng: Đẩy thay đổi lên màn hình
+    attron(A_BOLD | COLOR_PAIR(1)); 
+    refresh(); 
 }

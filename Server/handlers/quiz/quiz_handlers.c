@@ -84,8 +84,6 @@ int can_receive_treasure(Player *player) {
         return 0;
     }
     
-    // CHỈ gửi treasure cho người đang TRONG TRẬN ĐẤU
-    // Nếu muốn gửi cho cả người có đội, thêm: || player->status == STATUS_IN_TEAM
     if (player->status == STATUS_IN_BATTLE) {
         return 1;
     }

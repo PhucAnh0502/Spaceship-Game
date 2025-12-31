@@ -4,7 +4,6 @@
 #include "client_state.h"
 #include <unistd.h>
 
-// Hiển thị treasure đã pending (khi UI bị khóa)
 void show_pending_treasure() {
     pthread_mutex_lock(&pending_mutex);
     if (pending_treasure.has_pending) {

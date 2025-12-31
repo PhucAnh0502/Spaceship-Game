@@ -141,22 +141,15 @@ void broadcast_to_team(Team *team,
     if (!team)
         return;
 
-    // Loop through all player in team
     for (int i = 0; i < team->current_size; i++)
     {
         int member_id = team->member_ids[i];
 
-        // Skip if member id is invalid
         if (member_id <= 0)
             continue;
 
-        // Find player
         Player *member = find_player_by_id(member_id);
 
-        // Only send message if:
-        // 1. Player found
-        // 2. Player is online
-        // 3. Valid socket
         if (member && member->is_online && member->socket_fd > 0)
         {
             send_response(member->socket_fd, status, message, payload);

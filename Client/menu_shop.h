@@ -1,6 +1,3 @@
-//
-// Created by kali on 12/30/25.
-//
 
 #ifndef SPACESHIP_GAME_MENU_SHOP_H
 void do_mock_equip();
