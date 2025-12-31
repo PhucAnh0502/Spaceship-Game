@@ -70,7 +70,7 @@ pthread_mutex_t sync_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t sync_cond = PTHREAD_COND_INITIALIZER;
 cJSON *sync_response = NULL;
 
-int fetch_and_update_status();
+
 void print_equipment_status();
 
 void *background_listener(void *arg);
@@ -524,8 +524,10 @@ void *background_listener(void *arg) {
             cJSON *hp_node = cJSON_GetObjectItem(data, "current_hp");
             cJSON *coin_node = cJSON_GetObjectItem(data, "current_coin");
             cJSON *total_coin = cJSON_GetObjectItem(data, "total_coins");
+            cJSON *armor_slot_0 = cJSON_GetObjectItem(data, "armor_slot_0");
+            cJSON *armor_slot_1 = cJSON_GetObjectItem(data, "armor_slot_1");
 
-            if (hp_node || coin_node || total_coin) {
+            if (hp_node || coin_node || total_coin || armor_slot_0 || armor_slot_1) {
                 pthread_mutex_lock(&ui_mutex);
                 if (hp_node)
                     current_hp = hp_node->valueint;
@@ -533,6 +535,10 @@ void *background_listener(void *arg) {
                     current_coins = coin_node->valueint;
                 if (total_coin)
                     current_coins = total_coin->valueint;
+                if (armor_slot_0)
+                    client_armor[0].durability = armor_slot_0->valueint;
+                if (armor_slot_1)
+                    client_armor[1].durability = armor_slot_1->valueint;
                 pthread_mutex_unlock(&ui_mutex);
             }
         }
