@@ -373,8 +373,8 @@ void do_leave_team() {
     }
 
     mvprintw(10, 5, "Press any key to continue...");
-    getch(); 
-
+    getch();
+}
 
 void do_kick_member() {
     clear();
