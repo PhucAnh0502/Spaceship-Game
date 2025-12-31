@@ -463,12 +463,12 @@ void *background_listener(void *arg) {
             pthread_mutex_unlock(&ui_mutex);
 
             pthread_mutex_unlock(&pending_mutex);
-            pthread_mutex_lock(&sync_mutex);
-            if (waiting_for_result) {
-                waiting_for_result = 0; 
-                pthread_cond_broadcast(&sync_cond);
-            }
-            pthread_mutex_unlock(&sync_mutex);
+            // pthread_mutex_lock(&sync_mutex);
+            // if (waiting_for_result) {
+            //     waiting_for_result = 0;
+            //     pthread_cond_broadcast(&sync_cond);
+            // }
+            // pthread_mutex_unlock(&sync_mutex);
         }
 
         if (status && status->valueint == RES_TREASURE_SUCCESS) {

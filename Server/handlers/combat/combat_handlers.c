@@ -440,6 +440,9 @@ void check_end_game(int client_fd, int team_id) {
         return;
     }
 
+    if (losing_team->opponent_team_id == 0) {
+        return;
+    }
     //---------------------------------------------------------
     // 1. Check if all member of one team is already eliminated
     //---------------------------------------------------------
