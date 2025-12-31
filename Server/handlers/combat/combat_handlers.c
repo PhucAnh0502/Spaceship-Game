@@ -356,6 +356,10 @@ void handle_attack(int client_fd, cJSON *payload) {
         cJSON *victim_data = cJSON_CreateObject();
         cJSON_AddNumberToObject(victim_data, "current_hp", target->ship.hp); // Update HP
         cJSON_AddNumberToObject(victim_data, "damage_taken", damage);
+        cJSON_AddNumberToObject(victim_data, "target_armor", current_armor_val); // Update target armour for better UX
+        cJSON_AddNumberToObject(victim_data, "armor_slot_hit", armour_idx); // Update armour slot that take dmg
+        cJSON_AddNumberToObject(victim_data, "armor_slot_0", target->ship.armor[0].current_durability);
+        cJSON_AddNumberToObject(victim_data, "armor_slot_1", target->ship.armor[1].current_durability);
         cJSON_AddStringToObject(victim_data, "attacker_name", attacker->username);
         send_response(target->socket_fd, RES_BATTLE_SUCCESS, "Warning: You are under attack!", victim_data);
     }
